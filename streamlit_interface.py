@@ -4,6 +4,7 @@ from langchain_core.prompts import MessagesPlaceholder, ChatPromptTemplate
 import random
 from langchain.prompts import PromptTemplate
 from langchain_core.runnables import chain
+import uuid
 
 def initialize_streamlit():
     """Initializes the Streamlit UI, including title, caption, and session state."""
@@ -98,7 +99,8 @@ def handle_user_input(agent_executor, llm):
         # Generate and display follow-up suggestions
         followup_suggestions = generate_followup_suggestions(llm, ai_response_content)
         for suggestion in followup_suggestions:
-            if st.button(suggestion, key=suggestion):
+            button_key = str(uuid.uuid4())  # Generate a unique key for each button
+            if st.button(suggestion, key=button_key):
                 # Add user message to chat history
                 st.session_state.messages.append(HumanMessage(content=suggestion))
                 # Display user message in chat message container

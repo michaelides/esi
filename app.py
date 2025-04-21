@@ -144,7 +144,7 @@ base_tools = [rag_tool, crawl4ai_tool]
 if google_search_tool:
     base_tools.append(google_search_tool)
 if tavily_search_tool:
-    base_tools.append(tavily_search)
+    base_tools.append(tavily_search_tool)
 
 embedding_function = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
 

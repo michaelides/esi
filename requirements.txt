@@ -18,3 +18,4 @@ crawl4ai
 tavily-python
 pandas==1.5.3
 pandasai==2.3.0
+pandas==1.5.3

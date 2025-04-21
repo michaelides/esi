@@ -36,8 +36,7 @@ def generate_followup_suggestions(llm, agent_response_content):
     """Generates follow-up question suggestions based on the agent's response using LLM."""
     prompt_template = """
     You are an AI assistant that helps generate follow-up questions for a conversation about dissertation research.
-    Given the following content from the conversation, please generate 3 follow-up questions that the user might ask.
-    The questions should be concise and directly related to the content.
+    Given the following content from the conversation, please generate 3 follow-up questions that the user might ask to continue the conversation and delve deeper into the topic. The questions should be concise, directly related to the content, and phrased in a way that encourages further exploration or clarification.
 
     Content:
     {content}

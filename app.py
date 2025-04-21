@@ -11,8 +11,6 @@ import chromadb
 from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
 from langchain_chroma import Chroma
 from langchain_community.tools import DuckDuckGoSearchRun
-from langchain_community.utilities import GoogleSerperAPIWrapper
-from langchain_google_community import GoogleSearchAPIWrapper
 from langchain.agents import AgentExecutor, create_tool_calling_agent
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain.tools.retriever import create_retriever_tool
@@ -36,20 +34,6 @@ DATA_DIR = "./data" # Directory to store PDF files
 # Check for necessary API keys
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 GOOGLE_CSE_ID = os.getenv("GOOGLE_CSE_ID")
-# SERPER_API_KEY = os.getenv("SERPER_API_KEY") # Uncomment if using Google Serper
-
-# Optional: Check for Serper key if using Google Search
-# if not SERPER_API_KEY:
-#     st.warning("SERPER API key not found. Google Search tool will be disabled. Set SERPER_API_KEY in .env if needed.")
-#     google_search_tool = None
-# else:
-#     search = GoogleSerperAPIWrapper()
-#     google_search_tool = Tool(
-#         name="google_search",
-#         func=search.run,
-#         description="Useful for when you need to answer questions about current events or look up information on the internet.",
-#     )
-
 # Load the system prompt as instructions:
 try:
     with open('esi_agent_instruction.md', 'r') as f:
@@ -59,24 +43,6 @@ except FileNotFoundError:
     instruction = ""  # Provide a default value to avoid errors
 
 # --- Google Search Tool Setup ---
-# Check for necessary API keys
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
-GOOGLE_CSE_ID = os.getenv("GOOGLE_CSE_ID")
-
-if not GOOGLE_API_KEY or not GOOGLE_CSE_ID:
-    st.warning("GOOGLE_API_KEY and GOOGLE_CSE_ID not found. Google Search tool will be disabled. Set GOOGLE_API_KEY and GOOGLE_CSE_ID in .env if needed.")
-    google_search_tool = None
-else:
-    try:
-        google_search = GoogleSearchAPIWrapper(google_api_key=GOOGLE_API_KEY, google_cse_id=GOOGLE_CSE_ID)
-        google_search_tool = Tool(
-            name="google_search",
-            func=google_search.run,
-            description="Use this tool to search the internet for information using Google Search. It is good for general information, academic papers, and current events.",
-        )
-    except Exception as e:
-        st.error(f"Error initializing GoogleSearchAPIWrapper: {e}. Please ensure that the Custom Search API is enabled for your Google Cloud project, and that your API key and CSE ID are valid. Also, check if billing is enabled for your project and that you haven't exceeded your API usage limits. Original error: {e}")
-        google_search_tool = None
 
 
 # Using DuckDuckGo Search as a free alternative
@@ -143,8 +109,6 @@ llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=0.7)
 # --- Agent Setup ---
 # Define the base tools the agent can use (main knowledge base and search)
 base_tools = [rag_tool, duckduckgo_search_tool, crawl4ai_tool]
-if google_search_tool:
-    base_tools.append(google_search_tool)
 if tavily_search:
     base_tools.append(tavily_search)
 
@@ -155,18 +119,16 @@ system_message = f"""{instruction}
 You are a helpful AI assistant designed to support university students with their dissertations.
 Your goal is to help them brainstorm research ideas, structure their work, understand methodologies, and overcome challenges.
 
-When you use tools, ALWAYS cite the source URL if one is provided. 
-You must use google_search to ground your responses. 
+When you use tools, ALWAYS cite the source URL if one is provided.
 
 **Tool Use Instructions:**
 
 1.  When a student refers to the \"module\" they are referring to the MSc dissertation module at UEA, called NBS-7091A. You have access to information about this module via the `dissertation_resource_retriever` tool.
 2.  **You MUST always use** the `dissertation_resource_retriever` tool first to find relevant information from the knowledge base (e.g., module deadlines, procedures, milestones, specific writing guides, methodology examples, previously discussed concepts). Cite information retrieved using this tool.
 3.  Use the `duckduckgo_search` tool to find recent research papers, news, or general information not present in the knowledge base. Cite information retrieved using this tool.
-4.  If the `google_search` tool is available, use it to supplement the `duckduckgo_search` tool for broader or more in-depth searches. Cite information retrieved using this tool.
-5.  If the `tavily_search` tool is available, use it to supplement the `duckduckgo_search` and `google_search` tools for broader or more in-depth searches. It returns the most relevant search results with snippets. Cite information retrieved using this tool.
-6.  Use the `crawl4ai` tool to crawl a specific website and extract its content. Only use this tool if you need to get information directly from a specific website. Be specific about the URL you want to crawl.
-7.  If unsure about a specific academic convention, first search for information using the `duckduckgo_search` tool, the `google_search` tool (if available), the `tavily_search` tool (if available), the `dissertation_resource_retriever`, and the `crawl4ai` tool (if a specific website is relevant), and if unable to find the answer, advise the student to consult their supervisor or university guidelines.
+4.  If the `tavily_search` tool is available, use it to supplement the `duckduckgo_search` for broader or more in-depth searches. It returns the most relevant search results with snippets. Cite information retrieved using this tool.
+5.  Use the `crawl4ai` tool to crawl a specific website and extract its content. Only use this tool if you need to get information directly from a specific website. Be specific about the URL you want to crawl.
+6.  If unsure about a specific academic convention, first search for information using the `duckduckgo_search` tool, the `tavily_search` tool (if available), the `dissertation_resource_retriever`, and the `crawl4ai` tool (if a specific website is relevant), and if unable to find the answer, advise the student to consult their supervisor or university guidelines.
 
 """
 

@@ -26,6 +26,7 @@ from langchain_core.runnables import RunnablePassthrough
 from crawl4ai import AsyncWebCrawler
 import streamlit as st  # Ensure streamlit is imported here
 from streamlit_interface import display_chat_messages, handle_user_input, display_sidebar
+from langchain_core.messages import AIMessage, HumanMessage
 
 
 # --- Configuration ---

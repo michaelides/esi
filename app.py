@@ -135,52 +135,87 @@ agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True) # Set ver
 
 
 # --- PDF Ingestion Function ---
-def ingest_pdfs(data_directory: str, vector_store_instance: Chroma):
-    """Loads PDFs from data_directory, splits them, and adds them to the vector store."""
-    st.write(f"Scanning for PDF files in {data_directory}...")
-    pdf_files = glob.glob(os.path.join(data_directory, "*.pdf"))
+def check_and_ingest_new_pdfs(data_directory: str, vector_store_instance: Chroma, db_path: str):
+    """Checks for new PDFs in data_directory and ingests them into the vector store."""
+    log_file_path = os.path.join(db_path, ".ingested_files.log")
+    ingested_files = set()
 
-    if not pdf_files:
-        st.warning(f"No PDF files found in {data_directory}. Please add some PDFs to ingest.")
+    # Create data directory if it doesn't exist
+    if not os.path.exists(data_directory):
+        os.makedirs(data_directory)
+        st.info(f"Created data directory: {data_directory}")
+
+    # Read list of already ingested files
+    try:
+        with open(log_file_path, "r") as f:
+            ingested_files = set(line.strip() for line in f)
+        st.info(f"Found log of {len(ingested_files)} previously ingested files.")
+    except FileNotFoundError:
+        st.info("No ingestion log file found. Will process all PDFs in data directory.")
+
+    # Find current PDF files
+    current_pdf_files = glob.glob(os.path.join(data_directory, "*.pdf"))
+    current_filenames = set(os.path.basename(f) for f in current_pdf_files)
+
+    # Determine new files to ingest
+    new_filenames = current_filenames - ingested_files
+    new_file_paths = [os.path.join(data_directory, fname) for fname in new_filenames]
+
+    if not new_file_paths:
+        st.success("Vector database is up-to-date. No new PDFs found to ingest.")
         return
 
-    st.write(f"Found {len(pdf_files)} PDF file(s). Starting ingestion...")
+    st.info(f"Found {len(new_file_paths)} new PDF file(s) to ingest. Starting process...")
 
-    all_docs = []
-    for pdf_path in pdf_files:
+    all_new_docs = []
+    processed_new_files = []
+    for pdf_path in new_file_paths:
+        filename = os.path.basename(pdf_path)
         try:
-            st.write(f"  Loading: {os.path.basename(pdf_path)}")
+            st.write(f"  Loading: {filename}")
             loader = PyPDFLoader(pdf_path)
             documents = loader.load()
-            all_docs.extend(documents)
+            all_new_docs.extend(documents)
+            processed_new_files.append(filename) # Track successfully loaded files
         except Exception as e:
-            st.error(f"Error loading {os.path.basename(pdf_path)}: {e}")
+            st.error(f"Error loading {filename}: {e}")
             continue # Skip to the next file
 
-    if not all_docs:
-        st.error("No documents were successfully loaded from the PDF files.")
+    if not all_new_docs:
+        st.error("No new documents were successfully loaded from the PDF files.")
         return
 
-    st.write("Splitting documents into chunks...")
+    st.write("Splitting new documents into chunks...")
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
-    splits = text_splitter.split_documents(all_docs)
+    splits = text_splitter.split_documents(all_new_docs)
 
     if not splits:
-        st.error("Failed to split documents into chunks.")
+        st.error("Failed to split new documents into chunks.")
         return
 
-    st.write(f"Adding {len(splits)} document chunks to the vector store...")
+    st.write(f"Adding {len(splits)} new document chunks to the vector store...")
     try:
-        # Add documents to the existing vector store instance
+        # Add only the new documents to the vector store
         vector_store_instance.add_documents(splits)
-        st.success("PDF ingestion complete!")
+
+        # Update the log file with newly processed files
+        with open(log_file_path, "a") as f:
+            for fname in processed_new_files:
+                f.write(f"{fname}\n")
+        st.success(f"Successfully ingested {len(processed_new_files)} new PDF file(s)!")
+
     except Exception as e:
-        st.error(f"Error adding documents to vector store: {e}")
+        st.error(f"Error adding new documents to vector store: {e}")
 
 
 # --- Streamlit UI ---
 st.title("🎓 ESI: ESI Scholarly Instructor")
 st.caption("Your AI partner for brainstorming and structuring your research.")
+
+# --- Automatic PDF Ingestion on Startup ---
+# Check for new PDFs and ingest them right after vector store is initialized
+with st.spinner("Checking for new documents to load into the knowledge base..."):
+    check_and_ingest_new_pdfs(DATA_DIR, vector_store, CHROMA_DB_PATH)
 
 # Initialize chat history in session state if it doesn't exist
 if "messages" not in st.session_state:
@@ -230,14 +265,9 @@ with st.sidebar:
     It has access to some of the literature in your reading lists and also uses Search tools for web lookups.""")
     st.warning("⚠️ Remember: Always consult your official supervisor for final guidance and decisions.")
 
-    st.divider()
-    st.header("Manage RAG Documents")
-    if st.button("Ingest PDFs from Data Directory"):
-        with st.spinner("Ingesting PDF documents... Please wait."):
-            ingest_pdfs(DATA_DIR, vector_store) # Pass the existing vector_store instance
-
     # Placeholder for document upload/management in the future
-    # st.header("Manage RAG Documents") # Original placeholder header, can be removed or kept
+    # st.divider()
+    # st.header("Manage RAG Documents")
     # uploaded_file = st.file_uploader("Upload PDF or TXT documents", accept_multiple_files=True)
     # if uploaded_file:
     #     # Add logic here to process and ingest uploaded documents into ChromaDB

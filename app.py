@@ -109,7 +109,8 @@ Instructions for interacting with students:
 5.  Use the search tool ('duckduckgo_search') to find recent research papers, news, or general information not present in the knowledge base. Cite information retrieved using this tool.
 6.  Break down complex tasks into smaller, manageable steps.
 7.  If unsure about a specific academic convention, advise the student to consult their supervisor or university guidelines.
-8.  Maintain a conversational and supportive tone. Remember the student might be feeling overwhelmed."""
+8.  Maintain a conversational and supportive tone. Remember the student might be feeling overwhelmed.
+9.  If the user uploads files, use the 'uploaded_document_retriever' tool to answer questions specifically about the content of those files. Prioritize this tool for questions related to uploaded documents."""
 
 # Create the prompt template
 # Note: We include the system message logic within the HumanMessagePromptTemplate
@@ -217,7 +218,8 @@ st.caption("Your AI partner for brainstorming and structuring your research.")
 with st.spinner("Checking for new documents to load into the knowledge base..."):
     check_and_ingest_new_pdfs(DATA_DIR, vector_store, CHROMA_DB_PATH)
 
-# Initialize chat history in session state if it doesn't exist
+# --- Session State Initialization ---
+# Initialize chat history
 if "messages" not in st.session_state:
     st.session_state.messages = []
     # Add initial greeting from AI
@@ -246,9 +248,9 @@ if prompt := st.chat_input("What's on your mind regarding your dissertation?"):
     # Get AI response using the agent
     with st.chat_message("assistant"):
         with st.spinner("Thinking..."):
-            # We need to pass the chat history to the agent_executor
-            # The format depends on the agent type. Tool-calling agents often expect 'chat_history' and 'input'.
-            response = agent_executor.invoke({
+            # Use the agent_executor from session state (might include uploaded file tool)
+            current_agent_executor = st.session_state.agent_executor
+            response = current_agent_executor.invoke({
                 "input": prompt,
                 "chat_history": st.session_state.messages[:-1] # Pass history excluding the current user prompt
             })
@@ -265,10 +267,22 @@ with st.sidebar:
     It has access to some of the literature in your reading lists and also uses Search tools for web lookups.""")
     st.warning("⚠️ Remember: Always consult your official supervisor for final guidance and decisions.")
 
-    # Placeholder for document upload/management in the future
-    # st.divider()
-    # st.header("Manage RAG Documents")
-    # uploaded_file = st.file_uploader("Upload PDF or TXT documents", accept_multiple_files=True)
-    # if uploaded_file:
-    #     # Add logic here to process and ingest uploaded documents into ChromaDB
-    #     st.success("Document processing placeholder.")
+    st.divider()
+    st.header("Discuss Uploaded Files")
+    uploaded_files = st.file_uploader(
+        "Upload PDF files to discuss (temporary for this session)",
+        accept_multiple_files=True,
+        type=['pdf'] # Initially restrict to PDF
+    )
+
+    if uploaded_files:
+        if st.button("Process Uploaded Files"):
+            process_uploaded_files(uploaded_files)
+
+    # Display processed files and clear button only if files have been processed
+    if st.session_state.processed_files:
+        st.caption("Currently discussing:")
+        for fname in st.session_state.processed_files:
+            st.write(f"- {fname}")
+        if st.button("Clear Uploaded Files Context"):
+            clear_uploaded_files()

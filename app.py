@@ -89,7 +89,7 @@ duckduckgo_search_tool = Tool(
 crawl4ai = AsyncWebCrawler()
 crawl4ai_tool = Tool(
     name="crawl4ai",
-    func=crawl4ai.crawl,
+    func=crawl4ai.crawl_website,
     description="Use this tool to crawl a website and extract its content. Input should be a valid URL. Only use this tool if you need to get information directly from a specific website. Be specific about the URL you want to crawl.",
 )
 

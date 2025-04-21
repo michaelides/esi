@@ -37,10 +37,10 @@ if not OPENAI_API_KEY:
 
 # Using DuckDuckGo Search as a free alternative
 search = DuckDuckGoSearchRun()
-search_tool = create_tool_calling_agent(
+search_tool = Tool(
     name="duckduckgo_search",
-    description="Useful for when you need to answer questions about current events or look up information on the internet.",
-    func=search.run
+    func=search.run,
+    description="Useful for when you need to answer questions about current events or look up information on the internet."
 )
 
 

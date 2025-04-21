@@ -66,36 +66,46 @@ def display_chat_messages():
             with st.chat_message("user"):
                 st.markdown(message.content)
 
+def process_user_input(agent_executor, llm, prompt):
+    """Processes user input and generates AI response."""
+    # Add user message to chat history
+    st.session_state.messages.append(HumanMessage(content=prompt))
+    # Display user message in chat message container
+    with st.chat_message("user"):
+        st.markdown(prompt)
+
+    # Get AI response using the agent
+    with st.chat_message("assistant"):
+        with st.spinner("Thinking..."):
+            # Use the agent_executor from session state (might include uploaded file tool)
+            current_agent_executor = agent_executor
+            try:
+                response = current_agent_executor.invoke({
+                    "input": prompt,
+                    "chat_history": st.session_state.messages[:-1] # Pass history excluding the current user prompt
+                })
+                ai_response_content = response.get("output", "Sorry, I encountered an error getting the response.")
+            except Exception as e:
+                 ai_response_content = f"An error occurred while processing your request: {e}"
+                 st.error(ai_response_content) # Display error in UI as well
+
+            st.markdown(ai_response_content)
+
+    # Add AI response to chat history
+    st.session_state.messages.append(AIMessage(content=ai_response_content))
+
+    return ai_response_content
+
+
 def handle_user_input(agent_executor, llm):
-    """Handles user input and generates AI response."""
+    """Handles user input from chat input and follow-up suggestions."""
+    # Handle chat input
     if prompt := st.chat_input("What's on your mind regarding your dissertation?"):
-        # Add user message to chat history
-        st.session_state.messages.append(HumanMessage(content=prompt))
-        # Display user message in chat message container
-        with st.chat_message("user"):
-            st.markdown(prompt)
+        process_user_input(agent_executor, llm, prompt)
 
-        # Get AI response using the agent
-        with st.chat_message("assistant"):
-            with st.spinner("Thinking..."):
-                # Use the agent_executor from session state (might include uploaded file tool)
-                current_agent_executor = agent_executor
-                try:
-                    response = current_agent_executor.invoke({
-                        "input": prompt,
-                        "chat_history": st.session_state.messages[:-1] # Pass history excluding the current user prompt
-                    })
-                    ai_response_content = response.get("output", "Sorry, I encountered an error getting the response.")
-                except Exception as e:
-                     ai_response_content = f"An error occurred while processing your request: {e}"
-                     st.error(ai_response_content) # Display error in UI as well
-
-                st.markdown(ai_response_content)
-
-        # Add AI response to chat history
-        st.session_state.messages.append(AIMessage(content=ai_response_content))
-
-        # Generate and display follow-up suggestions
+    # Generate and display follow-up suggestions
+    if st.session_state.messages:
+        ai_response_content = st.session_state.messages[-1].content
         followup_suggestions = generate_followup_suggestions(llm, ai_response_content)
 
         with st.form(key='followup_form'):
@@ -110,32 +120,7 @@ def handle_user_input(agent_executor, llm):
                 if clicked:
                     suggestion_index = int(button_key.split("_")[1])
                     suggestion = followup_suggestions[suggestion_index]
-
-                    # Add user message to chat history
-                    st.session_state.messages.append(HumanMessage(content=suggestion))
-                    # Display user message in chat message container
-                    with st.chat_message("user"):
-                        st.markdown(suggestion)
-
-                    # Get AI response using the agent
-                    with st.chat_message("assistant"):
-                        with st.spinner("Thinking..."):
-                            # Use the agent_executor from session state (might include uploaded file tool)
-                            current_agent_executor = agent_executor
-                            try:
-                                response = current_agent_executor.invoke({
-                                    "input": suggestion,
-                                    "chat_history": st.session_state.messages[:-1] # Pass history excluding the current user prompt
-                                })
-                                ai_response_content = response.get("output", "Sorry, I encountered an error getting the response.")
-                            except Exception as e:
-                                 ai_response_content = f"An error occurred while processing your request: {e}"
-                                 st.error(ai_response_content) # Display error in UI as well
-
-                            st.markdown(ai_response_content)
-
-                    # Add AI response to chat history
-                    st.session_state.messages.append(AIMessage(content=ai_response_content))
+                    process_user_input(agent_executor, llm, suggestion)
 
 
 def display_sidebar():

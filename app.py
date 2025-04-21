@@ -59,7 +59,7 @@ search_tool = Tool(
 CHROMA_DB_PATH = "./chroma_db_dissertation"
 # Use Google Generative AI embeddings
 #embedding_function = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
-embedding_function = GoogleGenerativeAIEmbeddings(model="models/text-embedding-large-exp-03-07")
+embedding_function = GoogleGenerativeAIEmbeddings(model="models/gemini-embedding-exp-03-07") # Updated model name
     
 # Initialize ChromaDB client
 # This will create the directory if it doesn't exist.

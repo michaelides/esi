@@ -79,7 +79,7 @@ rag_tool = create_retriever_tool(
 # --- LLM and Agent Setup ---
 # Initialize the LLM (e.g., Gemini)
 # Make sure GOOGLE_API_KEY is set in the environment or passed directly
-llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash", temperature=0.7, convert_system_message_to_human=True) # convert_system_message_to_human is often needed for Gemini tool use
+llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=0.7, convert_system_message_to_human=True) # convert_system_message_to_human is often needed for Gemini tool use
 
 # Define the tools the agent can use
 tools = [search_tool, rag_tool]
@@ -128,7 +128,7 @@ agent = create_tool_calling_agent(llm, tools, prompt)
 agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True) # Set verbose=True for debugging
 
 # --- Streamlit UI ---
-st.title("🎓 Dissertation Advisor Chatbot")
+st.title("🎓 ESI: ESI Scholarly Instructor")
 st.caption("Your AI partner for brainstorming and structuring your research.")
 
 # Initialize chat history in session state if it doesn't exist
@@ -175,7 +175,8 @@ if prompt := st.chat_input("What's on your mind regarding your dissertation?"):
 # Add a sidebar for potential future options or info
 with st.sidebar:
     st.header("About")
-    st.info("This chatbot uses AI to help you navigate the dissertation process. Use the RAG tool for internal resources and the Search tool for web lookups.")
+    st.info("""ESI uses AI to help you navigate the dissertation process. 
+    It has access to some of the literature in your reading lists and also uses Search tools for web lookups.""")
     st.warning("⚠️ Remember: Always consult your official supervisor for final guidance and decisions.")
 
     # Placeholder for document upload/management in the future

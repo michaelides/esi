@@ -23,7 +23,7 @@ import glob
 from langchain_community.document_loaders import PyPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_core.runnables import RunnablePassthrough # Import for potential future use or clarity
-from crawl4ai import WebCrawler
+from crawl4ai import AsyncWebCrawler
 
 
 # --- Configuration ---
@@ -86,7 +86,7 @@ duckduckgo_search_tool = Tool(
 
 # --- Crawl4AI Tool Setup ---
 
-crawl4ai = WebCrawler()
+crawl4ai = AsyncWebCrawler()
 crawl4ai_tool = Tool(
     name="crawl4ai",
     func=crawl4ai.crawl,

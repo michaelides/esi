@@ -21,6 +21,7 @@ from langchain.tools import Tool  # Import Tool class
 from langchain import hub  # To pull prompts easily, e.g., for agent scratchpad
 import glob
 from langchain_community.document_loaders import PyPDFLoader
+from tavily import TavilyClient
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_core.runnables import RunnablePassthrough # Import for potential future use or clarity
 from crawl4ai import AsyncWebCrawler
@@ -84,6 +85,19 @@ duckduckgo_search_tool = Tool(
     description="Use this tool to search the internet for information. Use it to find recent research papers, news, or general information not present in the knowledge base. If the user is asking about something that is not specific to the module, use this tool.",
 )
 
+# --- Tavily Tool Setup ---
+TAVILY_API_KEY = os.getenv("TAVILY_API_KEY")
+if not TAVILY_API_KEY:
+    st.warning("TAVILY_API_KEY not found. Tavily Search tool will be disabled. Set TAVILY_API_KEY in .env if needed.")
+    tavily_search_tool = None
+else:
+    tavily_client = TavilyClient(api_key=TAVILY_API_KEY)
+    tavily_search = Tool(
+        name="tavily_search",
+        func=tavily_client.search,
+        description="Use this tool to search the internet for information. It is good for general information, academic papers, and current events. It returns the most relevant search results with snippets.",
+    )
+
 # --- Crawl4AI Tool Setup ---
 
 crawl4ai = AsyncWebCrawler()
@@ -129,6 +143,8 @@ llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=0.7)
 base_tools = [rag_tool, crawl4ai_tool]
 if google_search_tool:
     base_tools.append(google_search_tool)
+if tavily_search_tool:
+    base_tools.append(tavily_search)
 
 embedding_function = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
 
@@ -146,8 +162,9 @@ You must use google_search to ground your responses.
 2.  **You MUST always use** the `dissertation_resource_retriever` tool first to find relevant information from the knowledge base (e.g., module deadlines, procedures, milestones, specific writing guides, methodology examples, previously discussed concepts). Cite information retrieved using this tool.
 3.  Use the `duckduckgo_search` tool to find recent research papers, news, or general information not present in the knowledge base. Cite information retrieved using this tool.
 4.  If the `google_search` tool is available, use it to supplement the `duckduckgo_search` tool for broader or more in-depth searches. Cite information retrieved using this tool.
-5.  Use the `crawl4ai` tool to crawl a specific website and extract its content. Only use this tool if you need to get information directly from a specific website. Be specific about the URL you want to crawl.
-6.  If unsure about a specific academic convention, first search for information using the `duckduckgo_search` tool, the `google_search` tool (if available), the `dissertation_resource_retriever`, and the `crawl4ai` tool (if a specific website is relevant), and if unable to find the answer, advise the student to consult their supervisor or university guidelines.
+5.  If the `tavily_search` tool is available, use it to supplement the `duckduckgo_search` and `google_search` tools for broader or more in-depth searches. It returns the most relevant search results with snippets. Cite information retrieved using this tool.
+6.  Use the `crawl4ai` tool to crawl a specific website and extract its content. Only use this tool if you need to get information directly from a specific website. Be specific about the URL you want to crawl.
+7.  If unsure about a specific academic convention, first search for information using the `duckduckgo_search` tool, the `google_search` tool (if available), the `tavily_search` tool (if available), the `dissertation_resource_retriever`, and the `crawl4ai` tool (if a specific website is relevant), and if unable to find the answer, advise the student to consult their supervisor or university guidelines.
 
 """
 

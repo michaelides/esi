@@ -11,7 +11,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.messages import AIMessage, HumanMessage
 from langchain.tools.retriever import create_retriever_tool
 from langchain.tools import Tool # Import Tool class
-from langchainhub import pull # To pull prompts easily, e.g., for agent scratchpad
+from langchain import hub # To pull prompts easily, e.g., for agent scratchpad
 
 # --- Configuration ---
 load_dotenv()
@@ -86,7 +86,7 @@ tools = [search_tool, rag_tool]
 # Using the newer `create_tool_calling_agent` which requires a specific prompt structure
 # You can pull a base prompt and customize it, or create one from scratch.
 # Let's pull a base prompt suitable for tool calling agents
-prompt = pull("hwchase17/openai-tools-agent")
+prompt = hub.pull("hwchase17/openai-tools-agent")
 
 # Customize the system message part of the prompt template
 # The base prompt structure is usually [SystemMessage, MessagesPlaceholder, AIMessage]

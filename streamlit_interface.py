@@ -46,10 +46,10 @@ def initialize_streamlit():
         prompt_messages = [
             ("system", system_message),
             MessagesPlaceholder(variable_name="chat_history"),
-            ("human", "{{input}}"),
+            ("human", "{input}"),
             MessagesPlaceholder(variable_name="agent_scratchpad"),
         ]
-        st.session_state.agent_prompt = prompt_messages
+        st.session_state.agent_prompt = ChatPromptTemplate.from_messages(prompt_messages)
 
 
 def display_chat_messages():

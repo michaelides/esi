@@ -239,9 +239,17 @@ if "agent_prompt" not in st.session_state:
     st.session_state.agent_prompt = ChatPromptTemplate.from_messages(prompt_messages)
 
 
-# if "agent_executor" not in st.session_state:
-#     # Initialize the agent executor with base tools on first run
-#     update_agent_executor()
+if "agent_executor" not in st.session_state:
+    # Initialize the agent executor with base tools on first run
+    # Retrieve the prompt from session state
+    agent_prompt = st.session_state.agent_prompt
+
+    # Create and store the new agent executor instance
+    st.session_state.agent_executor = AgentExecutor(
+        agent=create_tool_calling_agent(llm, base_tools, agent_prompt),  # Use prompt from session state
+        tools=base_tools,
+        verbose=True  # Set verbose=True for debugging
+    )
 
 
 # Display chat messages from history

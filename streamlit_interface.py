@@ -2,7 +2,6 @@ import streamlit as st
 from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.prompts import MessagesPlaceholder, ChatPromptTemplate
 import random
-from langchain.prompts import PromptTemplate
 from langchain_core.runnables import chain
 import uuid
 
@@ -30,30 +29,6 @@ def initialize_streamlit():
             instruction = ""  # Provide a default value to avoid errors
 
         # st.session_state.agent_prompt = ChatPromptTemplate.from_messages(prompt_messages)
-
-
-def generate_followup_suggestions(llm, agent_response_content):
-    """Generates follow-up question suggestions based on the agent's response using LLM."""
-    prompt_template = """
-    You are an AI assistant that helps generate follow-up questions for a conversation about dissertation research.
-    Given the following content from the conversation, please generate 3 follow-up questions that the user might ask to continue the conversation and delve deeper into the topic. The questions should be concise, directly related to the content, and phrased in a way that encourages further exploration or clarification.
-
-    Content:
-    {content}
-
-    Follow-up Questions:
-    """
-    prompt = PromptTemplate(template=prompt_template, input_variables=["content"])
-    followup_chain = prompt | llm
-
-    # Ensure that the output is a string
-    followup_suggestions = followup_chain.invoke({"content": agent_response_content}).content
-
-    # Split the suggestions into a list
-    suggestions_list = followup_suggestions.strip().split("\n")
-    # Remove any empty strings from the list
-    suggestions_list = [s.strip() for s in suggestions_list if s.strip()]
-    return suggestions_list
 
 
 def display_chat_messages():
@@ -98,33 +73,10 @@ def process_user_input(agent_executor, llm, prompt):
 
 
 def handle_user_input(agent_executor, llm):
-    """Handles user input from chat input and follow-up suggestions."""
+    """Handles user input from chat input."""
     # Handle chat input
     if prompt := st.chat_input("What's on your mind regarding your dissertation?"):
         process_user_input(agent_executor, llm, prompt)
-
-    # Generate and display follow-up suggestions
-    if st.session_state.messages:
-        ai_response_content = st.session_state.messages[-1].content
-        followup_suggestions = generate_followup_suggestions(llm, ai_response_content)
-
-        with st.form(key='followup_form'):
-            # Create a dictionary to store the button state
-            button_states = {}
-            for i, suggestion in enumerate(followup_suggestions):
-                button_key = f"suggestion_{i}"  # Generate a unique key for each button
-                button_states[button_key] = st.form_submit_button(suggestion)
-
-            # Add a submit button to the form
-            submitted = st.form_submit_button("Submit")
-
-            # Process the button clicks outside the loop
-            if submitted:
-                for button_key, suggestion in button_states.items():
-                    if button_states[button_key]:
-                        suggestion_index = int(button_key.split("_")[1])
-                        suggestion = followup_suggestions[suggestion_index]
-                        process_user_input(agent_executor, llm, suggestion)
 
 
 def display_sidebar():

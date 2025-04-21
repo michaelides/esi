@@ -34,13 +34,6 @@ DATA_DIR = "./data" # Directory to store PDF files
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 # SERPER_API_KEY = os.getenv("SERPER_API_KEY") # Uncomment if using Google Serper
 
-if not GOOGLE_API_KEY:
-    st.error("Google API key not found. Please set it in your .env file (GOOGLE_API_KEY=...).")
-    st.stop()
-
-# Configure Google API key for LangChain components
-os.environ["GOOGLE_API_KEY"] = GOOGLE_API_KEY
-
 # Optional: Check for Serper key if using Google Search
 # if not SERPER_API_KEY:
 #     st.warning("SERPER API key not found. Google Search tool will be disabled. Set SERPER_API_KEY in .env if needed.")
@@ -52,6 +45,12 @@ os.environ["GOOGLE_API_KEY"] = GOOGLE_API_KEY
 #         func=search.run,
 #         description="Useful for when you need to answer questions about current events or look up information on the internet.",
 #     )
+
+# Load the system prompt as instructions:
+
+with open('esi_agent_instruction.md', 'r') as f:
+    instruction = f.read()
+
 
 # Using DuckDuckGo Search as a free alternative
 search = DuckDuckGoSearchRun()
@@ -84,30 +83,32 @@ retriever = vector_store.as_retriever(search_kwargs={"k": 3})
 rag_tool = create_retriever_tool(
     retriever,
     "dissertation_resource_retriever",
-    "Searches and returns relevant information from loaded dissertation guides, research papers, and academic resources. Use this to find specific details, methodologies, or examples from the knowledge base.",
+    """Searches and returns relevant information from loaded the module dissertation guides, research papers, and academic resources. 
+    Use this to find specific details, methodologies, or examples from the knowledge base.
+    The database also includes information about scales, questionnaires, and instruments. 
+    You can also find relenant information about the module deadlines, milestones, procedures, and other key information.""",
 )
 
 # --- LLM Setup ---
 # Initialize the LLM (e.g., Gemini)
-llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash", temperature=0.7) # Removed deprecated convert_system_message_to_human
+llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash", temperature=0.7) 
 
 # --- Agent Setup ---
 # Define the base tools the agent can use (main knowledge base and search)
 base_tools = [search_tool, rag_tool]
 
 # Define the system message and prompt structure globally
-system_message = """You are a helpful AI assistant designed to support university students with their dissertations. Your goal is to help them brainstorm research ideas, structure their work, understand methodologies, and overcome challenges.
+system_message = instruction + f"""
+You are a helpful AI assistant designed to support university students with their dissertations. 
+Your goal is to help them brainstorm research ideas, structure their work, understand methodologies, and overcome challenges.
 
 Instructions for interacting with students:
-1.  Be encouraging, patient, and constructive. Avoid overly critical language.
-2.  Ask clarifying questions to understand the student's specific field, topic, and progress.
-3.  When brainstorming, suggest diverse ideas but encourage the student to evaluate them based on feasibility, interest, and academic contribution.
-4.  Use the 'dissertation_resource_retriever' tool to find relevant information from the knowledge base (e.g., specific writing guides, methodology examples, previously discussed concepts). Cite information retrieved using this tool.
-5.  Use the search tool ('duckduckgo_search') to find recent research papers, news, or general information not present in the knowledge base. Cite information retrieved using this tool.
-6.  Break down complex tasks into smaller, manageable steps.
-7.  If unsure about a specific academic convention, advise the student to consult their supervisor or university guidelines.
-8.  Maintain a conversational and supportive tone. Remember the student might be feeling overwhelmed.
-9.  **IMPORTANT:** If the user has uploaded files and asks questions specifically about their content, use the 'uploaded_document_retriever' tool to answer those questions. Prioritize this tool for questions directly related to the uploaded documents. If the question is general or about the main knowledge base, use the other tools.
+1. When A student refers to the "module" they are refering to the MSc dissertation module at UEA, called NBS-7091A. You have access to this via the rag_tool (dissertation_resource_retriever). )
+2.  Use the 'dissertation_resource_retriever' tool to find relevant information from the knowledge base (e.g., module deadlines procedures or milestones, specific writing guides, methodology examples, previously discussed concepts). Cite information retrieved using this tool.
+3.  Use the search tool ('duckduckgo_search') to find recent research papers, news, or general information not present in the knowledge base. Cite information retrieved using this tool.
+4.  If unsure about a specific academic convention, first search for information using thesearch tool and the dissertation_resource_retriever, 
+and if unable to find the answer, advise the student to consult their supervisor or university guidelines.
+5.  **IMPORTANT:** If the user has uploaded files and asks questions specifically about their content, use the 'uploaded_document_retriever' tool to answer those questions. Prioritize this tool for questions directly related to the uploaded documents. If the question is general or about the main knowledge base, use the other tools.
 """
 
 # Define the prompt message structure

@@ -94,7 +94,7 @@ rag_tool = create_retriever_tool(
 
 # --- LLM Setup ---
 # Initialize the LLM (e.g., Gemini)
-llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash", temperature=0.7) 
+llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=0.7) 
 
 # --- Agent Setup ---
 # Define the base tools the agent can use (main knowledge base and search)

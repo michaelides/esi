@@ -45,7 +45,10 @@ def generate_followup_suggestions(llm, agent_response_content):
     """
     prompt = PromptTemplate(template=prompt_template, input_variables=["content"])
     followup_chain = prompt | llm
-    followup_suggestions = followup_chain.invoke({"content": agent_response_content})
+
+    # Ensure that the output is a string
+    followup_suggestions = followup_chain.invoke({"content": agent_response_content}).content
+
     # Split the suggestions into a list
     suggestions_list = followup_suggestions.strip().split("\n")
     # Remove any empty strings from the list

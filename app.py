@@ -61,7 +61,7 @@ search = DuckDuckGoSearchRun()
 search_tool = Tool(
     name="duckduckgo_search",
     func=search.run,
-    description="Useful for when you need to answer questions about current events or look up information on the internet."
+    description="Use this tool to search the internet for information. Use it to find recent research papers, news, or general information not present in the knowledge base. If the user is asking about something that is not specific to the module or their uploaded documents, use this tool."
 )
 
 
@@ -87,10 +87,9 @@ retriever = vector_store.as_retriever(search_kwargs={"k": 3})
 rag_tool = create_retriever_tool(
     retriever,
     "dissertation_resource_retriever",
-    """Searches and returns relevant information from loaded the module dissertation guides, research papers, and academic resources. 
-    Use this to find specific details, methodologies, or examples from the knowledge base.
-    The database also includes information about scales, questionnaires, and instruments. 
-    You can also find relenant information about the module deadlines, milestones, procedures, and other key information.""",
+    """Use this tool to retrieve information about the MSc dissertation module at UEA, called NBS-7091A.
+    Specifically, use this tool to find information about module deadlines, procedures, milestones, specific writing guides, methodology examples, previously discussed concepts, scales, questionnaires, and instruments.
+    If the question is at all related to the module requirements, use this tool first.""",
 )
 
 # --- LLM Setup ---
@@ -103,16 +102,16 @@ base_tools = [search_tool, rag_tool]
 
 # Define the system message and prompt structure globally
 system_message = f"""{instruction}
-You are a helpful AI assistant designed to support university students with their dissertations. 
+You are a helpful AI assistant designed to support university students with their dissertations.
 Your goal is to help them brainstorm research ideas, structure their work, understand methodologies, and overcome challenges.
 
 **Tool Use Instructions:**
 
-1.  When a student refers to the "module" they are referring to the MSc dissertation module at UEA, called NBS-7091A. You have access to information about this module via the `dissertation_resource_retriever` tool.
-2.  **Always use** the `dissertation_resource_retriever` tool first to find relevant information from the knowledge base (e.g., module deadlines, procedures, milestones, specific writing guides, methodology examples, previously discussed concepts). Cite information retrieved using this tool.
+1.  When a student refers to the \"module\" they are referring to the MSc dissertation module at UEA, called NBS-7091A. You have access to information about this module via the `dissertation_resource_retriever` tool.
+2.  **You MUST always use** the `dissertation_resource_retriever` tool first to find relevant information from the knowledge base (e.g., module deadlines, procedures, milestones, specific writing guides, methodology examples, previously discussed concepts). Cite information retrieved using this tool.
 3.  Use the `duckduckgo_search` tool to find recent research papers, news, or general information not present in the knowledge base. Cite information retrieved using this tool.
 4.  If unsure about a specific academic convention, first search for information using the `duckduckgo_search` tool and the `dissertation_resource_retriever`, and if unable to find the answer, advise the student to consult their supervisor or university guidelines.
-5.  **IMPORTANT:** If the user has uploaded files and asks questions specifically about their content, **always use** the `uploaded_document_retriever` tool to answer those questions. Prioritize this tool for questions directly related to the uploaded documents. If the question is general or about the main knowledge base, use the other tools.
+5.  **IMPORTANT:** If the user has uploaded files and asks questions specifically about their content, **you MUST always use** the `uploaded_document_retriever` tool to answer those questions. Prioritize this tool for questions directly related to the uploaded documents. If the question is general or about the main knowledge base, use the other tools.
 
 """
 

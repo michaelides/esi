@@ -31,6 +31,7 @@ DATA_DIR = "./data" # Directory to store PDF files
 
 # Check for necessary API keys
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+GOOGLE_CSE_ID = os.getenv("GOOGLE_CSE_ID")
 # SERPER_API_KEY = os.getenv("SERPER_API_KEY") # Uncomment if using Google Serper
 
 # Optional: Check for Serper key if using Google Search
@@ -45,26 +46,6 @@ GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 #         description="Useful for when you need to answer questions about current events or look up information on the internet.",
 #     )
 
-# --- Google Search Tool Setup ---
-# Check for necessary API keys
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
-GOOGLE_CSE_ID = os.getenv("GOOGLE_CSE_ID")
-
-if not GOOGLE_API_KEY or not GOOGLE_CSE_ID:
-    st.warning("GOOGLE_API_KEY and GOOGLE_CSE_ID not found. Google Search tool will be disabled. Set GOOGLE_API_KEY and GOOGLE_CSE_ID in .env if needed.")
-    google_search_tool = None
-else:
-    try:
-        google_search = GoogleSearchAPIWrapper(google_api_key=GOOGLE_API_KEY, google_cse_id=GOOGLE_CSE_ID)
-        google_search_tool = Tool(
-            name="google_search",
-            func=google_search.run,
-            description="Use this tool to search the internet for information using Google Search. It is good for general information and current events.",
-        )
-    except ImportError as e:
-        st.error(f"Error initializing GoogleSearchAPIWrapper: {e}. Please ensure you have installed the google-api-python-client. pip install google-api-python-client")
-        google_search_tool = None
-
 # Load the system prompt as instructions:
 try:
     with open('esi_agent_instruction.md', 'r') as f:
@@ -72,6 +53,17 @@ try:
 except FileNotFoundError:
     st.error("Could not find esi_agent_instruction.md. Please ensure it is in the correct directory.")
     instruction = ""  # Provide a default value to avoid errors
+
+
+
+# --- Google Search Tool Setup ---
+
+google_search = GoogleSearchAPIWrapper(google_api_key=GOOGLE_API_KEY, google_cse_id=GOOGLE_CSE_ID)
+google_search_tool = Tool(
+        name="google_search",
+        func=google_search.run,
+        description="Use this tool to search the internet for information using Google Search. It is good for general information, academic papers, and current events.",
+)
 
 
 # Using DuckDuckGo Search as a free alternative
@@ -98,7 +90,7 @@ vector_store = Chroma(
 
 # Create a retriever from the main vector store
 # `k=3` means it will retrieve the top 3 most relevant documents
-retriever = vector_store.as_retriever(search_kwargs={"k": 3})
+retriever = vector_store.as_retriever(search_kwargs={"k": 5})
 
 # Create a RAG tool for the main knowledge base
 rag_tool = create_retriever_tool(
@@ -115,16 +107,15 @@ llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=0.7)
 
 # --- Agent Setup ---
 # Define the base tools the agent can use (main knowledge base and search)
-base_tools = [rag_tool, duckduckgo_search_tool]
-if google_search_tool:
-    base_tools.append(google_search_tool)
+base_tools = [rag_tool, duckduckgo_search_tool, google_search_tool]
 
 # Define the system message and prompt structure globally
 system_message = f"""{instruction}
 You are a helpful AI assistant designed to support university students with their dissertations.
 Your goal is to help them brainstorm research ideas, structure their work, understand methodologies, and overcome challenges.
 
-When you use tools, ALWAYS cite the source URL if one is provided.
+When you use tools, ALWAYS cite the source URL if one is provided. 
+You must use google_search to ground your responses. 
 
 **Tool Use Instructions:**
 

@@ -25,11 +25,13 @@ from crawl4ai import AsyncWebCrawler
 import streamlit as st  # Ensure streamlit is imported here
 from streamlit_interface import display_chat_messages, handle_user_input, display_sidebar
 from langchain_core.messages import AIMessage, HumanMessage
+import streamlit as st  # Ensure streamlit is imported here
+from streamlit_interface import display_chat_messages, handle_user_input, display_sidebar, initialize_streamlit
 
 
 # --- Configuration ---
 load_dotenv()
-DATA_DIR = "./data" # Directory to store PDF files
+DATA_DIR = "./data"  # Directory to store PDF files
 
 # Check for necessary API keys
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
@@ -232,28 +234,12 @@ def check_and_ingest_new_pdfs(data_directory: str, vector_store_instance: Chroma
 #         agent=create_tool_calling_agent(llm, current_tools, agent_prompt), # Use prompt from session state
 #         tools=current_tools,
 #         verbose=True # Set verbose=True for debugging
-#     )
-
-
-# --- Streamlit UI ---
-st.title("🎓 ESI: ESI Scholarly Instructor")
-st.caption("Your AI partner for brainstorming and structuring your research.")
-
 # --- Automatic PDF Ingestion on Startup (Main Knowledge Base) ---
 with st.spinner("Checking for new documents to load into the main knowledge base..."):
     check_and_ingest_new_pdfs(DATA_DIR, vector_store, CHROMA_DB_PATH)
 
-# --- Session State Initialization ---
-if "messages" not in st.session_state:
-    st.session_state.messages = []
-    # Add initial greeting from AI
-    st.session_state.messages.append(
-        AIMessage(content="Hello! I'm here to help you with your dissertation. How can I assist you today? Feel free to ask about brainstorming ideas, structuring chapters, finding resources, or anything else!")
-    )
-
-# Initialize the agent prompt in session state
-if "agent_prompt" not in st.session_state:
-    st.session_state.agent_prompt = ChatPromptTemplate.from_messages(prompt_messages)
+# Initialize Streamlit UI and session state
+initialize_streamlit()
 
 if "agent_executor" not in st.session_state:
     # Initialize the agent executor with base tools on first run

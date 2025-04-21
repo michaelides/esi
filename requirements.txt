@@ -11,3 +11,4 @@ python-dotenv
 langchain-google-genai
 duckduckgo-search
 langchain-chroma
+pypdf

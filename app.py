@@ -13,9 +13,14 @@ from langchain_core.messages import AIMessage, HumanMessage
 from langchain.tools.retriever import create_retriever_tool
 from langchain.tools import Tool # Import Tool class
 from langchain import hub # To pull prompts easily, e.g., for agent scratchpad
+import glob
+from langchain_community.document_loaders import PyPDFLoader
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+
 
 # --- Configuration ---
 load_dotenv()
+DATA_DIR = "./data" # Directory to store PDF files
 
 # Check for necessary API keys
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
@@ -127,6 +132,51 @@ agent = create_tool_calling_agent(llm, tools, prompt)
 
 # Create the agent executor
 agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True) # Set verbose=True for debugging
+
+
+# --- PDF Ingestion Function ---
+def ingest_pdfs(data_directory: str, vector_store_instance: Chroma):
+    """Loads PDFs from data_directory, splits them, and adds them to the vector store."""
+    st.write(f"Scanning for PDF files in {data_directory}...")
+    pdf_files = glob.glob(os.path.join(data_directory, "*.pdf"))
+
+    if not pdf_files:
+        st.warning(f"No PDF files found in {data_directory}. Please add some PDFs to ingest.")
+        return
+
+    st.write(f"Found {len(pdf_files)} PDF file(s). Starting ingestion...")
+
+    all_docs = []
+    for pdf_path in pdf_files:
+        try:
+            st.write(f"  Loading: {os.path.basename(pdf_path)}")
+            loader = PyPDFLoader(pdf_path)
+            documents = loader.load()
+            all_docs.extend(documents)
+        except Exception as e:
+            st.error(f"Error loading {os.path.basename(pdf_path)}: {e}")
+            continue # Skip to the next file
+
+    if not all_docs:
+        st.error("No documents were successfully loaded from the PDF files.")
+        return
+
+    st.write("Splitting documents into chunks...")
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+    splits = text_splitter.split_documents(all_docs)
+
+    if not splits:
+        st.error("Failed to split documents into chunks.")
+        return
+
+    st.write(f"Adding {len(splits)} document chunks to the vector store...")
+    try:
+        # Add documents to the existing vector store instance
+        vector_store_instance.add_documents(splits)
+        st.success("PDF ingestion complete!")
+    except Exception as e:
+        st.error(f"Error adding documents to vector store: {e}")
+
 
 # --- Streamlit UI ---
 st.title("🎓 ESI: ESI Scholarly Instructor")

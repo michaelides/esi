@@ -4,6 +4,10 @@ from dotenv import load_dotenv
 import io # Import io for handling file streams
 import tempfile # Import tempfile for creating temporary files
 import shutil # Import shutil for directory cleanup
+import uuid # Import uuid for generating unique IDs
+
+# Import chromadb client
+import chromadb
 
 # Use Google Generative AI
 from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
@@ -65,6 +69,7 @@ CHROMA_DB_PATH = "./chroma_db_dissertation"
 embedding_function = GoogleGenerativeAIEmbeddings(model="models/text-embedding-004") # Updated model name
 
 # Initialize ChromaDB client for the main knowledge base
+# This uses the default persistent client
 vector_store = Chroma(
     persist_directory=CHROMA_DB_PATH,
     embedding_function=embedding_function,
@@ -246,37 +251,57 @@ def process_uploaded_files(uploaded_files):
 
         st.write(f"Adding {len(splits)} document chunks to a temporary vector store...")
 
-        # Create a *new*, temporary in-memory Chroma instance for uploaded files
-        # This ensures uploaded files don't mix with the persistent DB
-        uploaded_vector_store = Chroma.from_documents(
-            splits,
-            embedding_function,
-            collection_name="uploaded_resources" # Use a different collection name
-        )
+        # --- Explicitly create an in-memory Chroma client and add documents ---
+        try:
+            # Create an in-memory client
+            uploaded_client = chromadb.Client()
+            # Get or create the collection
+            uploaded_collection = uploaded_client.get_or_create_collection(name="uploaded_resources")
 
-        # Create a retriever and tool for the uploaded files
-        uploaded_retriever = uploaded_vector_store.as_retriever(search_kwargs={"k": 3})
-        uploaded_retriever_tool = create_retriever_tool(
-            uploaded_retriever,
-            "uploaded_document_retriever",
-            "Searches and returns relevant information ONLY from the documents the user has uploaded during this session. Use this tool specifically when the user asks questions about the content of their uploaded files.",
-        )
+            # Prepare documents for adding
+            docs_to_add = [split.page_content for split in splits]
+            metadatas_to_add = [split.metadata for split in splits]
+            ids_to_add = [str(uuid.uuid4()) for _ in splits] # Generate unique IDs
 
-        # Store the temporary vector store and tool in session state
-        st.session_state.uploaded_vector_store = uploaded_vector_store
-        st.session_state.uploaded_retriever_tool = uploaded_retriever_tool
+            # Add documents to the collection
+            uploaded_collection.add(
+                documents=docs_to_add,
+                metadatas=metadatas_to_add,
+                ids=ids_to_add
+            )
 
-        # Update the agent executor to include the new tool
-        update_agent_executor()
+            # Create the LangChain Chroma wrapper around the explicit client and collection
+            uploaded_vector_store = Chroma(
+                client=uploaded_client,
+                collection_name="uploaded_resources",
+                embedding_function=embedding_function # Use the same embedding function
+            )
 
-        st.success(f"Successfully processed {len(st.session_state.processed_files)} uploaded file(s)! You can now ask questions about their content.")
+            # Store the temporary vector store and tool in session state
+            st.session_state.uploaded_vector_store = uploaded_vector_store
+            st.session_state.uploaded_retriever_tool = create_retriever_tool(
+                uploaded_vector_store.as_retriever(search_kwargs={"k": 3}),
+                "uploaded_document_retriever",
+                "Searches and returns relevant information ONLY from the documents the user has uploaded during this session. Use this tool specifically when the user asks questions about the content of their uploaded files.",
+            )
+
+            # Update the agent executor to include the new tool
+            update_agent_executor()
+
+            st.success(f"Successfully processed {len(st.session_state.processed_files)} uploaded file(s)! You can now ask questions about their content.")
+
+        except Exception as e:
+            st.error(f"An error occurred during Chroma processing for uploaded files: {e}")
+            # Ensure session state is clean if processing fails
+            clear_uploaded_files()
+            # Re-raise the exception to show the full traceback if needed for debugging
+            # raise e # Uncomment for detailed debugging
+        # --- End of explicit Chroma client creation ---
+
 
     except Exception as e:
         st.error(f"An error occurred during file processing: {e}")
         # Ensure session state is clean if processing fails
-        # The clear_uploaded_files() call was moved to the start of the function
-        # but we should still ensure state is clean on error.
-        # Let's re-call it here just in case something went wrong mid-process.
         clear_uploaded_files()
     finally:
         # Clean up the temporary directory
@@ -293,10 +318,19 @@ def clear_uploaded_files():
     st.info("Clearing uploaded files context...")
     if "uploaded_vector_store" in st.session_state and st.session_state.uploaded_vector_store:
         try:
+            # If the vector store exists, try to get the client and delete the collection
+            uploaded_vector_store = st.session_state.uploaded_vector_store
+            if hasattr(uploaded_vector_store, '_client') and uploaded_vector_store._client:
+                 try:
+                     uploaded_vector_store._client.delete_collection(name="uploaded_resources")
+                     st.info("Deleted 'uploaded_resources' collection from temporary client.")
+                 except Exception as e:
+                     st.warning(f"Could not delete 'uploaded_resources' collection: {e}")
+
             # For in-memory Chroma, setting to None should be sufficient for garbage collection
             st.session_state.uploaded_vector_store = None
         except Exception as e:
-            st.warning(f"Could not clear temporary vector store: {e}")
+            st.warning(f"Could not clear temporary vector store reference: {e}")
 
     st.session_state.uploaded_retriever_tool = None
     st.session_state.processed_files = []

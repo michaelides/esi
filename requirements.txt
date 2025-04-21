@@ -9,3 +9,4 @@ faiss-cpu # or faiss-gpu if you have CUDA installed
 tiktoken
 python-dotenv
 langchain-google-genai
+duckduckgo-search

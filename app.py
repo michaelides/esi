@@ -54,16 +54,25 @@ except FileNotFoundError:
     st.error("Could not find esi_agent_instruction.md. Please ensure it is in the correct directory.")
     instruction = ""  # Provide a default value to avoid errors
 
-
-
 # --- Google Search Tool Setup ---
+# Check for necessary API keys
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+GOOGLE_CSE_ID = os.getenv("GOOGLE_CSE_ID")
 
+if not GOOGLE_API_KEY or not GOOGLE_CSE_ID:
+    st.warning("GOOGLE_API_KEY and GOOGLE_CSE_ID not found. Google Search tool will be disabled. Set GOOGLE_API_KEY and GOOGLE_CSE_ID in .env if needed.")
+    google_search_tool = None
+else:
+    try:
         google_search = GoogleSearchAPIWrapper(google_api_key=GOOGLE_API_KEY, google_cse_id=GOOGLE_CSE_ID)
         google_search_tool = Tool(
             name="google_search",
             func=google_search.run,
             description="Use this tool to search the internet for information using Google Search. It is good for general information, academic papers, and current events.",
         )
+    except ImportError as e:
+        st.error(f"Error initializing GoogleSearchAPIWrapper: {e}. Please ensure you have installed the google-api-python-client. pip install google-api-python-client")
+        google_search_tool = None
 
 
 # Using DuckDuckGo Search as a free alternative

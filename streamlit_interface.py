@@ -2,8 +2,8 @@ import streamlit as st
 from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.prompts import MessagesPlaceholder, ChatPromptTemplate
 import random
-from langchain.chains import LLMChain
 from langchain.prompts import PromptTemplate
+from langchain_core.runnables import chain
 
 def initialize_streamlit():
     """Initializes the Streamlit UI, including title, caption, and session state."""
@@ -44,8 +44,8 @@ def generate_followup_suggestions(llm, agent_response_content):
     Follow-up Questions:
     """
     prompt = PromptTemplate(template=prompt_template, input_variables=["content"])
-    llm_chain = LLMChain(prompt=prompt, llm=llm)
-    followup_suggestions = llm_chain.run(agent_response_content)
+    followup_chain = prompt | llm
+    followup_suggestions = followup_chain.invoke({"content": agent_response_content})
     # Split the suggestions into a list
     suggestions_list = followup_suggestions.strip().split("\n")
     # Remove any empty strings from the list

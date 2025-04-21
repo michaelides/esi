@@ -53,8 +53,9 @@ search_tool = Tool(
 # Define the path for the persistent ChromaDB database
 CHROMA_DB_PATH = "./chroma_db_dissertation"
 # Use Google Generative AI embeddings
-embedding_function = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
-
+#embedding_function = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
+embedding_function = GoogleGenerativeAIEmbeddings(model="models/text-embedding-large-exp-03-07")
+    
 # Initialize ChromaDB client
 # This will create the directory if it doesn't exist.
 # In a real scenario, you'd have a separate script to ingest documents.

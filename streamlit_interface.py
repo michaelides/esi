@@ -94,28 +94,27 @@ def handle_user_input(agent_executor, llm):
 
         # Generate and display follow-up suggestions
         followup_suggestions = generate_followup_suggestions(llm, ai_response_content)
-        with st.expander("Follow-up Questions"):
-            for suggestion in followup_suggestions:
-                if st.button(suggestion, key=suggestion):
-                    # Simulate user clicking on the suggestion
-                    st.session_state.messages.append(HumanMessage(content=suggestion))
-                    with st.chat_message("user"):
-                        st.markdown(suggestion)
-                    # Re-run the agent with the suggested prompt
-                    with st.chat_message("assistant"):
-                        with st.spinner("Thinking..."):
-                            current_agent_executor = agent_executor
-                            try:
-                                response = current_agent_executor.invoke({
-                                    "input": suggestion,
-                                    "chat_history": st.session_state.messages[:-1]
-                                })
-                                ai_response_content = response.get("output", "Sorry, I encountered an error getting the response.")
-                            except Exception as e:
-                                ai_response_content = f"An error occurred while processing your request: {e}"
-                                st.error(ai_response_content)
-                            st.markdown(ai_response_content)
-                    st.session_state.messages.append(AIMessage(content=ai_response_content))
+        for suggestion in followup_suggestions:
+            if st.button(suggestion, key=suggestion):
+                # Simulate user clicking on the suggestion
+                st.session_state.messages.append(HumanMessage(content=suggestion))
+                with st.chat_message("user"):
+                    st.markdown(suggestion)
+                # Re-run the agent with the suggested prompt
+                with st.chat_message("assistant"):
+                    with st.spinner("Thinking..."):
+                        current_agent_executor = agent_executor
+                        try:
+                            response = current_agent_executor.invoke({
+                                "input": suggestion,
+                                "chat_history": st.session_state.messages[:-1]
+                            })
+                            ai_response_content = response.get("output", "Sorry, I encountered an error getting the response.")
+                        except Exception as e:
+                            ai_response_content = f"An error occurred while processing your request: {e}"
+                            st.error(ai_response_content)
+                        st.markdown(ai_response_content)
+                st.session_state.messages.append(AIMessage(content=ai_response_content))
 
 
 def display_sidebar():

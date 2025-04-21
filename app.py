@@ -3,6 +3,7 @@ import os
 from dotenv import load_dotenv
 import io # Import io for handling file streams
 import tempfile # Import tempfile for creating temporary files
+import shutil # Import shutil for directory cleanup
 
 # Use Google Generative AI
 from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
@@ -89,7 +90,7 @@ llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash", temperature=0.7) # Remove
 # Define the base tools the agent can use (main knowledge base and search)
 base_tools = [search_tool, rag_tool]
 
-# Define the prompt template for the agent
+# Define the system message and prompt structure globally
 system_message = """You are a helpful AI assistant designed to support university students with their dissertations. Your goal is to help them brainstorm research ideas, structure their work, understand methodologies, and overcome challenges.
 
 Instructions for interacting with students:
@@ -104,15 +105,14 @@ Instructions for interacting with students:
 9.  **IMPORTANT:** If the user has uploaded files and asks questions specifically about their content, use the 'uploaded_document_retriever' tool to answer those questions. Prioritize this tool for questions directly related to the uploaded documents. If the question is general or about the main knowledge base, use the other tools.
 """
 
-# Create the prompt template using MessagesPlaceholder
-prompt = ChatPromptTemplate.from_messages(
-    [
-        ("system", system_message),
-        MessagesPlaceholder(variable_name="chat_history"), # Use MessagesPlaceholder
-        ("human", "{input}"),
-        MessagesPlaceholder(variable_name="agent_scratchpad"), # Use MessagesPlaceholder
-    ]
-)
+# Define the prompt message structure
+prompt_messages = [
+    ("system", system_message),
+    MessagesPlaceholder(variable_name="chat_history"), # Use MessagesPlaceholder
+    ("human", "{input}"),
+    MessagesPlaceholder(variable_name="agent_scratchpad"), # Use MessagesPlaceholder
+]
+
 
 # --- PDF Ingestion Function (Main Knowledge Base) ---
 def check_and_ingest_new_pdfs(data_directory: str, vector_store_instance: Chroma, db_path: str):
@@ -196,6 +196,9 @@ def process_uploaded_files(uploaded_files):
         st.warning("No files uploaded.")
         return
 
+    # Clear any previous uploaded file context before processing new ones
+    clear_uploaded_files()
+
     st.session_state.processed_files = []
     all_uploaded_docs = []
     temp_dir = None # Initialize temp_dir outside the try block
@@ -271,12 +274,14 @@ def process_uploaded_files(uploaded_files):
     except Exception as e:
         st.error(f"An error occurred during file processing: {e}")
         # Ensure session state is clean if processing fails
+        # The clear_uploaded_files() call was moved to the start of the function
+        # but we should still ensure state is clean on error.
+        # Let's re-call it here just in case something went wrong mid-process.
         clear_uploaded_files()
     finally:
         # Clean up the temporary directory
         if temp_dir and os.path.exists(temp_dir):
             try:
-                import shutil
                 shutil.rmtree(temp_dir)
                 # st.info(f"Cleaned up temporary directory: {temp_dir}") # Optional: keep this less verbose
             except Exception as e:
@@ -285,13 +290,10 @@ def process_uploaded_files(uploaded_files):
 
 def clear_uploaded_files():
     """Clears the temporary vector store and removes the uploaded file tool from the agent."""
+    st.info("Clearing uploaded files context...")
     if "uploaded_vector_store" in st.session_state and st.session_state.uploaded_vector_store:
         try:
-            # Attempt to delete the collection if it's not in-memory or needs explicit cleanup
-            # For in-memory Chroma, simply removing the reference might be enough,
-            # but explicit deletion is safer if using temporary persistence.
-            # If using pure in-memory, this might not be necessary or possible.
-            # Let's assume in-memory for simplicity here.
+            # For in-memory Chroma, setting to None should be sufficient for garbage collection
             st.session_state.uploaded_vector_store = None
         except Exception as e:
             st.warning(f"Could not clear temporary vector store: {e}")
@@ -314,10 +316,12 @@ def update_agent_executor():
     else:
          st.info(f"Agent tools: {', '.join([tool.name for tool in current_tools])}")
 
+    # Retrieve the prompt from session state
+    agent_prompt = st.session_state.agent_prompt
 
     # Create and store the new agent executor instance
     st.session_state.agent_executor = AgentExecutor(
-        agent=create_tool_calling_agent(llm, current_tools, prompt),
+        agent=create_tool_calling_agent(llm, current_tools, agent_prompt), # Use prompt from session state
         tools=current_tools,
         verbose=True # Set verbose=True for debugging
     )
@@ -348,6 +352,12 @@ if "uploaded_retriever_tool" not in st.session_state:
     st.session_state.uploaded_retriever_tool = None
 if "processed_files" not in st.session_state:
     st.session_state.processed_files = []
+
+# Initialize the agent prompt in session state
+if "agent_prompt" not in st.session_state:
+     st.session_state.agent_prompt = ChatPromptTemplate.from_messages(prompt_messages)
+
+
 if "agent_executor" not in st.session_state:
     # Initialize the agent executor with base tools on first run
     update_agent_executor()
@@ -406,9 +416,8 @@ with st.sidebar:
     )
 
     # Process files button
+    # Only show process button if new files are selected
     if uploaded_files:
-        # Only show process button if new files are selected or if processed files list is empty
-        # This prevents reprocessing the same files unless new ones are added
         if st.button("Process Uploaded Files", key="process_files_button"):
              process_uploaded_files(uploaded_files)
 

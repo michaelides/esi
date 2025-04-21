@@ -20,7 +20,7 @@ from langchain.tools.retriever import create_retriever_tool
 from langchain.tools import Tool  # Import Tool class
 from langchain import hub  # To pull prompts easily, e.g., for agent scratchpad
 import glob
-from crawl4ai import WebCrawler 
+from crawl4ai.crawl4ai import Crawl4AI
 from langchain_community.document_loaders import PyPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_core.runnables import RunnablePassthrough # Import for potential future use or clarity
@@ -85,11 +85,11 @@ duckduckgo_search_tool = Tool(
 )
 
 # --- Crawl4AI Tool Setup ---
-crawl4ai = WebCrawler()
+crawl4ai = Crawl4AI()
 crawl4ai_tool = Tool(
     name="crawl4ai",
     func=crawl4ai.crawl,
-    description="Use this tool to crawl a website and extract its content. Input should be a valid URL. Only use this tool if you need to get information directly from a specific website. Be specific about the URL you want to crawl."
+    description="Use this tool to crawl a website and extract its content. Input should be a valid URL. Only use this tool if you need to get information directly from a specific website. Be specific about the URL you want to crawl.",
 )
 
 # --- RAG Setup (Main Dissertation Knowledge Base) ---

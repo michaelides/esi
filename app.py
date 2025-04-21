@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 
 # Use Google Generative AI
 from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
-from langchain_community.vectorstores import Chroma
+from langchain_chroma import Chroma # Updated Chroma import
 from langchain_community.tools import DuckDuckGoSearchRun # Using DuckDuckGo as a free alternative first
 # from langchain_community.utilities import GoogleSerperAPIWrapper # Option for Google Search via Serper
 from langchain.agents import AgentExecutor, create_tool_calling_agent
@@ -79,7 +79,7 @@ rag_tool = create_retriever_tool(
 # --- LLM and Agent Setup ---
 # Initialize the LLM (e.g., Gemini)
 # Make sure GOOGLE_API_KEY is set in the environment or passed directly
-llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=0.7, convert_system_message_to_human=True) # convert_system_message_to_human is often needed for Gemini tool use
+llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash", temperature=0.7) # Removed deprecated convert_system_message_to_human
 
 # Define the tools the agent can use
 tools = [search_tool, rag_tool]

@@ -1,13 +1,14 @@
 import streamlit as st
 from pandasai import SmartDataframe
-from pandasai.llm.openai import OpenAI
+from pandasai import SmartDataframe
 import pandas as pd
 import io
 import os
+from langchain_google_genai import ChatGoogleGenerativeAI
 
 def create_pandas_ai_agent(api_key: str):
     """Creates a PandasAI agent with the given API key."""
-    llm = OpenAI(api_key=api_key)
+    llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=0.7, google_api_key=api_key)
     return SmartDataframe(llm, conversational=False)
 
 def analyze_data(agent: SmartDataframe, data: pd.DataFrame, prompt: str):

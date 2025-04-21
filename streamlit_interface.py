@@ -115,12 +115,16 @@ def handle_user_input(agent_executor, llm):
                 button_key = f"suggestion_{i}"  # Generate a unique key for each button
                 button_states[button_key] = st.form_submit_button(suggestion)
 
+            # Add a submit button to the form
+            submitted = st.form_submit_button("Submit")
+
             # Process the button clicks outside the loop
-            for button_key, clicked in button_states.items():
-                if clicked:
-                    suggestion_index = int(button_key.split("_")[1])
-                    suggestion = followup_suggestions[suggestion_index]
-                    process_user_input(agent_executor, llm, suggestion)
+            if submitted:
+                for button_key, suggestion in button_states.items():
+                    if button_states[button_key]:
+                        suggestion_index = int(button_key.split("_")[1])
+                        suggestion = followup_suggestions[suggestion_index]
+                        process_user_input(agent_executor, llm, suggestion)
 
 
 def display_sidebar():

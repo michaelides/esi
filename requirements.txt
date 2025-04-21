@@ -17,4 +17,4 @@ langchain-google-community
 crawl4ai
 tavily-python
 pandas==1.5.3
-pandasai
+pandasai==2.3.0

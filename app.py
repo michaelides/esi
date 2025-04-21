@@ -253,8 +253,8 @@ def process_uploaded_files(uploaded_files):
 
         # --- Explicitly create an in-memory Chroma client and add documents ---
         try:
-            # Create an in-memory client - **Explicitly initialize with default settings**
-            uploaded_client = chromadb.Client() # Keep it as default in-memory client
+            # Create an in-memory client - **Explicitly initialize with tenant and database**
+            uploaded_client = chromadb.Client(client_kwargs={"tenant": "default_tenant", "database": "default_database"}) # Explicitly set tenant and database
             # Get or create the collection
             uploaded_collection = uploaded_client.get_or_create_collection(name="uploaded_resources")
 

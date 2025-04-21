@@ -22,11 +22,10 @@ from tavily import TavilyClient
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_core.runnables import RunnablePassthrough
 from crawl4ai import AsyncWebCrawler
-import streamlit as st  # Ensure streamlit is imported here
+import streamlit as st
 from streamlit_interface import display_chat_messages, handle_user_input, display_sidebar
 from langchain_core.messages import AIMessage, HumanMessage
-import streamlit as st  # Ensure streamlit is imported here
-from streamlit_interface import display_chat_messages, handle_user_input, display_sidebar, initialize_streamlit
+from streamlit_interface import initialize_streamlit
 
 
 # --- Configuration ---
@@ -36,15 +35,40 @@ DATA_DIR = "./data"  # Directory to store PDF files
 # Check for necessary API keys
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 GOOGLE_CSE_ID = os.getenv("GOOGLE_CSE_ID")
+
 # Load the system prompt as instructions:
 try:
     with open('esi_agent_instruction.md', 'r') as f:
         instruction = f.read()
 except FileNotFoundError:
     st.error("Could not find esi_agent_instruction.md. Please ensure it is in the correct directory.")
-    instruction = ""  # Provide a default value to avoid errors
+    instruction = ""
 
-# --- Google Search Tool Setup ---
+# Define the system message and prompt structure globally
+system_message = f"""{instruction}
+You are a helpful AI assistant designed to support university students with their dissertations.
+Your goal is to help them brainstorm research ideas, structure their work, understand methodologies, and overcome challenges.
+
+When you use tools, ALWAYS cite the source URL if one is provided.
+
+**Tool Use Instructions:**
+
+1.  When a student refers to the \"module\" they are referring to the MSc dissertation module at UEA, called NBS-7095x. You have access to information about this module via the `dissertation_resource_retriever` tool.
+2.  **You MUST always use** the `dissertation_resource_retriever` tool first to find relevant information from the knowledge base (e.g., module deadlines, procedures, milestones, specific writing guides, methodology examples, previously discussed concepts). Cite information retrieved using this tool.
+3.  Use the `duckduckgo_search` tool to find recent research papers, news, or general information not present in the knowledge base. Cite information retrieved using this tool.
+4.  If the `tavily_search` tool is available, use it to supplement the `duckduckgo_search` for broader or more in-depth searches. It returns the most relevant search results with snippets. Cite information retrieved using this tool.
+5.  Use the `crawl4ai` tool to crawl a specific website and extract its content. Only use this tool if you need to get information directly from a specific website. Be specific about the URL you want to crawl.
+6.  If unsure about a specific academic convention, first search for information using the `duckduckgo_search` tool, the `tavily_search` tool (if available), the `dissertation_resource_retriever`, and the `crawl4ai` tool (if a specific website is relevant), and if unable to find the answer, advise the student to consult their supervisor or university guidelines.
+
+"""
+
+# Define the prompt message structure
+prompt_messages = [
+    ("system", system_message),
+    MessagesPlaceholder(variable_name="chat_history"),
+    ("human", "{input}"),
+    MessagesPlaceholder(variable_name="agent_scratchpad"),
+]
 
 
 # Using DuckDuckGo Search as a free alternative
@@ -240,6 +264,10 @@ with st.spinner("Checking for new documents to load into the main knowledge base
 
 # Initialize Streamlit UI and session state
 initialize_streamlit()
+
+# Initialize the agent prompt in session state
+if "agent_prompt" not in st.session_state:
+    st.session_state.agent_prompt = ChatPromptTemplate.from_messages(prompt_messages)
 
 if "agent_executor" not in st.session_state:
     # Initialize the agent executor with base tools on first run

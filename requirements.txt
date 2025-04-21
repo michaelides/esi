@@ -14,3 +14,4 @@ langchain-chroma
 pypdf
 google-api-python-client
 langchain-google-community
+crawl4ai

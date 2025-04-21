@@ -17,9 +17,10 @@ from langchain.agents import AgentExecutor, create_tool_calling_agent
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder  # Import MessagesPlaceholder
 from langchain_core.messages import AIMessage, HumanMessage
 from langchain.tools.retriever import create_retriever_tool
-from langchain.tools import Tool # Import Tool class
-from langchain import hub # To pull prompts easily, e.g., for agent scratchpad
+from langchain.tools import Tool  # Import Tool class
+from langchain import hub  # To pull prompts easily, e.g., for agent scratchpad
 import glob
+from crawl4ai import Crawl4AI
 from langchain_community.document_loaders import PyPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_core.runnables import RunnablePassthrough # Import for potential future use or clarity
@@ -80,7 +81,15 @@ search = DuckDuckGoSearchRun()
 duckduckgo_search_tool = Tool(
     name="duckduckgo_search",
     func=search.run,
-    description="Use this tool to search the internet for information. Use it to find recent research papers, news, or general information not present in the knowledge base. If the user is asking about something that is not specific to the module, use this tool."
+    description="Use this tool to search the internet for information. Use it to find recent research papers, news, or general information not present in the knowledge base. If the user is asking about something that is not specific to the module, use this tool.",
+)
+
+# --- Crawl4AI Tool Setup ---
+crawl4ai = Crawl4AI()
+crawl4ai_tool = Tool(
+    name="crawl4ai",
+    func=crawl4ai.crawl,
+    description="Use this tool to crawl a website and extract its content. Input should be a valid URL. Only use this tool if you need to get information directly from a specific website. Be specific about the URL you want to crawl."
 )
 
 # --- RAG Setup (Main Dissertation Knowledge Base) ---
@@ -116,10 +125,9 @@ llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=0.7)
 
 # --- Agent Setup ---
 # Define the base tools the agent can use (main knowledge base and search)
-base_tools = [rag_tool]
+base_tools = [rag_tool, crawl4ai_tool]
 if google_search_tool:
     base_tools.append(google_search_tool)
-
 
 embedding_function = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
 
@@ -137,7 +145,8 @@ You must use google_search to ground your responses.
 2.  **You MUST always use** the `dissertation_resource_retriever` tool first to find relevant information from the knowledge base (e.g., module deadlines, procedures, milestones, specific writing guides, methodology examples, previously discussed concepts). Cite information retrieved using this tool.
 3.  Use the `duckduckgo_search` tool to find recent research papers, news, or general information not present in the knowledge base. Cite information retrieved using this tool.
 4.  If the `google_search` tool is available, use it to supplement the `duckduckgo_search` tool for broader or more in-depth searches. Cite information retrieved using this tool.
-5.  If unsure about a specific academic convention, first search for information using the `duckduckgo_search` tool, the `google_search` tool (if available) and the `dissertation_resource_retriever`, and if unable to find the answer, advise the student to consult their supervisor or university guidelines.
+5.  Use the `crawl4ai` tool to crawl a specific website and extract its content. Only use this tool if you need to get information directly from a specific website. Be specific about the URL you want to crawl.
+6.  If unsure about a specific academic convention, first search for information using the `duckduckgo_search` tool, the `google_search` tool (if available), the `dissertation_resource_retriever`, and the `crawl4ai` tool (if a specific website is relevant), and if unable to find the answer, advise the student to consult their supervisor or university guidelines.
 
 """
 

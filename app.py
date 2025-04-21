@@ -20,7 +20,7 @@ from langchain.tools.retriever import create_retriever_tool
 from langchain.tools import Tool  # Import Tool class
 from langchain import hub  # To pull prompts easily, e.g., for agent scratchpad
 import glob
-from crawl4ai.crawl4ai import Crawl4AI
+from crawl4ai import Crawl4AI
 from langchain_community.document_loaders import PyPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_core.runnables import RunnablePassthrough # Import for potential future use or clarity

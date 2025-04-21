@@ -292,6 +292,8 @@ def process_uploaded_files(uploaded_files):
 
         except Exception as e:
             st.error(f"An error occurred during Chroma processing for uploaded files: {e}")
+            import traceback # Import traceback
+            traceback.print_exc() # Print the full traceback to console/logs
             # Ensure session state is clean if processing fails
             clear_uploaded_files()
             # Re-raise the exception to show the full traceback if needed for debugging
@@ -438,7 +440,7 @@ if prompt := st.chat_input("What's on your mind regarding your dissertation?"):
 with st.sidebar:
     st.header("About")
     st.info("""ESI uses AI to help you navigate the dissertation process.
-    It has access to some of the literature in your reading lists and also uses Search tools for web lookups.""")
+    It has access to some of of the literature in your reading lists and also uses Search tools for web lookups.""")
     st.warning("⚠️ Remember: Always consult your official supervisor for final guidance and decisions.")
 
     st.divider()

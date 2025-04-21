@@ -230,8 +230,14 @@ with st.sidebar:
     It has access to some of the literature in your reading lists and also uses Search tools for web lookups.""")
     st.warning("⚠️ Remember: Always consult your official supervisor for final guidance and decisions.")
 
+    st.divider()
+    st.header("Manage RAG Documents")
+    if st.button("Ingest PDFs from Data Directory"):
+        with st.spinner("Ingesting PDF documents... Please wait."):
+            ingest_pdfs(DATA_DIR, vector_store) # Pass the existing vector_store instance
+
     # Placeholder for document upload/management in the future
-    # st.header("Manage RAG Documents")
+    # st.header("Manage RAG Documents") # Original placeholder header, can be removed or kept
     # uploaded_file = st.file_uploader("Upload PDF or TXT documents", accept_multiple_files=True)
     # if uploaded_file:
     #     # Add logic here to process and ingest uploaded documents into ChromaDB

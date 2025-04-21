@@ -1,0 +1,10 @@
+streamlit
+langchain
+langchain-openai
+langchain-community
+langchainhub
+chromadb
+google-search-results
+faiss-cpu # or faiss-gpu if you have CUDA installed
+tiktoken
+python-dotenv

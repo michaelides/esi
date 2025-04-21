@@ -10,7 +10,7 @@ from langchain_chroma import Chroma # Updated Chroma import
 from langchain_community.tools import DuckDuckGoSearchRun # Using DuckDuckGo as a free alternative first
 # from langchain_community.utilities import GoogleSerperAPIWrapper # Option for Google Search via Serper
 from langchain.agents import AgentExecutor, create_tool_calling_agent
-from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder # Import MessagesPlaceholder
 from langchain_core.messages import AIMessage, HumanMessage
 from langchain.tools.retriever import create_retriever_tool
 from langchain.tools import Tool # Import Tool class
@@ -104,13 +104,13 @@ Instructions for interacting with students:
 9.  **IMPORTANT:** If the user has uploaded files and asks questions specifically about their content, use the 'uploaded_document_retriever' tool to answer those questions. Prioritize this tool for questions directly related to the uploaded documents. If the question is general or about the main knowledge base, use the other tools.
 """
 
-# Create the prompt template
+# Create the prompt template using MessagesPlaceholder
 prompt = ChatPromptTemplate.from_messages(
     [
         ("system", system_message),
-        ("placeholder", "{chat_history}"),
+        MessagesPlaceholder(variable_name="chat_history"), # Use MessagesPlaceholder
         ("human", "{input}"),
-        ("placeholder", "{agent_scratchpad}"),
+        MessagesPlaceholder(variable_name="agent_scratchpad"), # Use MessagesPlaceholder
     ]
 )
 

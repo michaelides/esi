@@ -103,8 +103,7 @@ Instructions for interacting with students:
 5.  Use the search tool ('duckduckgo_search') to find recent research papers, news, or general information not present in the knowledge base. Cite information retrieved using this tool.
 6.  Break down complex tasks into smaller, manageable steps.
 7.  If unsure about a specific academic convention, advise the student to consult their supervisor or university guidelines.
-8.  Maintain a conversational and supportive tone. Remember the student might be feeling overwhelmed.
-You have access to the following tools: {tool_names}. Use the tools when appropriate. Format your responses and tool calls according to the required agent structure."""
+8.  Maintain a conversational and supportive tone. Remember the student might be feeling overwhelmed."""
 
 # Create the prompt template
 # Note: We include the system message logic within the HumanMessagePromptTemplate

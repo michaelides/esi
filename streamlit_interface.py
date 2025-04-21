@@ -99,42 +99,43 @@ def handle_user_input(agent_executor, llm):
         # Generate and display follow-up suggestions
         followup_suggestions = generate_followup_suggestions(llm, ai_response_content)
 
-        # Create a dictionary to store the button state
-        button_states = {}
-        for i, suggestion in enumerate(followup_suggestions):
-            button_key = f"suggestion_{i}"  # Generate a unique key for each button
-            button_states[button_key] = st.button(suggestion, key=button_key)
+        with st.form(key='followup_form'):
+            # Create a dictionary to store the button state
+            button_states = {}
+            for i, suggestion in enumerate(followup_suggestions):
+                button_key = f"suggestion_{i}"  # Generate a unique key for each button
+                button_states[button_key] = st.form_submit_button(suggestion, key=button_key)
 
-        # Process the button clicks outside the loop
-        for button_key, clicked in button_states.items():
-            if clicked:
-                suggestion = followup_suggestions[int(button_key.split("_")[1])]
+            # Process the button clicks outside the loop
+            for button_key, clicked in button_states.items():
+                if clicked:
+                    suggestion = followup_suggestions[int(button_key.split("_")[1])]
 
-                # Add user message to chat history
-                st.session_state.messages.append(HumanMessage(content=suggestion))
-                # Display user message in chat message container
-                with st.chat_message("user"):
-                    st.markdown(suggestion)
+                    # Add user message to chat history
+                    st.session_state.messages.append(HumanMessage(content=suggestion))
+                    # Display user message in chat message container
+                    with st.chat_message("user"):
+                        st.markdown(suggestion)
 
-                # Get AI response using the agent
-                with st.chat_message("assistant"):
-                    with st.spinner("Thinking..."):
-                        # Use the agent_executor from session state (might include uploaded file tool)
-                        current_agent_executor = agent_executor
-                        try:
-                            response = current_agent_executor.invoke({
-                                "input": suggestion,
-                                "chat_history": st.session_state.messages[:-1] # Pass history excluding the current user prompt
-                            })
-                            ai_response_content = response.get("output", "Sorry, I encountered an error getting the response.")
-                        except Exception as e:
-                             ai_response_content = f"An error occurred while processing your request: {e}"
-                             st.error(ai_response_content) # Display error in UI as well
+                    # Get AI response using the agent
+                    with st.chat_message("assistant"):
+                        with st.spinner("Thinking..."):
+                            # Use the agent_executor from session state (might include uploaded file tool)
+                            current_agent_executor = agent_executor
+                            try:
+                                response = current_agent_executor.invoke({
+                                    "input": suggestion,
+                                    "chat_history": st.session_state.messages[:-1] # Pass history excluding the current user prompt
+                                })
+                                ai_response_content = response.get("output", "Sorry, I encountered an error getting the response.")
+                            except Exception as e:
+                                 ai_response_content = f"An error occurred while processing your request: {e}"
+                                 st.error(ai_response_content) # Display error in UI as well
 
-                        st.markdown(ai_response_content)
+                            st.markdown(ai_response_content)
 
-                # Add AI response to chat history
-                st.session_state.messages.append(AIMessage(content=ai_response_content))
+                    # Add AI response to chat history
+                    st.session_state.messages.append(AIMessage(content=ai_response_content))
 
 
 def display_sidebar():

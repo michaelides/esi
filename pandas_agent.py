@@ -8,7 +8,7 @@ import os
 def create_pandas_ai_agent(api_key: str):
     """Creates a PandasAI agent with the given API key."""
     llm = OpenAI(api_key=api_key)
-    return SmartDataframe(llm=llm)
+    return SmartDataframe(llm, config={"llm": llm})
 
 def analyze_data(agent: SmartDataframe, data: pd.DataFrame, prompt: str):
     """Analyzes the data using the PandasAI agent and the given prompt."""

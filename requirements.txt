@@ -16,3 +16,4 @@ google-api-python-client
 langchain-google-community
 crawl4ai
 tavily-python
+pandas==1.5.3

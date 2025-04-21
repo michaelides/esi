@@ -55,7 +55,7 @@ if not GOOGLE_API_KEY or not GOOGLE_CSE_ID:
     google_search_tool = None
 else:
     try:
-        google_search = GoogleSearchAPIWrapper(api_key=GOOGLE_API_KEY, cse_id=GOOGLE_CSE_ID)
+        google_search = GoogleSearchAPIWrapper(google_api_key=GOOGLE_API_KEY, google_cse_id=GOOGLE_CSE_ID)
         google_search_tool = Tool(
             name="google_search",
             func=google_search.run,

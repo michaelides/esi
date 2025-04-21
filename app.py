@@ -26,7 +26,6 @@ import streamlit as st
 from streamlit_interface import display_chat_messages, handle_user_input, display_sidebar, initialize_streamlit
 from langchain_core.messages import AIMessage, HumanMessage
 from streamlit_interface import initialize_streamlit
-from streamlit_interface import generate_followup_suggestions
 
 
 # --- Configuration ---

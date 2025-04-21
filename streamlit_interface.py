@@ -1,5 +1,6 @@
 import streamlit as st
 from langchain_core.messages import AIMessage, HumanMessage
+from langchain_core.prompts import MessagesPlaceholder
 
 def initialize_streamlit():
     """Initializes the Streamlit UI, including title, caption, and session state."""

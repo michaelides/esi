@@ -11,7 +11,8 @@ import chromadb
 from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
 from langchain_chroma import Chroma  # Updated Chroma import
 from langchain_community.tools import DuckDuckGoSearchRun  # Using DuckDuckGo as a free alternative first
-from langchain_community.utilities import GoogleSearchAPIWrapper, GoogleSerperAPIWrapper  # Option for Google Search via Serper
+from langchain_community.utilities import GoogleSerperAPIWrapper  # Option for Google Search via Serper
+from langchain_google_community import GoogleSearchAPIWrapper
 from langchain.agents import AgentExecutor, create_tool_calling_agent
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder  # Import MessagesPlaceholder
 from langchain_core.messages import AIMessage, HumanMessage
@@ -47,16 +48,22 @@ GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 # --- Google Search Tool Setup ---
 # Check for necessary API keys
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
-if not GOOGLE_API_KEY:
-    st.warning("GOOGLE_API_KEY not found. Google Search tool will be disabled. Set GOOGLE_API_KEY in .env if needed.")
+GOOGLE_CSE_ID = os.getenv("GOOGLE_CSE_ID")
+
+if not GOOGLE_API_KEY or not GOOGLE_CSE_ID:
+    st.warning("GOOGLE_API_KEY and GOOGLE_CSE_ID not found. Google Search tool will be disabled. Set GOOGLE_API_KEY and GOOGLE_CSE_ID in .env if needed.")
     google_search_tool = None
 else:
-    google_search = GoogleSearchAPIWrapper()
-    google_search_tool = Tool(
-        name="google_search",
-        func=google_search.run,
-        description="Use this tool to search the internet for information using Google Search. It is good for general information and current events.",
-    )
+    try:
+        google_search = GoogleSearchAPIWrapper(api_key=GOOGLE_API_KEY, cse_id=GOOGLE_CSE_ID)
+        google_search_tool = Tool(
+            name="google_search",
+            func=google_search.run,
+            description="Use this tool to search the internet for information using Google Search. It is good for general information and current events.",
+        )
+    except ImportError as e:
+        st.error(f"Error initializing GoogleSearchAPIWrapper: {e}. Please ensure you have installed the google-api-python-client. pip install google-api-python-client")
+        google_search_tool = None
 
 # Load the system prompt as instructions:
 try:

@@ -10,6 +10,7 @@ from langchain.agents import AgentExecutor, create_tool_calling_agent
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.messages import AIMessage, HumanMessage
 from langchain.tools.retriever import create_retriever_tool
+from langchain.tools import Tool # Import Tool class
 from langchainhub import pull # To pull prompts easily, e.g., for agent scratchpad
 
 # --- Configuration ---

@@ -253,8 +253,8 @@ def process_uploaded_files(uploaded_files):
 
         # --- Explicitly create an in-memory Chroma client and add documents ---
         try:
-            # Create an in-memory client
-            uploaded_client = chromadb.Client()
+            # Create an in-memory client - **Explicitly initialize with default settings**
+            uploaded_client = chromadb.Client() # Keep it as default in-memory client
             # Get or create the collection
             uploaded_collection = uploaded_client.get_or_create_collection(name="uploaded_resources")
 
@@ -464,5 +464,3 @@ with st.sidebar:
             clear_uploaded_files()
             # Rerun the app to clear the display immediately
             st.rerun() # Use st.rerun() to refresh the UI state
-
-

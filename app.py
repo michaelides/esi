@@ -9,11 +9,11 @@ import chromadb
 
 # Use Google Generative AI
 from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
-from langchain_chroma import Chroma # Updated Chroma import
-from langchain_community.tools import DuckDuckGoSearchRun # Using DuckDuckGo as a free alternative first
-# from langchain_community.utilities import GoogleSerperAPIWrapper # Option for Google Search via Serper
+from langchain_chroma import Chroma  # Updated Chroma import
+from langchain_community.tools import DuckDuckGoSearchRun  # Using DuckDuckGo as a free alternative first
+from langchain_community.utilities import GoogleSearchAPIWrapper, GoogleSerperAPIWrapper  # Option for Google Search via Serper
 from langchain.agents import AgentExecutor, create_tool_calling_agent
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder # Import MessagesPlaceholder
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder  # Import MessagesPlaceholder
 from langchain_core.messages import AIMessage, HumanMessage
 from langchain.tools.retriever import create_retriever_tool
 from langchain.tools import Tool # Import Tool class
@@ -44,8 +44,21 @@ GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 #         description="Useful for when you need to answer questions about current events or look up information on the internet.",
 #     )
 
-# Load the system prompt as instructions:
+# --- Google Search Tool Setup ---
+# Check for necessary API keys
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+if not GOOGLE_API_KEY:
+    st.warning("GOOGLE_API_KEY not found. Google Search tool will be disabled. Set GOOGLE_API_KEY in .env if needed.")
+    google_search_tool = None
+else:
+    google_search = GoogleSearchAPIWrapper()
+    google_search_tool = Tool(
+        name="google_search",
+        func=google_search.run,
+        description="Use this tool to search the internet for information using Google Search. It is good for general information and current events.",
+    )
 
+# Load the system prompt as instructions:
 try:
     with open('esi_agent_instruction.md', 'r') as f:
         instruction = f.read()
@@ -56,12 +69,11 @@ except FileNotFoundError:
 
 # Using DuckDuckGo Search as a free alternative
 search = DuckDuckGoSearchRun()
-search_tool = Tool(
+duckduckgo_search_tool = Tool(
     name="duckduckgo_search",
     func=search.run,
-    description="Use this tool to search the internet for information. Use it to find recent research papers, news, or general information not present in the knowledge base. If the user is asking about something that is not specific to the module or their uploaded documents, use this tool."
+    description="Use this tool to search the internet for information. Use it to find recent research papers, news, or general information not present in the knowledge base. If the user is asking about something that is not specific to the module, use this tool."
 )
-
 
 # --- RAG Setup (Main Dissertation Knowledge Base) ---
 # Define the path for the persistent ChromaDB database
@@ -96,20 +108,24 @@ llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=0.7)
 
 # --- Agent Setup ---
 # Define the base tools the agent can use (main knowledge base and search)
-base_tools = [search_tool, rag_tool]
+base_tools = [rag_tool, duckduckgo_search_tool]
+if google_search_tool:
+    base_tools.append(google_search_tool)
 
 # Define the system message and prompt structure globally
 system_message = f"""{instruction}
 You are a helpful AI assistant designed to support university students with their dissertations.
 Your goal is to help them brainstorm research ideas, structure their work, understand methodologies, and overcome challenges.
 
+When you use tools, ALWAYS cite the source URL if one is provided.
+
 **Tool Use Instructions:**
 
 1.  When a student refers to the \"module\" they are referring to the MSc dissertation module at UEA, called NBS-7091A. You have access to information about this module via the `dissertation_resource_retriever` tool.
 2.  **You MUST always use** the `dissertation_resource_retriever` tool first to find relevant information from the knowledge base (e.g., module deadlines, procedures, milestones, specific writing guides, methodology examples, previously discussed concepts). Cite information retrieved using this tool.
 3.  Use the `duckduckgo_search` tool to find recent research papers, news, or general information not present in the knowledge base. Cite information retrieved using this tool.
-4.  If unsure about a specific academic convention, first search for information using the `duckduckgo_search` tool and the `dissertation_resource_retriever`, and if unable to find the answer, advise the student to consult their supervisor or university guidelines.
-5.  If unsure about a specific academic convention, first search for information using the `duckduckgo_search` tool and the `dissertation_resource_retriever`, and if unable to find the answer, advise the student to consult their supervisor or university guidelines.
+4.  If the `google_search` tool is available, use it to supplement the `duckduckgo_search` tool for broader or more in-depth searches. Cite information retrieved using this tool.
+5.  If unsure about a specific academic convention, first search for information using the `duckduckgo_search` tool, the `google_search` tool (if available) and the `dissertation_resource_retriever`, and if unable to find the answer, advise the student to consult their supervisor or university guidelines.
 
 """
 

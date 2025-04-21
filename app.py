@@ -140,11 +140,11 @@ llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=0.7)
 
 # --- Agent Setup ---
 # Define the base tools the agent can use (main knowledge base and search)
-base_tools = [rag_tool, crawl4ai_tool]
+base_tools = [rag_tool, duckduckgo_search_tool, crawl4ai_tool]
 if google_search_tool:
     base_tools.append(google_search_tool)
-if tavily_search_tool:
-    base_tools.append(tavily_search_tool)
+if tavily_search:
+    base_tools.append(tavily_search)
 
 embedding_function = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
 

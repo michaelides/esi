@@ -2,6 +2,8 @@ import streamlit as st
 from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.prompts import MessagesPlaceholder, ChatPromptTemplate
 import random
+from langchain.chains import LLMChain
+from langchain.prompts import PromptTemplate
 
 def initialize_streamlit():
     """Initializes the Streamlit UI, including title, caption, and session state."""
@@ -29,51 +31,26 @@ def initialize_streamlit():
         # st.session_state.agent_prompt = ChatPromptTemplate.from_messages(prompt_messages)
 
 
-def generate_followup_suggestions(agent_response_content):
-    """Generates follow-up question suggestions based on the agent's response."""
-    suggestions = [
-        "Can you elaborate on that?",
-        "What are the next steps?",
-        "Where can I find more information about this?",
-        "How does this relate to my research question?",
-        "Can you give me an example?",
-        "What are the potential challenges?",
-        "How can I address those challenges?",
-        "What are the ethical considerations?",
-        "Can you suggest some relevant readings?",
-        "How can I refine my methodology based on this?",
-    ]
+def generate_followup_suggestions(llm, agent_response_content):
+    """Generates follow-up question suggestions based on the agent's response using LLM."""
+    prompt_template = """
+    You are an AI assistant that helps generate follow-up questions for a conversation about dissertation research.
+    Given the following content from the conversation, please generate 3 follow-up questions that the user might ask.
+    The questions should be concise and directly related to the content.
 
-    # Add more specific suggestions based on keywords in the agent's response
-    if "methodology" in agent_response_content.lower():
-        suggestions.extend([
-            "Can you suggest some methodologies?",
-            "What are the pros and cons of different methodologies?",
-            "How do I choose the right methodology for my research?",
-        ])
-    if "data analysis" in agent_response_content.lower():
-        suggestions.extend([
-            "What are some data analysis techniques I could use?",
-            "How do I interpret the results of my data analysis?",
-            "What software can I use for data analysis?",
-        ])
-    if "literature review" in agent_response_content.lower():
-        suggestions.extend([
-            "How do I conduct a literature review?",
-            "What are the key sources I should be looking at?",
-            "How do I synthesize information from different sources?",
-        ])
-    if "research question" in agent_response_content.lower():
-        suggestions.extend([
-            "How do I refine my research question?",
-            "Is my research question feasible?",
-            "How do I ensure my research question is original?",
-        ])
+    Content:
+    {content}
 
-    # Remove duplicates and return a random sample of suggestions
-    suggestions = list(set(suggestions))
-    num_suggestions = min(3, len(suggestions))  # Display up to 3 suggestions
-    return random.sample(suggestions, num_suggestions)
+    Follow-up Questions:
+    """
+    prompt = PromptTemplate(template=prompt_template, input_variables=["content"])
+    llm_chain = LLMChain(prompt=prompt, llm=llm)
+    followup_suggestions = llm_chain.run(agent_response_content)
+    # Split the suggestions into a list
+    suggestions_list = followup_suggestions.strip().split("\n")
+    # Remove any empty strings from the list
+    suggestions_list = [s.strip() for s in suggestions_list if s.strip()]
+    return suggestions_list
 
 
 def display_chat_messages():
@@ -86,7 +63,7 @@ def display_chat_messages():
             with st.chat_message("user"):
                 st.markdown(message.content)
 
-def handle_user_input(agent_executor):
+def handle_user_input(agent_executor, llm):
     """Handles user input and generates AI response."""
     if prompt := st.chat_input("What's on your mind regarding your dissertation?"):
         # Add user message to chat history
@@ -116,7 +93,7 @@ def handle_user_input(agent_executor):
         st.session_state.messages.append(AIMessage(content=ai_response_content))
 
         # Generate and display follow-up suggestions
-        followup_suggestions = generate_followup_suggestions(ai_response_content)
+        followup_suggestions = generate_followup_suggestions(llm, ai_response_content)
         with st.expander("Follow-up Questions"):
             for suggestion in followup_suggestions:
                 if st.button(suggestion, key=suggestion):

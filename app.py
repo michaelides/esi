@@ -23,9 +23,10 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_core.runnables import RunnablePassthrough
 from crawl4ai import AsyncWebCrawler
 import streamlit as st
-from streamlit_interface import display_chat_messages, handle_user_input, display_sidebar
+from streamlit_interface import display_chat_messages, handle_user_input, display_sidebar, initialize_streamlit
 from langchain_core.messages import AIMessage, HumanMessage
 from streamlit_interface import initialize_streamlit
+from streamlit_interface import generate_followup_suggestions
 
 
 # --- Configuration ---
@@ -282,7 +283,7 @@ if "agent_executor" not in st.session_state:
 display_chat_messages()
 
 # Handle user input and generate AI response
-handle_user_input(st.session_state.agent_executor)
+handle_user_input(st.session_state.agent_executor, llm)
 
 # Display the sidebar
 display_sidebar()

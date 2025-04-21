@@ -104,12 +104,13 @@ def handle_user_input(agent_executor, llm):
             button_states = {}
             for i, suggestion in enumerate(followup_suggestions):
                 button_key = f"suggestion_{i}"  # Generate a unique key for each button
-                button_states[button_key] = st.form_submit_button(suggestion, key=button_key)
+                button_states[button_key] = st.form_submit_button(suggestion)
 
             # Process the button clicks outside the loop
             for button_key, clicked in button_states.items():
                 if clicked:
-                    suggestion = followup_suggestions[int(button_key.split("_")[1])]
+                    suggestion_index = int(button_key.split("_")[1])
+                    suggestion = followup_suggestions[suggestion_index]
 
                     # Add user message to chat history
                     st.session_state.messages.append(HumanMessage(content=suggestion))

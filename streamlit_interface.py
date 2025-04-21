@@ -98,9 +98,18 @@ def handle_user_input(agent_executor, llm):
 
         # Generate and display follow-up suggestions
         followup_suggestions = generate_followup_suggestions(llm, ai_response_content)
-        for suggestion in followup_suggestions:
-            button_key = str(uuid.uuid4())  # Generate a unique key for each button
-            if st.button(suggestion, key=button_key):
+
+        # Create a dictionary to store the button state
+        button_states = {}
+        for i, suggestion in enumerate(followup_suggestions):
+            button_key = f"suggestion_{i}"  # Generate a unique key for each button
+            button_states[button_key] = st.button(suggestion, key=button_key)
+
+        # Process the button clicks outside the loop
+        for button_key, clicked in button_states.items():
+            if clicked:
+                suggestion = followup_suggestions[int(button_key.split("_")[1])]
+
                 # Add user message to chat history
                 st.session_state.messages.append(HumanMessage(content=suggestion))
                 # Display user message in chat message container

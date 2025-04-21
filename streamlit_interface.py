@@ -4,6 +4,7 @@ from langchain_core.prompts import MessagesPlaceholder, ChatPromptTemplate
 import random
 from langchain_core.runnables import chain
 import uuid
+from pandas_agent import create_pandas_ai_agent, analyze_data, load_data
 
 def initialize_streamlit():
     """Initializes the Streamlit UI, including title, caption, and session state."""
@@ -74,9 +75,37 @@ def process_user_input(agent_executor, llm, prompt):
 
 def handle_user_input(agent_executor, llm):
     """Handles user input from chat input."""
-    # Handle chat input
-    if prompt := st.chat_input("What's on your mind regarding your dissertation?"):
-        process_user_input(agent_executor, llm, prompt)
+    # Add a selectbox to choose between the two agents
+    agent_type = st.selectbox("Choose an agent:", ["Dissertation Agent", "Data Analysis Agent"])
+
+    if agent_type == "Dissertation Agent":
+        # Handle chat input for the dissertation agent
+        if prompt := st.chat_input("What's on your mind regarding your dissertation?"):
+            process_user_input(agent_executor, llm, prompt)
+    elif agent_type == "Data Analysis Agent":
+        # Handle data analysis agent
+        uploaded_file = st.file_uploader("Upload a CSV, Excel, RData, or SAV file", type=["csv", "xlsx", "xls", "rda", "rdata", "sav"])
+        if uploaded_file is not None:
+            df = load_data(uploaded_file)
+            if df is not None:
+                st.write("Data loaded successfully. Here's a preview:")
+                st.dataframe(df.head())
+
+                # Get OpenAI API key from the user
+                openai_api_key = st.text_input("Enter your OpenAI API key:", type="password")
+
+                if openai_api_key:
+                    # Create PandasAI agent
+                    pandas_ai_agent = create_pandas_ai_agent(openai_api_key)
+
+                    # Get analysis prompt from the user
+                    analysis_prompt = st.text_area("Enter your data analysis prompt:")
+
+                    if analysis_prompt:
+                        # Analyze data and display the response
+                        response = analyze_data(pandas_ai_agent, df, analysis_prompt)
+                        st.write("Analysis Result:")
+                        st.write(response)
 
 
 def display_sidebar():

@@ -55,24 +55,13 @@ except FileNotFoundError:
     instruction = ""  # Provide a default value to avoid errors
 
 # --- Google Search Tool Setup ---
-# Check for necessary API keys
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
-GOOGLE_CSE_ID = os.getenv("GOOGLE_CSE_ID")
 
-if not GOOGLE_API_KEY or not GOOGLE_CSE_ID:
-    st.warning("GOOGLE_API_KEY and GOOGLE_CSE_ID not found. Google Search tool will be disabled. Set GOOGLE_API_KEY and GOOGLE_CSE_ID in .env if needed.")
-    google_search_tool = None
-else:
-    try:
-        google_search = GoogleSearchAPIWrapper(google_api_key=GOOGLE_API_KEY, google_cse_id=GOOGLE_CSE_ID)
-        google_search_tool = Tool(
-            name="google_search",
-            func=google_search.run,
-            description="Use this tool to search the internet for information using Google Search. It is good for general information, academic papers, and current events.",
-        )
-    except ImportError as e:
-        st.error(f"Error initializing GoogleSearchAPIWrapper: {e}. Please ensure you have installed the google-api-python-client. pip install google-api-python-client")
-        google_search_tool = None
+google_search = GoogleSearchAPIWrapper(google_api_key=GOOGLE_API_KEY, google_cse_id=GOOGLE_CSE_ID)
+google_search_tool = Tool(
+    name="google_search",
+    func=google_search.run,
+    description="Use this tool to search the internet for information using Google Search. It is good for general information, academic papers, and current events.",
+)
 
 
 # Using DuckDuckGo Search as a free alternative
@@ -116,7 +105,11 @@ llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=0.7)
 
 # --- Agent Setup ---
 # Define the base tools the agent can use (main knowledge base and search)
-base_tools = [rag_tool, duckduckgo_search_tool, google_search_tool]
+#base_tools = [rag_tool, duckduckgo_search_tool, google_search_tool]
+base_tools = [rag_tool, google_search_tool]
+
+
+embedding_function = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
 
 # Define the system message and prompt structure globally
 system_message = f"""{instruction}

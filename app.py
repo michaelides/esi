@@ -1,10 +1,8 @@
 import streamlit as st
 import os
 from dotenv import load_dotenv
-import io # Import io for handling file streams
-import tempfile # Import tempfile for creating temporary files
-import shutil # Import shutil for directory cleanup
-import uuid # Import uuid for generating unique IDs
+import io  # Import io for handling file streams
+import uuid  # Import uuid for generating unique IDs
 
 # Import chromadb client
 import chromadb
@@ -111,7 +109,7 @@ Your goal is to help them brainstorm research ideas, structure their work, under
 2.  **You MUST always use** the `dissertation_resource_retriever` tool first to find relevant information from the knowledge base (e.g., module deadlines, procedures, milestones, specific writing guides, methodology examples, previously discussed concepts). Cite information retrieved using this tool.
 3.  Use the `duckduckgo_search` tool to find recent research papers, news, or general information not present in the knowledge base. Cite information retrieved using this tool.
 4.  If unsure about a specific academic convention, first search for information using the `duckduckgo_search` tool and the `dissertation_resource_retriever`, and if unable to find the answer, advise the student to consult their supervisor or university guidelines.
-5.  **IMPORTANT:** If the user has uploaded files and asks questions specifically about their content, **you MUST always use** the `uploaded_document_retriever` tool to answer those questions. Prioritize this tool for questions directly related to the uploaded documents. If the question is general or about the main knowledge base, use the other tools.
+5.  If unsure about a specific academic convention, first search for information using the `duckduckgo_search` tool and the `dissertation_resource_retriever`, and if unable to find the answer, advise the student to consult their supervisor or university guidelines.
 
 """
 
@@ -198,174 +196,24 @@ def check_and_ingest_new_pdfs(data_directory: str, vector_store_instance: Chroma
         st.error(f"Error adding new documents to main vector store: {e}")
 
 
-# --- Uploaded File Processing Functions ---
+# def update_agent_executor():
+#     """Recreates the agent executor with the current set of tools."""
+#     current_tools = list(base_tools) # Start with the base tools
+#     if "uploaded_retriever_tool" in st.session_state and st.session_state.uploaded_retriever_tool:
+#         current_tools.append(st.session_state.uploaded_retriever_tool)
+#         st.info(f"Agent tools updated: {', '.join([tool.name for tool in current_tools])}")
+#     else:
+#          st.info(f"Agent tools: {', '.join([tool.name for tool in current_tools])}")
 
-def process_uploaded_files(uploaded_files):
-    """Processes uploaded files, creates a temporary vector store, and updates the agent."""
-    if not uploaded_files:
-        st.warning("No files uploaded.")
-        return
+#     # Retrieve the prompt from session state
+#     agent_prompt = st.session_state.agent_prompt
 
-    # Clear any previous uploaded file context before processing new ones
-    clear_uploaded_files()
-
-    st.session_state.processed_files = []
-    all_uploaded_docs = []
-    temp_dir = None # Initialize temp_dir outside the try block
-
-    try:
-        # Create a temporary directory to save uploaded files
-        temp_dir = tempfile.mkdtemp()
-        st.info(f"Processing {len(uploaded_files)} uploaded file(s)...")
-
-        for uploaded_file in uploaded_files:
-            filename = uploaded_file.name
-            st.write(f"  Loading: {filename}")
-
-            # Save the uploaded file to the temporary directory
-            temp_filepath = os.path.join(temp_dir, filename)
-            with open(temp_filepath, "wb") as f:
-                f.write(uploaded_file.getvalue())
-
-            try:
-                # Use PyPDFLoader to load the saved file
-                loader = PyPDFLoader(temp_filepath)
-                documents = loader.load()
-                all_uploaded_docs.extend(documents)
-                st.session_state.processed_files.append(filename) # Track successfully loaded files
-            except Exception as e:
-                st.error(f"Error loading {filename}: {e}")
-                # Continue processing other files even if one fails
-                continue
-
-        if not all_uploaded_docs:
-            st.error("No documents were successfully loaded from the uploaded files.")
-            # Clear processed files list if none were successful
-            st.session_state.processed_files = []
-            return
-
-        st.write("Splitting uploaded documents into chunks...")
-        text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
-        splits = text_splitter.split_documents(all_uploaded_docs)
-
-        if not splits:
-            st.error("Failed to split uploaded documents into chunks.")
-            # Clear processed files list if splitting fails
-            st.session_state.processed_files = []
-            return
-
-        st.write(f"Adding {len(splits)} document chunks to a temporary vector store...")
-
-        # --- Explicitly create an in-memory Chroma client and add documents ---
-        try:
-            # Create an in-memory client - **Explicitly initialize with tenant and database**
-            uploaded_client = chromadb.Client() # Explicitly set tenant and database
-            # Get or create the collection
-            uploaded_collection = uploaded_client.get_or_create_collection(name="uploaded_resources")
-
-            # Prepare documents for adding
-            docs_to_add = [split.page_content for split in splits]
-            metadatas_to_add = [split.metadata for split in splits]
-            ids_to_add = [str(uuid.uuid4()) for _ in splits] # Generate unique IDs
-
-            # Add documents to the collection
-            uploaded_collection.add(
-                documents=docs_to_add,
-                metadatas=metadatas_to_add,
-                ids=ids_to_add
-            )
-
-            # Create the LangChain Chroma wrapper around the explicit client and collection
-            uploaded_vector_store = Chroma(
-                client=uploaded_client,
-                collection_name="uploaded_resources",
-                embedding_function=embedding_function # Use the same embedding function
-            )
-
-            # Store the temporary vector store and tool in session state
-            st.session_state.uploaded_vector_store = uploaded_vector_store
-            st.session_state.uploaded_retriever_tool = create_retriever_tool(
-                uploaded_vector_store.as_retriever(search_kwargs={"k": 3}),
-                "uploaded_document_retriever",
-                "Searches and returns relevant information ONLY from the documents the user has uploaded during this session. Use this tool specifically when the user asks questions about the content of their uploaded files.",
-            )
-
-            # Update the agent executor to include the new tool
-            update_agent_executor()
-
-            st.success(f"Successfully processed {len(st.session_state.processed_files)} uploaded file(s)! You can now ask questions about their content.")
-
-        except Exception as e:
-            st.error(f"An error occurred during Chroma processing for uploaded files: {e}")
-            import traceback # Import traceback
-            traceback.print_exc() # Print the full traceback to console/logs
-            # Ensure session state is clean if processing fails
-            clear_uploaded_files()
-            # Re-raise the exception to show the full traceback if needed for debugging
-            # raise e # Uncomment for detailed debugging
-        # --- End of explicit Chroma client creation ---
-
-
-    except Exception as e:
-        st.error(f"An error occurred during file processing: {e}")
-        # Ensure session state is clean if processing fails
-        clear_uploaded_files()
-    finally:
-        # Clean up the temporary directory
-        if temp_dir and os.path.exists(temp_dir):
-            try:
-                shutil.rmtree(temp_dir)
-                # st.info(f"Cleaned up temporary directory: {temp_dir}") # Optional: keep this less verbose
-            except Exception as e:
-                st.warning(f"Could not clean up temporary directory {temp_dir}: {e}")
-
-
-def clear_uploaded_files():
-    """Clears the temporary vector store and removes the uploaded file tool from the agent."""
-    st.info("Clearing uploaded files context...")
-    if "uploaded_vector_store" in st.session_state and st.session_state.uploaded_vector_store:
-        try:
-            # If the vector store exists, try to get the client and delete the collection
-            uploaded_vector_store = st.session_state.uploaded_vector_store
-            if hasattr(uploaded_vector_store, '_client') and uploaded_vector_store._client:
-                 try:
-                     uploaded_vector_store._client.delete_collection(name="uploaded_resources")
-                     st.info("Deleted 'uploaded_resources' collection from temporary client.")
-                 except Exception as e:
-                     st.warning(f"Could not delete 'uploaded_resources' collection: {e}")
-
-            # For in-memory Chroma, setting to None should be sufficient for garbage collection
-            st.session_state.uploaded_vector_store = None
-        except Exception as e:
-            st.warning(f"Could not clear temporary vector store reference: {e}")
-
-    st.session_state.uploaded_retriever_tool = None
-    st.session_state.processed_files = []
-
-    # Update the agent executor to remove the uploaded file tool
-    update_agent_executor()
-
-    st.success("Uploaded files context cleared.")
-
-
-def update_agent_executor():
-    """Recreates the agent executor with the current set of tools."""
-    current_tools = list(base_tools) # Start with the base tools
-    if "uploaded_retriever_tool" in st.session_state and st.session_state.uploaded_retriever_tool:
-        current_tools.append(st.session_state.uploaded_retriever_tool)
-        st.info(f"Agent tools updated: {', '.join([tool.name for tool in current_tools])}")
-    else:
-         st.info(f"Agent tools: {', '.join([tool.name for tool in current_tools])}")
-
-    # Retrieve the prompt from session state
-    agent_prompt = st.session_state.agent_prompt
-
-    # Create and store the new agent executor instance
-    st.session_state.agent_executor = AgentExecutor(
-        agent=create_tool_calling_agent(llm, current_tools, agent_prompt), # Use prompt from session state
-        tools=current_tools,
-        verbose=True # Set verbose=True for debugging
-    )
+#     # Create and store the new agent executor instance
+#     st.session_state.agent_executor = AgentExecutor(
+#         agent=create_tool_calling_agent(llm, current_tools, agent_prompt), # Use prompt from session state
+#         tools=current_tools,
+#         verbose=True # Set verbose=True for debugging
+#     )
 
 
 # --- Streamlit UI ---
@@ -386,22 +234,14 @@ if "messages" not in st.session_state:
         AIMessage(content="Hello! I'm here to help you with your dissertation. How can I assist you today? Feel free to ask about brainstorming ideas, structuring chapters, finding resources, or anything else!")
     )
 
-# Initialize session state for uploaded files and agent executor
-if "uploaded_vector_store" not in st.session_state:
-    st.session_state.uploaded_vector_store = None
-if "uploaded_retriever_tool" not in st.session_state:
-    st.session_state.uploaded_retriever_tool = None
-if "processed_files" not in st.session_state:
-    st.session_state.processed_files = []
-
 # Initialize the agent prompt in session state
 if "agent_prompt" not in st.session_state:
-     st.session_state.agent_prompt = ChatPromptTemplate.from_messages(prompt_messages)
+    st.session_state.agent_prompt = ChatPromptTemplate.from_messages(prompt_messages)
 
 
-if "agent_executor" not in st.session_state:
-    # Initialize the agent executor with base tools on first run
-    update_agent_executor()
+# if "agent_executor" not in st.session_state:
+#     # Initialize the agent executor with base tools on first run
+#     update_agent_executor()
 
 
 # Display chat messages from history
@@ -447,27 +287,3 @@ with st.sidebar:
     st.info("""ESI uses AI to help you navigate the dissertation process.
     It has access to some of of the literature in your reading lists and also uses Search tools for web lookups.""")
     st.warning("⚠️ Remember: Always consult your official supervisor for final guidance and decisions.")
-
-    st.divider()
-    st.header("Discuss Uploaded Files")
-    uploaded_files = st.file_uploader(
-        "Upload PDF files to discuss (temporary for this session)",
-        accept_multiple_files=True,
-        type=['pdf'] # Initially restrict to PDF
-    )
-
-    # Process files button
-    # Only show process button if new files are selected
-    if uploaded_files:
-        if st.button("Process Uploaded Files", key="process_files_button"):
-             process_uploaded_files(uploaded_files)
-
-    # Display processed files and clear button only if files have been processed
-    if st.session_state.processed_files:
-        st.caption("Currently discussing:")
-        for fname in st.session_state.processed_files:
-            st.write(f"- {fname}")
-        if st.button("Clear Uploaded Files Context", key="clear_files_button"):
-            clear_uploaded_files()
-            # Rerun the app to clear the display immediately
-            st.rerun() # Use st.rerun() to refresh the UI state

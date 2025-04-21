@@ -58,12 +58,12 @@ except FileNotFoundError:
 
 # --- Google Search Tool Setup ---
 
-google_search = GoogleSearchAPIWrapper(google_api_key=GOOGLE_API_KEY, google_cse_id=GOOGLE_CSE_ID)
-google_search_tool = Tool(
-        name="google_search",
-        func=google_search.run,
-        description="Use this tool to search the internet for information using Google Search. It is good for general information, academic papers, and current events.",
-)
+        google_search = GoogleSearchAPIWrapper(google_api_key=GOOGLE_API_KEY, google_cse_id=GOOGLE_CSE_ID)
+        google_search_tool = Tool(
+            name="google_search",
+            func=google_search.run,
+            description="Use this tool to search the internet for information using Google Search. It is good for general information, academic papers, and current events.",
+        )
 
 
 # Using DuckDuckGo Search as a free alternative

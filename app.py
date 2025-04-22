@@ -23,7 +23,8 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_core.runnables import RunnablePassthrough
 from crawl4ai import AsyncWebCrawler
 import streamlit as st
-from streamlit_interface import display_chat_messages, handle_user_input, display_sidebar, initialize_streamlit
+# Updated import: Added display_input_controls, removed handle_user_input
+from streamlit_interface import display_chat_messages, display_input_controls, display_sidebar, initialize_streamlit
 from langchain_core.messages import AIMessage, HumanMessage
 
 # --- Embedding Model Setup ---
@@ -274,11 +275,13 @@ if "agent_executor" not in st.session_state:
         verbose=True
     )
 
-# Display chat messages from history
+# Display the sidebar first (optional, can be anywhere before main content)
+display_sidebar()
+
+# Display the new input controls area
+display_input_controls(st.session_state.agent_executor, llm)
+
+# Display chat messages from history below the input controls
 display_chat_messages()
 
-# Handle user input and generate AI response
-handle_user_input(st.session_state.agent_executor, llm)
-
-# Display the sidebar
-display_sidebar()
+# Removed the call to the old handle_user_input function

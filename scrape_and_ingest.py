@@ -199,4 +199,4 @@ def check_and_ingest_new_pdfs(data_directory: str, vector_store_instance: Chroma
 
 
 print("Checking for new documents to load into the main knowledge base...")
-    check_and_ingest_new_pdfs(DATA_DIR, vector_store, CHROMA_DB_PATH)
+check_and_ingest_new_pdfs(DATA_DIR, vector_store, CHROMA_DB_PATH)

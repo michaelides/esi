@@ -60,7 +60,6 @@ When you use tools, ALWAYS cite the source URL if one is provided.
 6.  If unsure about a specific academic convention, first search for information using the `duckduckgo_search` tool, the `tavily_search` tool (if available), the `dissertation_resource_retriever`, and the `crawl4ai` tool (if a specific website is relevant), and if unable to find the answer, advise the student to consult their supervisor or university guidelines.
 
 """
-
 # Define the prompt message structure
 prompt_messages = [
     ("system", system_message),
@@ -138,6 +137,11 @@ if tavily_search:
     base_tools.append(tavily_search)
 
 embedding_function = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
+
+# Define the system message and prompt structure globally
+system_message = f"""{instruction}
+You are a helpful AI assistant designed to support university students with their dissertations.
+Your goal is to help them brainstorm research ideas, structure their work, understand methodologies, and overcome challenges.
 
 When you use tools, ALWAYS cite the source URL if one is provided.
 

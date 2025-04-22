@@ -97,7 +97,10 @@ def handle_user_input(agent_executor, llm):
                 if analysis_prompt:
                     # Create PandasAI agent
                     # Assuming the Google API key is already available in the environment
-                    google_api_key = st.secrets["GOOGLE_API_KEY"]  # Access the Google API key from Streamlit secrets
+                    google_api_key = os.getenv("GOOGLE_API_KEY")  # Access the Google API key from environment variable
+                    if not google_api_key:
+                        st.error("GOOGLE_API_KEY not found in environment variables. Please set it.")
+                        return
                     pandas_ai_agent = create_pandas_ai_agent(google_api_key)
 
                     # Analyze data and display the response

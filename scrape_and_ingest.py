@@ -197,24 +197,41 @@ if __name__ == "__main__":
         logging.error(f"Failed to initialize Qdrant client: {e}", exc_info=True)
         exit(1)
 
-    # Check if the collection exists using the initialized client
+    # Check if the collection exists and its vector configuration
     collection_exists = False
+    collection_needs_recreate = False
     try:
-        client.get_collection(collection_name=COLLECTION_NAME)
+        collection_info = client.get_collection(collection_name=COLLECTION_NAME)
         collection_exists = True
         logging.info(f"Collection '{COLLECTION_NAME}' already exists.")
+
+        # Check vector configuration
+        # Assuming a single vector config for simplicity
+        if collection_info.vectors_config.params.size != VECTOR_SIZE:
+             logging.warning(f"Existing collection '{COLLECTION_NAME}' has vector size {collection_info.vectors_config.params.size}, expected {VECTOR_SIZE}.")
+             collection_needs_recreate = True
+        else:
+             logging.info(f"Existing collection '{COLLECTION_NAME}' has compatible vector size {VECTOR_SIZE}.")
+
     except ValueError: # Qdrant client raises ValueError if collection not found
         collection_exists = False
         logging.info(f"Collection '{COLLECTION_NAME}' not found. Will create it.")
     except Exception as e:
-        logging.error(f"Error checking for collection existence: {e}", exc_info=True)
+        logging.error(f"Error checking for collection existence or config: {e}", exc_info=True)
         exit(1) # Exit if collection check fails unexpectedly
 
 
     try:
+        if collection_needs_recreate:
+             # Delete the incompatible collection
+             logging.warning(f"Deleting incompatible collection '{COLLECTION_NAME}'...")
+             client.delete_collection(collection_name=COLLECTION_NAME)
+             logging.warning(f"Collection '{COLLECTION_NAME}' deleted.")
+             collection_exists = False # Mark as not existing so it gets recreated
+
         if not collection_exists:
-            # If collection does not exist, create it manually
-            logging.info(f"Creating collection '{COLLECTION_NAME}'...")
+            # If collection does not exist (either initially or after deletion), create it manually
+            logging.info(f"Creating collection '{COLLECTION_NAME}' with vector size {VECTOR_SIZE}...")
             client.create_collection(
                 collection_name=COLLECTION_NAME,
                 vectors_config=models.VectorParams(size=VECTOR_SIZE, distance=DISTANCE_METRIC),

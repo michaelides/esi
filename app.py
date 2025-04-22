@@ -4,9 +4,13 @@ from dotenv import load_dotenv
 import io  # Import io for handling file streams
 import uuid  # Import uuid for generating unique IDs
 
-# Import qdrant client
-from qdrant_client import QdrantClient # Import QdrantClient
-from langchain_qdrant import QdrantVectorStore # Changed from langchain_qdrant import Qdrant
+# Removed Qdrant imports
+# from qdrant_client import QdrantClient # Import QdrantClient
+# from langchain_qdrant import QdrantVectorStore # Changed from langchain_qdrant import Qdrant
+
+# Import LanceDB
+from langchain_community.vectorstores import LanceDB
+import lancedb # Import lancedb client
 
 # Use Google Generative AI
 from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
@@ -101,28 +105,38 @@ else:
     )
 
 # --- RAG Setup (Main Dissertation Knowledge Base) ---
-# Define the path for the persistent Qdrant database
-QDRANT_DB_PATH = "./qdrant_db" # Changed path name to match scrape_and_ingest.py
-COLLECTION_NAME = "dissertation_resources" # Keep the collection name
+# Define the path for the persistent LanceDB database
+LANCEDB_DB_PATH = "./lancedb_db" # Changed path name to match scrape_and_ingest.py
+COLLECTION_NAME = "dissertation_resources" # This will be the table name in LanceDB
 
-# Initialize Qdrant vector store for the main knowledge base
-# This uses a local directory for persistence
+# Initialize LanceDB vector store for the main knowledge base
 try:
-    # Initialize Qdrant client for local persistence
-    # Use the 'path' argument for local storage
-    client = QdrantClient(path=QDRANT_DB_PATH)
+    # Connect to the LanceDB database
+    db = lancedb.connect(LANCEDB_DB_PATH)
 
-    # Initialize Qdrant vector store using the client
-    # Use QdrantVectorStore as recommended by the deprecation warning
-    vector_store = QdrantVectorStore(
-        client=client, # Pass the initialized client
-        collection_name=COLLECTION_NAME,
-        embedding=embedding_function, # Use 'embedding' keyword
-    )
-    st.info(f"Connected to Qdrant DB at {QDRANT_DB_PATH} with collection '{COLLECTION_NAME}'")
+    # Check if the table exists before opening
+    table_names = db.table_names()
+    if COLLECTION_NAME not in table_names:
+        st.error(f"LanceDB table '{COLLECTION_NAME}' not found at {LANCEDB_DB_PATH}.")
+        st.info("Please run the ingestion script (`python scrape_and_ingest.py`) first to create and populate the database.")
+        st.stop() # Stop the app if the database/table is not ready
+
+    # Open the existing table
+    table = db.open_table(COLLECTION_NAME)
+
+    # Initialize LanceDB vector store from the table
+    vector_store = LanceDB(table, embedding_function)
+
+    st.info(f"Connected to LanceDB database at {LANCEDB_DB_PATH} and table '{COLLECTION_NAME}'")
+
+except FileNotFoundError:
+    st.error(f"LanceDB database directory not found at {LANCEDB_DB_PATH}.")
+    st.info("Please run the ingestion script (`python scrape_and_ingest.py`) first to create and populate the database.")
+    st.stop() # Stop the app if the database directory doesn't exist
 except Exception as e:
-    st.error(f"Failed to initialize Qdrant vector store: {e}")
-    st.stop() # Stop the app if the vector store cannot be initialized
+    st.error(f"Failed to initialize LanceDB vector store: {e}")
+    st.stop() # Stop the app on other initialization errors
+
 
 # Create a retriever from the main vector store
 # `k=5` means it will retrieve the top 5 most relevant documents
@@ -143,7 +157,11 @@ rag_tool = create_retriever_tool(
 
 # --- Agent Setup ---
 # Define the base tools the agent can use (main knowledge base and search)
-base_tools = [rag_tool, duckduckgo_search, tavily_search]
+# Ensure tavily_search is included only if it was successfully initialized
+base_tools = [rag_tool, duckduckgo_search]
+if tavily_search:
+    base_tools.append(tavily_search)
+
 
 # Initialize Streamlit UI and session state
 initialize_streamlit()
@@ -179,7 +197,7 @@ handle_user_input(st.session_state.agent_executor, llm)
 # For now, I will keep the function here but comment out the call at the end of the file.
 # The call is moved to scrape_and_ingest.py's __main__ block.
 
-# def check_and_ingest_new_pdfs(data_directory: str, vector_store_instance: QdrantVectorStore, db_path: str): # Changed type hint
+# def check_and_ingest_new_pdfs(data_directory: str, vector_store_instance: LanceDB, db_path: str): # Changed type hint
 #     """Checks for new PDFs in data_directory and ingests them into the main vector store."""
 #     log_file_path = os.path.join(db_path, ".ingested_files.log")
 #     ingested_files = set()
@@ -243,7 +261,7 @@ handle_user_input(st.session_state.agent_executor, llm)
 #     print(f"Adding {len(splits)} new document chunks to the main vector store...")
 #     try:
 #         # Add the new documents to the vector store
-#         # Qdrant's add_documents handles batching internally
+#         # LanceDB's add_documents handles batching internally
 #         vector_store_instance.add_documents(splits)
 
 #         # Update the log file with newly processed files
@@ -256,4 +274,4 @@ handle_user_input(st.session_state.agent_executor, llm)
 #         print(f"Error adding new documents to main vector store: {e}")
 
 # print("Checking for new documents to load into the main knowledge base...")
-# check_and_ingest_new_pdfs(DATA_DIR, vector_store, QDRANT_DB_PATH) # Pass the Qdrant instance and new path
+# check_and_ingest_new_pdfs(DATA_DIR, vector_store, LANCEDB_DB_PATH) # Pass the LanceDB instance and new path

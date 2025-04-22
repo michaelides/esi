@@ -2,15 +2,18 @@ import os
 import asyncio
 from dotenv import load_dotenv
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
-from langchain_qdrant import QdrantVectorStore
-from qdrant_client import QdrantClient, models # Import models for VectorParams
+# Removed Qdrant imports
+# from langchain_qdrant import QdrantVectorStore
+# from qdrant_client import QdrantClient, models # Import models for VectorParams
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document
 import logging
 from crawl4ai import AsyncWebCrawler
 import glob
 from langchain_community.document_loaders import PyPDFLoader
-# import streamlit as st # Removed streamlit import as it's not used in this script
+# Import LanceDB
+from langchain_community.vectorstores import LanceDB
+import lancedb # Import lancedb client
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -19,12 +22,13 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 load_dotenv()
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
-QDRANT_DB_PATH = "./qdrant_db"
-COLLECTION_NAME = "dissertation_resources"
-# Define vector parameters for the collection (based on the embedding model)
-# Corrected VECTOR_SIZE based on the error message (768 instead of 3072)
-VECTOR_SIZE = 768 # Dimension for models/text-embedding-004 (as reported by error)
-DISTANCE_METRIC = models.Distance.COSINE # Common distance metric
+# Changed path name for LanceDB
+LANCEDB_DB_PATH = "./lancedb_db"
+COLLECTION_NAME = "dissertation_resources" # This will be the table name in LanceDB
+
+# Removed Qdrant specific vector parameters
+# VECTOR_SIZE = 768 # Dimension for models/text-embedding-004 (as reported by error)
+# DISTANCE_METRIC = models.Distance.COSINE # Common distance metric
 
 # List of URLs to scrape
 URLS_TO_SCRAPE = [
@@ -94,6 +98,7 @@ async def scrape_and_collect_documents():
 # --- PDF Ingestion Function (Main Knowledge Base) ---
 def check_and_collect_new_pdfs(data_directory: str, db_path: str):
     """Checks for new PDFs in data_directory, loads and splits them, and returns documents."""
+    # Log file path is relative to the DB path
     log_file_path = os.path.join(db_path, ".ingested_files.log")
     ingested_files = set()
     all_new_docs = []
@@ -167,46 +172,6 @@ def check_and_collect_new_pdfs(data_directory: str, db_path: str):
 DATA_DIR = "./data"  # Directory to store PDF files
 
 if __name__ == "__main__":
-    # Initialize Qdrant client ONCE for the local persistence path
-    try:
-        client = QdrantClient(path=QDRANT_DB_PATH)
-        logging.info(f"Qdrant client initialized at {QDRANT_DB_PATH}.")
-    except Exception as e:
-        logging.error(f"Failed to initialize Qdrant client: {e}", exc_info=True)
-        exit(1)
-
-    # Check if the collection exists
-    collection_exists = False
-    try:
-        client.get_collection(collection_name=COLLECTION_NAME)
-        collection_exists = True
-        logging.info(f"Collection '{COLLECTION_NAME}' already exists.")
-    except ValueError: # Qdrant client raises ValueError if collection not found
-        collection_exists = False
-        logging.info(f"Collection '{COLLECTION_NAME}' not found.")
-    except Exception as e:
-        logging.error(f"Error checking for collection existence: {e}", exc_info=True)
-        # If we can't even check existence, something is very wrong. Exit.
-        exit(1)
-
-    # If collection exists, delete it and the log file to ensure a clean state
-    if collection_exists:
-        logging.warning(f"Deleting existing collection '{COLLECTION_NAME}' to ensure compatibility...")
-        try:
-            client.delete_collection(collection_name=COLLECTION_NAME)
-            logging.warning(f"Collection '{COLLECTION_NAME}' deleted.")
-
-            # Delete the ingestion log file as the collection is being rebuilt
-            log_file_path = os.path.join(QDRANT_DB_PATH, ".ingested_files.log")
-            if os.path.exists(log_file_path):
-                 logging.info(f"Deleting ingestion log file {log_file_path} due to collection recreation.")
-                 os.remove(log_file_path)
-
-        except Exception as e:
-             logging.error(f"Error deleting collection or log file: {e}", exc_info=True)
-             exit(1) # Exit if deletion fails
-
-    # Collect documents *after* potentially deleting the old log file
     all_documents_to_ingest = []
     successfully_processed_pdf_filenames = []
 
@@ -220,51 +185,57 @@ if __name__ == "__main__":
 
     # Collect documents from PDF ingestion
     logging.info("Checking for new documents to load into the main knowledge base...")
-    # Pass the QDRANT_DB_PATH to check_and_collect_new_pdfs so it can find the log file
-    pdf_docs, processed_pdf_filenames = check_and_collect_new_pdfs(DATA_DIR, QDRANT_DB_PATH)
+    # Pass the LANCEDB_DB_PATH to check_and_collect_new_pdfs so it can find the log file
+    pdf_docs, processed_pdf_filenames = check_and_collect_new_pdfs(DATA_DIR, LANCEDB_DB_PATH)
     all_documents_to_ingest.extend(pdf_docs)
     successfully_processed_pdf_filenames.extend(processed_pdf_filenames)
     logging.info(f"Collected {len(pdf_docs)} documents from PDF ingestion.")
 
 
     if not all_documents_to_ingest:
-        logging.info("No new documents found from either web scraping or PDF ingestion. Nothing to add to Qdrant.")
+        logging.info("No new documents found from either web scraping or PDF ingestion. Nothing to add to LanceDB.")
         exit(0) # Exit successfully as there's nothing to do
 
     logging.info(f"Total documents collected for ingestion: {len(all_documents_to_ingest)}")
 
-    # Create the collection (it won't exist at this point if it was deleted or never existed)
-    logging.info(f"Creating collection '{COLLECTION_NAME}' with vector size {VECTOR_SIZE}...")
     try:
-        client.create_collection(
-            collection_name=COLLECTION_NAME,
-            vectors_config=models.VectorParams(size=VECTOR_SIZE, distance=DISTANCE_METRIC),
-        )
-        logging.info(f"Collection '{COLLECTION_NAME}' created.")
-    except Exception as e:
-        logging.error(f"Error creating collection: {e}", exc_info=True)
-        exit(1)
+        # Connect to or create the LanceDB database
+        logging.info(f"Connecting to LanceDB database at {LANCEDB_DB_PATH}...")
+        db = lancedb.connect(LANCEDB_DB_PATH)
+        logging.info("Connected to LanceDB.")
 
+        # Use from_documents to create the table if it doesn't exist and add documents,
+        # or append to the existing table.
+        logging.info(f"Adding {len(all_documents_to_ingest)} documents to LanceDB table '{COLLECTION_NAME}'...")
 
-    try:
-        # Initialize vector store using the existing client and the newly created collection
-        vector_store = QdrantVectorStore(
-            client=client, # Use the pre-initialized client
-            collection_name=COLLECTION_NAME,
-            embedding=embedding_function,
-        )
+        # Check if the table exists
+        table_names = db.table_names()
+        if COLLECTION_NAME in table_names:
+            # If table exists, open it and add documents
+            logging.info(f"Table '{COLLECTION_NAME}' already exists. Appending documents.")
+            table = db.open_table(COLLECTION_NAME)
+            table.add_documents(all_documents_to_ingest)
+        else:
+            # If table does not exist, create it from documents
+            logging.info(f"Table '{COLLECTION_NAME}' not found. Creating table from documents.")
+            table = LanceDB.from_documents(
+                all_documents_to_ingest,
+                embedding_function,
+                connection=db, # Pass the lancedb connection
+                table_name=COLLECTION_NAME,
+            )
+            # Note: LanceDB.from_documents returns a LanceDB vector store instance,
+            # but we only need the table object for subsequent additions if any.
+            # The table object is implicitly created/updated by the call.
 
-        # Add documents to the collection using add_documents
-        logging.info(f"Adding {len(all_documents_to_ingest)} documents to collection '{COLLECTION_NAME}'...")
-        vector_store.add_documents(all_documents_to_ingest)
-        logging.info("Successfully added documents to Qdrant DB.")
+        logging.info("Successfully added documents to LanceDB.")
 
         # Update the PDF ingestion log file with newly processed files
         if successfully_processed_pdf_filenames:
-            log_file_path = os.path.join(QDRANT_DB_PATH, ".ingested_files.log")
+            # Log file path is relative to the DB path
+            log_file_path = os.path.join(LANCEDB_DB_PATH, ".ingested_files.log")
             try:
-                # Use 'a' mode to append to the log file. If the collection was recreated,
-                # the log file was deleted, so 'a' will create a new one.
+                # Use 'a' mode to append to the log file.
                 with open(log_file_path, "a") as f:
                     for fname in successfully_processed_pdf_filenames:
                         f.write(f"{fname}\n")
@@ -274,7 +245,7 @@ if __name__ == "__main__":
 
 
     except Exception as e:
-        logging.error(f"An error occurred during Qdrant ingestion: {e}", exc_info=True)
+        logging.error(f"An error occurred during LanceDB ingestion: {e}", exc_info=True)
         exit(1)
 
     logging.info("Ingestion script finished.")

@@ -72,29 +72,22 @@ async def scrape_and_store():
                 # arun returns a CrawlResultContainer
                 crawl_result_container = await crawler.arun(url)
 
-                if crawl_result_container and crawl_result_container.results:
-                    logging.info(f"Successfully crawled content from: {url}. Found {len(crawl_result_container.results)} result(s).")
-                    url_processed = False
-                    for result in crawl_result_container.results:
-                        # Extract markdown content if available
-                        page_content = result.markdown # Access the markdown attribute
-                        source_url = result.url # Get the specific source URL (could be original or PDF link)
+                if crawl_result_container:
+                    logging.info(f"Successfully crawled content from: {url}.")
+                    # Extract markdown content if available
+                    page_content = crawl_result_container.markdown # Access the markdown attribute
+                    source_url = url  #crawl_result_container.url # Get the specific source URL (could be original or PDF link)
 
-                        if page_content:
-                            # Create a Document object for each result (HTML page or PDF)
-                            doc = Document(page_content=page_content, metadata={"source": source_url})
+                    if page_content:
+                        # Create a Document object for each result (HTML page or PDF)
+                        doc = Document(page_content=page_content, metadata={"source": source_url})
 
-                            # Split the document content
-                            splits = text_splitter.split_documents([doc]) # Pass as list
-                            all_splits.extend(splits)
-                            url_processed = True # Mark the original URL as processed if any content was found
-                        else:
-                            logging.warning(f"No markdown content found in result for source: {source_url} (original URL: {url})")
-
-                    if url_processed:
-                        processed_urls += 1
+                        # Split the document content
+                        splits = text_splitter.split_documents([doc]) # Pass as list
+                        all_splits.extend(splits)
+                        processed_urls += 1 # Mark the original URL as processed if any content was found
                     else:
-                        logging.warning(f"No processable content (markdown) found for URL: {url}")
+                        logging.warning(f"No markdown content found for URL: {url}")
                         failed_urls.append(url)
 
                 else:

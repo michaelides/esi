@@ -185,18 +185,15 @@ if __name__ == "__main__":
 
     logging.info(f"Total documents collected for ingestion: {len(all_documents_to_ingest)}")
 
-    # Initialize Qdrant client to check for collection existence
-    # This client is only used for the existence check and potentially for add_documents
-    # when the collection already exists.
+    # Initialize Qdrant client ONCE for the local persistence path
     try:
         client = QdrantClient(path=QDRANT_DB_PATH)
-        logging.info(f"Qdrant client initialized at {QDRANT_DB_PATH} for existence check.")
+        logging.info(f"Qdrant client initialized at {QDRANT_DB_PATH}.")
     except Exception as e:
-        logging.error(f"Failed to initialize Qdrant client for existence check: {e}", exc_info=True)
+        logging.error(f"Failed to initialize Qdrant client: {e}", exc_info=True)
         exit(1)
 
-
-    # Check if the collection exists
+    # Check if the collection exists using the initialized client
     collection_exists = False
     try:
         client.get_collection(collection_name=COLLECTION_NAME)
@@ -207,6 +204,11 @@ if __name__ == "__main__":
         logging.info(f"Collection '{COLLECTION_NAME}' not found. Will create it.")
     except Exception as e:
         logging.error(f"Error checking for collection existence: {e}", exc_info=True)
+        # It's possible the client initialized but can't check collections,
+        # but the most likely scenario is a client init failure handled above.
+        # If we reach here, the client is likely okay, but the collection check failed.
+        # We can proceed assuming it doesn't exist or handle the specific error.
+        # For simplicity, we'll re-raise or exit if the check itself fails unexpectedly.
         exit(1)
 
 
@@ -224,14 +226,12 @@ if __name__ == "__main__":
 
         else:
             # If collection does not exist, use from_documents to create and populate.
-            # Pass the path here, and from_documents will create its own internal client.
-            # This avoids passing the potentially problematic pre-initialized client object
-            # into the from_documents flow.
+            # Pass the *existing* client instance here.
             logging.info(f"Creating collection '{COLLECTION_NAME}' and adding {len(all_documents_to_ingest)} documents using from_documents...")
             vector_store = QdrantVectorStore.from_documents(
                 all_documents_to_ingest,
                 embedding_function,
-                path=QDRANT_DB_PATH, # Pass path instead of client
+                client=client, # Pass the existing client instance
                 collection_name=COLLECTION_NAME,
             )
             logging.info(f"Successfully created collection '{COLLECTION_NAME}' and added documents.")

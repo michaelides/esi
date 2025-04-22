@@ -203,14 +203,15 @@ def handle_user_input(agent_executor, llm):
                 # Check if it's a new file or the same one to avoid reloading unnecessarily
                 if st.session_state.last_uploaded_filename != uploaded_file.name:
                     with st.spinner(f"Loading '{uploaded_file.name}'..."):
-                    df = load_data(uploaded_file)
-                    if df is not None:
-                        st.session_state.loaded_df = df
-                        st.session_state.last_uploaded_filename = uploaded_file.name
-                        st.success(f"'{uploaded_file.name}' loaded successfully. Preview:")
-                        st.dataframe(df.head())
-                    else:
-                        st.session_state.loaded_df = None # Clear if loading failed
+                        # Indent the following lines to be inside the 'with' block
+                        df = load_data(uploaded_file)
+                        if df is not None:
+                            st.session_state.loaded_df = df
+                            st.session_state.last_uploaded_filename = uploaded_file.name
+                            st.success(f"'{uploaded_file.name}' loaded successfully. Preview:")
+                            st.dataframe(df.head())
+                        else:
+                            st.session_state.loaded_df = None # Clear if loading failed
                             st.session_state.last_uploaded_filename = None
                 # Display preview if already loaded
                 elif st.session_state.loaded_df is not None:

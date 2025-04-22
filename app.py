@@ -28,7 +28,7 @@ from streamlit_interface import display_chat_messages, handle_user_input, displa
 from langchain_core.messages import AIMessage, HumanMessage
 
 # --- Embedding Model Setup ---
-embedding_function = GoogleGenerativeAIEmbeddings(model="models/text-embedding-001")
+embedding_function = GoogleGenerativeAIEmbeddings(model="models/text-embedding-004")
 
 
 # --- Configuration ---

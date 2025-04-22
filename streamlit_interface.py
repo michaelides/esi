@@ -208,20 +208,22 @@ def handle_user_input(agent_executor, llm):
                             st.dataframe(df.head())
                         else:
                             st.session_state.loaded_df = None # Clear if loading failed
-                        st.session_state.last_uploaded_filename = None
+                            # Indent this line correctly inside the else block
+                            st.session_state.last_uploaded_filename = None
             # Display preview if already loaded
             elif st.session_state.loaded_df is not None:
                  st.write("Current data preview:")
                  st.dataframe(st.session_state.loaded_df.head())
 
             # Only show chat input for analysis *after* data is loaded
-                if st.session_state.loaded_df is not None:
-                    # Use a different key for the data analysis chat input
-                    analysis_prompt = st.chat_input("Enter your data analysis prompt:", key="data_analysis_chat_input")
-                    # Assign to prompt_from_chat_input if a value was entered
-                    if analysis_prompt:
-                         prompt_from_chat_input = analysis_prompt
-                         # This logic will be moved to the processing block below
+            # Unindent this block to align with the if/elif above (lines 200/214)
+            if st.session_state.loaded_df is not None:
+                # Use a different key for the data analysis chat input
+                analysis_prompt = st.chat_input("Enter your data analysis prompt:", key="data_analysis_chat_input")
+                # Assign to prompt_from_chat_input if a value was entered
+                if analysis_prompt:
+                     prompt_from_chat_input = analysis_prompt
+                     # This logic will be moved to the processing block below
                          # df = st.session_state.loaded_df
                          # google_api_key = os.getenv("GOOGLE_API_KEY")
                 # The check and agent creation logic is moved below

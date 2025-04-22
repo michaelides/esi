@@ -43,7 +43,7 @@ def load_data(uploaded_file):
             df, meta = pyreadstat.read_sav(uploaded_file)
         else:
             raise ValueError("Unsupported file type. Please upload a CSV, Excel, RData, or SAV file.")
-        return df
+        return pd.DataFrame(df)
     except Exception as e:
         st.error(f"Error loading data: {e}")
         return None

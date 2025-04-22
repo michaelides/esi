@@ -91,21 +91,19 @@ def handle_user_input(agent_executor, llm):
                 st.write("Data loaded successfully. Here's a preview:")
                 st.dataframe(df.head())
 
-                # Get OpenAI API key from the user
-                openai_api_key = st.text_input("Enter your OpenAI API key:", type="password")
+                # Get analysis prompt from the user
+                analysis_prompt = st.text_area("Enter your data analysis prompt:")
 
-                if openai_api_key:
+                if analysis_prompt:
                     # Create PandasAI agent
-                    pandas_ai_agent = create_pandas_ai_agent(openai_api_key)
+                    # Assuming the Google API key is already available in the environment
+                    google_api_key = st.secrets["GOOGLE_API_KEY"]  # Access the Google API key from Streamlit secrets
+                    pandas_ai_agent = create_pandas_ai_agent(google_api_key)
 
-                    # Get analysis prompt from the user
-                    analysis_prompt = st.text_area("Enter your data analysis prompt:")
-
-                    if analysis_prompt:
-                        # Analyze data and display the response
-                        response = analyze_data(pandas_ai_agent, df, analysis_prompt)
-                        st.write("Analysis Result:")
-                        st.write(response)
+                    # Analyze data and display the response
+                    response = analyze_data(pandas_ai_agent, df, analysis_prompt)
+                    st.write("Analysis Result:")
+                    st.write(response)
 
 
 def display_sidebar():

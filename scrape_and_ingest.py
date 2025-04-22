@@ -20,10 +20,10 @@ COLLECTION_NAME = "dissertation_resources" # Assuming the same collection name a
 
 # List of URLs to scrape
 URLS_TO_SCRAPE = [
-    "https://www.uea.ac.uk/course/postgraduate/msc-management", # Example URL 1
-    "https://www.uea.ac.uk/about/university-information/campus-map", # Example URL 2
-    "https://www.uea.ac.uk/course/postgraduate/msc-organisational-psychology", # Added comma
-    "https://scholar.google.co.uk/citations?user=v9Rzv3kAAAAJ&hl=en", # Added comma
+#    "https://www.uea.ac.uk/course/postgraduate/msc-management", # Example URL 1
+#    "https://www.uea.ac.uk/about/university-information/campus-map", # Example URL 2
+#    "https://www.uea.ac.uk/course/postgraduate/msc-organisational-psychology", # Added comma
+#    "https://scholar.google.co.uk/citations?user=v9Rzv3kAAAAJ&hl=en", # Added comma
     "https://research-portal.uea.ac.uk/en/persons/kevin-daniels/publications/"
     # Add more relevant URLs here
 ]

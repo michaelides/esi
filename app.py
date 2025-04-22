@@ -55,7 +55,8 @@ system_message = f"""{instruction}
 You are a helpful AI assistant designed to support university students with their dissertations.
 Your goal is to help them brainstorm research ideas, structure their work, understand methodologies, and overcome challenges.
 
-When you use tools, ALWAYS cite the source URL if one is provided.
+When you use the duckduckgo_search and tavily_search tools, ALWAYS cite the source URL if one is provided. This should be inline citation (e.g. evidence show xyz[X], 
+where X is a number. The url for each of these citations should be provided at the end. 
 
 **Tool Use Instructions:**
 

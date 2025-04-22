@@ -15,7 +15,7 @@ import streamlit as st # Keep streamlit import if needed for st.info/warning, ot
 load_dotenv()
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
-QDRANT_DB_PATH = "./qdrant_db_dissertation" # Changed path name
+QDRANT_DB_PATH = "./qdrant_db" # Changed path name
 COLLECTION_NAME = "dissertation_resources" # Assuming the same collection name as in app.py
 
 # List of URLs to scrape

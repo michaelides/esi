@@ -19,6 +19,8 @@ def create_pandas_ai_agent(api_key: str, df: pd.DataFrame):
 
 def analyze_data(agent: SmartDataframe, data: pd.DataFrame, prompt: str):
     """Analyzes the data using the PandasAI agent and the given prompt."""
+    if agent is None:
+        return "Data analysis agent could not be initialized."
     try:
         response = agent.chat(prompt)
         return response

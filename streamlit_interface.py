@@ -5,6 +5,7 @@ from langchain_core.prompts import MessagesPlaceholder, ChatPromptTemplate
 import random
 from langchain_core.runnables import chain
 import uuid
+import re # Import regex for parsing suggestions
 from pandas_agent import create_pandas_ai_agent, analyze_data, load_data
 
 
@@ -41,6 +42,11 @@ def initialize_streamlit():
         st.session_state.loaded_df = None
     if "last_uploaded_filename" not in st.session_state:
         st.session_state.last_uploaded_filename = None
+    # --- Suggested Prompts State ---
+    if "suggested_prompts" not in st.session_state:
+        st.session_state.suggested_prompts = []
+    if "selected_prompt" not in st.session_state:
+        st.session_state.selected_prompt = None
 
 
 def display_chat_messages():
@@ -81,21 +87,101 @@ def process_user_input(agent_executor, llm, prompt):
     # Add AI response to chat history
     st.session_state.messages.append(AIMessage(content=ai_response_content))
 
+    # Clear previous suggestions after processing is done for this turn
+    st.session_state.suggested_prompts = []
+
     return ai_response_content
 
 
-# --- Restored Input Handling Logic ---
+# --- Suggested Prompts Generation ---
+
+def generate_suggested_prompts(llm, chat_history):
+    """Generates suggested follow-up prompts using the LLM."""
+    if not chat_history:
+        return [] # No history, no suggestions
+
+    # Create a concise history string (e.g., last 4 messages)
+    history_str = "\n".join([f"{type(m).__name__}: {m.content}" for m in chat_history[-4:]])
+
+    # Simple prompt asking for 4 follow-up questions
+    prompt_text = f"""Based on this recent conversation history:
+{history_str}
+
+Suggest exactly 4 concise and relevant follow-up questions a student might ask next about their dissertation.
+Format the output as a numbered list, each question on a new line. Do not include any preamble or explanation.
+Example:
+1. Can you help me refine my research question?
+2. Where can I find examples of literature reviews?
+3. What are common pitfalls in methodology?
+4. How do I structure the introduction chapter?
+"""
+    try:
+        response = llm.invoke(prompt_text)
+        content = response.content if hasattr(response, 'content') else str(response)
+
+        # Extract suggestions using regex (handles potential numbering variations)
+        # Looks for lines starting with a number, optional dot/parenthesis, and whitespace
+        suggestions = re.findall(r"^\s*\d[\.\)]?\s*(.+)$", content, re.MULTILINE)
+
+        # Return the first 4 suggestions found, stripping whitespace
+        return [s.strip() for s in suggestions[:4]]
+
+    except Exception as e:
+        print(f"Error generating suggested prompts: {e}")
+        return [] # Return empty list on error
+
+
+# --- Callback for Suggestion Buttons ---
+def suggestion_button_callback(prompt_text):
+    """Sets the selected prompt and clears suggestions for rerun."""
+    st.session_state.selected_prompt = prompt_text
+    st.session_state.suggested_prompts = [] # Clear suggestions immediately
+
+
+# --- Input Handling Logic with Suggestions ---
 
 def handle_user_input(agent_executor, llm):
-    """Handles user input using st.chat_input and agent selection."""
-    agent_type = st.selectbox("Choose an agent:", ["Dissertation Agent", "Data Analysis Agent"], key="agent_selector")
+    """Handles user input via chat_input or suggestion buttons, and agent selection."""
 
+    # --- Check for Selected Prompt from Button Click ---
+    selected_prompt = st.session_state.get("selected_prompt")
+    if selected_prompt:
+        prompt_to_process = selected_prompt
+        st.session_state.selected_prompt = None # Consume the selected prompt
+        # Ensure agent type is Dissertation Agent if a suggestion was clicked
+        # (This assumes suggestions are only shown for Dissertation Agent)
+        agent_type = "Dissertation Agent"
+        st.session_state.agent_selector = "Dissertation Agent" # Update selectbox state if needed
+        process_user_input(agent_executor, llm, prompt_to_process)
+        # Suggestions will be regenerated later in this run if needed
+
+    # --- Agent Selection ---
+    # Use on_change to clear suggestions if agent type changes
+    def clear_suggestions_on_agent_change():
+        st.session_state.suggested_prompts = []
+        # Also clear loaded data if switching away from Data Analysis? Optional.
+        # if st.session_state.agent_selector != "Data Analysis Agent":
+        #     st.session_state.loaded_df = None
+        #     st.session_state.last_uploaded_filename = None
+
+    agent_type = st.selectbox(
+        "Choose an agent:",
+        ["Dissertation Agent", "Data Analysis Agent"],
+        key="agent_selector",
+        on_change=clear_suggestions_on_agent_change
+    )
+
+    # --- Agent-Specific UI and Input ---
+    prompt_from_chat_input = None
     if agent_type == "Dissertation Agent":
         # Use chat_input for the dissertation agent
-        if prompt := st.chat_input("What's on your mind regarding your dissertation?"):
-            process_user_input(agent_executor, llm, prompt) # Use the main agent executor
+        prompt_from_chat_input = st.chat_input("What's on your mind regarding your dissertation?")
+        if prompt_from_chat_input and not selected_prompt: # Process only if no button was clicked in this run
+            process_user_input(agent_executor, llm, prompt_from_chat_input)
 
     elif agent_type == "Data Analysis Agent":
+        # Clear suggestions just in case
+        st.session_state.suggested_prompts = []
         # File uploader for data analysis
         uploaded_file = st.file_uploader(
             "Upload a CSV, Excel, RData, or SAV file for analysis",
@@ -149,6 +235,33 @@ def handle_user_input(agent_executor, llm):
              # Clear data if no file is uploaded
              st.session_state.loaded_df = None
              st.session_state.last_uploaded_filename = None
+
+    # --- Display Suggestions (only for Dissertation Agent after input processing) ---
+    # Check if the agent is Dissertation, if we are not currently processing a selected prompt,
+    # and if either a chat input was just processed OR the page loaded without input (initial state/after rerun)
+    should_generate_suggestions = (
+        agent_type == "Dissertation Agent" and
+        not selected_prompt and # Don't generate if we just clicked a button
+        (prompt_from_chat_input or not st.session_state.messages[-1].type == 'human') # Generate if input was processed OR last msg wasn't human
+    )
+
+    # Generate suggestions if needed and not already generated in this run
+    if should_generate_suggestions and not st.session_state.suggested_prompts:
+         with st.spinner("Generating suggestions..."):
+             st.session_state.suggested_prompts = generate_suggested_prompts(llm, st.session_state.messages)
+
+    # Display suggestions if available
+    if agent_type == "Dissertation Agent" and st.session_state.suggested_prompts:
+        st.write("Suggestions:") # Add a label
+        cols = st.columns(len(st.session_state.suggested_prompts))
+        for i, suggestion in enumerate(st.session_state.suggested_prompts):
+            with cols[i]:
+                st.button(
+                    suggestion,
+                    key=f"suggestion_{i}",
+                    on_click=suggestion_button_callback,
+                    args=(suggestion,) # Pass suggestion text to callback
+                )
 
 
 def display_sidebar():

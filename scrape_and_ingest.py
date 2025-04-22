@@ -3,11 +3,13 @@ import asyncio
 from dotenv import load_dotenv
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_chroma import Chroma
-# Removed AsyncHtmlLoader import
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document
 import logging
 from crawl4ai import AsyncWebCrawler # Import crawl4ai
+import glob
+from langchain_community.document_loaders import PyPDFLoader
+import streamlit as st
 
 # Load environment variables from .env file
 load_dotenv()

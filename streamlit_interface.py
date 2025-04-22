@@ -194,11 +194,11 @@ def handle_user_input(agent_executor, llm):
             key="data_uploader"
         )
 
-        # --- Indentation corrected for this block ---
-            if uploaded_file is not None:
-                # Check if it's a new file or the same one to avoid reloading unnecessarily
-                if st.session_state.last_uploaded_filename != uploaded_file.name:
-                    with st.spinner(f"Loading '{uploaded_file.name}'..."):
+        # --- Correct indentation for this block ---
+        if uploaded_file is not None:
+            # Check if it's a new file or the same one to avoid reloading unnecessarily
+            if st.session_state.last_uploaded_filename != uploaded_file.name:
+                with st.spinner(f"Loading '{uploaded_file.name}'..."):
                         # Indent the following lines to be inside the 'with' block
                         df = load_data(uploaded_file)
                         if df is not None:
@@ -208,13 +208,13 @@ def handle_user_input(agent_executor, llm):
                             st.dataframe(df.head())
                         else:
                             st.session_state.loaded_df = None # Clear if loading failed
-                            st.session_state.last_uploaded_filename = None
-                # Display preview if already loaded
-                elif st.session_state.loaded_df is not None:
-                     st.write("Current data preview:")
-                     st.dataframe(st.session_state.loaded_df.head())
+                        st.session_state.last_uploaded_filename = None
+            # Display preview if already loaded
+            elif st.session_state.loaded_df is not None:
+                 st.write("Current data preview:")
+                 st.dataframe(st.session_state.loaded_df.head())
 
-                # Only show chat input for analysis *after* data is loaded
+            # Only show chat input for analysis *after* data is loaded
                 if st.session_state.loaded_df is not None:
                     # Use a different key for the data analysis chat input
                     analysis_prompt = st.chat_input("Enter your data analysis prompt:", key="data_analysis_chat_input")
@@ -224,31 +224,32 @@ def handle_user_input(agent_executor, llm):
                          # This logic will be moved to the processing block below
                          # df = st.session_state.loaded_df
                          # google_api_key = os.getenv("GOOGLE_API_KEY")
-                    # The check and agent creation logic is moved below
-                    # if not google_api_key:
-                    #     st.error("GOOGLE_API_KEY not found.")
-                    # else:
-                        pandas_ai_agent = create_pandas_ai_agent(google_api_key, df)
-                        if pandas_ai_agent:
-                            # Add user analysis request to chat history
-                            st.session_state.messages.append(HumanMessage(content=f"Analysis request: {analysis_prompt}"))
-                            with st.chat_message("user"):
-                                st.markdown(f"Analysis request: {analysis_prompt}")
+                # The check and agent creation logic is moved below
+                # if not google_api_key:
+                #     st.error("GOOGLE_API_KEY not found.")
+                # else:
+                    # This block seems to be leftover from a previous refactor attempt and should be removed
+                    # pandas_ai_agent = create_pandas_ai_agent(google_api_key, df)
+                    # if pandas_ai_agent:
+                    #     # Add user analysis request to chat history
+                    #     st.session_state.messages.append(HumanMessage(content=f"Analysis request: {analysis_prompt}"))
+                    #     with st.chat_message("user"):
+                    #         st.markdown(f"Analysis request: {analysis_prompt}")
 
-                            # Get analysis result and display it
-                            with st.chat_message("assistant"):
-                                with st.spinner("Analyzing data..."):
-                                    response = analyze_data(pandas_ai_agent, df, analysis_prompt)
-                                    st.markdown(response) # Display result directly
-                                    # Add AI analysis response to chat history
-                                    st.session_state.messages.append(AIMessage(content=response))
-                                    prompt_processed_this_run = True # Mark that an interaction happened
-                        else:
-                            st.error("Failed to initialize data analysis agent.")
-            else:
-                 # Clear data if no file is uploaded
-                 st.session_state.loaded_df = None
-                 st.session_state.last_uploaded_filename = None
+                    #     # Get analysis result and display it
+                    #     with st.chat_message("assistant"):
+                    #         with st.spinner("Analyzing data..."):
+                    #             response = analyze_data(pandas_ai_agent, df, analysis_prompt)
+                    #             st.markdown(response) # Display result directly
+                    #             # Add AI analysis response to chat history
+                    #             st.session_state.messages.append(AIMessage(content=response))
+                    #             prompt_processed_this_run = True # Mark that an interaction happened
+                    # else:
+                    #     st.error("Failed to initialize data analysis agent.")
+        else:
+             # Clear data if no file is uploaded
+             st.session_state.loaded_df = None
+             st.session_state.last_uploaded_filename = None
 
     # --- Process Input (only if button wasn't clicked AND chat input has value) ---
     if not prompt_from_suggestion_button and prompt_from_chat_input:

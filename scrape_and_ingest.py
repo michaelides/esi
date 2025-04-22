@@ -71,6 +71,7 @@ async def scrape_and_collect_documents():
                 source_url = url
 
                 if page_content:
+                    # Ensure metadata is pickleable - only keep the source URL string
                     doc = Document(page_content=page_content, metadata={"source": source_url})
                     splits = text_splitter.split_documents([doc])
                     all_splits.extend(splits)
@@ -131,24 +132,30 @@ def check_and_collect_new_pdfs(data_directory: str, db_path: str):
 
     logging.info(f"Found {len(new_file_paths)} new PDF file(s) to ingest into the main knowledge base. Starting process...")
 
+    loaded_documents = []
     for pdf_path in new_file_paths:
         filename = os.path.basename(pdf_path)
         try:
             logging.info(f"  Loading: {filename}")
             loader = PyPDFLoader(pdf_path)
             documents = loader.load()
-            all_new_docs.extend(documents)
+            # Explicitly clean metadata to ensure pickleability
+            cleaned_documents = []
+            for doc in documents:
+                 # Keep only the source path in metadata
+                 cleaned_documents.append(Document(page_content=doc.page_content, metadata={"source": pdf_path}))
+            loaded_documents.extend(cleaned_documents)
             processed_new_files.append(filename) # Track successfully loaded files
         except Exception as e:
             logging.error(f"Error loading {filename}: {e}")
             continue # Skip to the next file
 
-    if not all_new_docs:
+    if not loaded_documents:
         logging.warning("No new documents were successfully loaded from the PDF files for the main knowledge base.")
         return [], [] # Return empty list of docs and processed files
 
     logging.info("Splitting new documents into chunks...")
-    splits = text_splitter.split_documents(all_new_docs)
+    splits = text_splitter.split_documents(loaded_documents) # Split the cleaned documents
 
     if not splits:
         logging.warning("Failed to split new documents into chunks for the main knowledge base.")

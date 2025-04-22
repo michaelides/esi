@@ -22,6 +22,7 @@ from tavily import TavilyClient
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_core.runnables import RunnablePassthrough
 from crawl4ai import AsyncWebCrawler
+import asyncio # Import asyncio
 import streamlit as st
 # Restored import: Removed display_input_controls, added handle_user_input
 from streamlit_interface import display_chat_messages, handle_user_input, display_sidebar, initialize_streamlit
@@ -97,9 +98,19 @@ else:
 # --- Crawl4AI Tool Setup ---
 
 crawl4ai = AsyncWebCrawler()
+
+# Define a synchronous wrapper for the async function
+def run_crawl4ai_sync(url: str) -> str:
+    """Synchronous wrapper to run the async crawl4ai.arun function."""
+    try:
+        # Use asyncio.run to execute the async function and return the result
+        return asyncio.run(crawl4ai.arun(url=url))
+    except Exception as e:
+        return f"Error during crawling {url}: {e}"
+
 crawl4ai_tool = Tool(
     name="crawl4ai",
-    func=crawl4ai.arun,
+    func=run_crawl4ai_sync, # Use the synchronous wrapper function
     description="Use this tool to crawl a website and extract its content. Input should be a valid URL. Only use this tool if you need to get information directly from a specific website. Be specific about the URL you want to crawl.",
 )
 

@@ -115,6 +115,7 @@ async def scrape_and_store():
         logging.error(f"An error occurred during scraping or storing: {e}", exc_info=True)
 
 # --- Main Execution ---
+DATA_DIR = "./data"  # Directory to store PDF files - ADDED
 if __name__ == "__main__":
     if not URLS_TO_SCRAPE:
         logging.warning("No URLs provided in URLS_TO_SCRAPE list. Exiting.")

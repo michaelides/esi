@@ -4,12 +4,12 @@ from dotenv import load_dotenv
 import io  # Import io for handling file streams
 import uuid  # Import uuid for generating unique IDs
 
-# Import chromadb client
-import chromadb
+# Import qdrant client (optional, langchain_qdrant handles client internally for local persistence)
+# from qdrant_client import QdrantClient, models
 
 # Use Google Generative AI
 from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
-from langchain_chroma import Chroma
+from langchain_qdrant import Qdrant # Changed from langchain_chroma
 from langchain_community.tools import DuckDuckGoSearchRun
 from langchain.agents import AgentExecutor, create_tool_calling_agent
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
@@ -37,7 +37,7 @@ TAVILY_API_KEY = os.getenv("TAVILY_API_KEY")
 
 # --- LLM Setup ---
 # Initialize the LLM (e.g., Gemini)
-llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=0.7) 
+llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=0.7)
 
 # --- Embedding Model Setup ---
 embedding_function = GoogleGenerativeAIEmbeddings(model="models/text-embedding-004")
@@ -55,8 +55,8 @@ system_message = f"""{instruction}
 You are a helpful AI assistant designed to support university students with their dissertations.
 Your goal is to help them brainstorm research ideas, structure their work, understand methodologies, and overcome challenges.
 
-When you use the duckduckgo_search and tavily_search tools, ALWAYS cite the source URL if one is provided. This should be inline citation (e.g. evidence show xyz[X], 
-where X is a number. The url for each of these citations should be provided at the end. 
+When you use the duckduckgo_search and tavily_search tools, ALWAYS cite the source URL if one is provided. This should be inline citation (e.g. evidence show xyz[X],
+where X is a number. The url for each of these citations should be provided at the end.
 
 **Tool Use Instructions:**
 
@@ -66,7 +66,7 @@ where X is a number. The url for each of these citations should be provided at t
 4.  If the `tavily_search` tool is available, use it to supplement the `duckduckgo_search` for broader or more in-depth searches. It returns the most relevant search results with snippets. Cite information retrieved using this tool.
 5.  Use the `crawl4ai` tool to crawl a specific website and extract its content. Only use this tool if you need to get information directly from a specific website. Be specific about the URL you want to crawl.
 6.  If unsure about a specific academic convention, first search for information using the `duckduckgo_search` tool, the `tavily_search` tool (if available), the `dissertation_resource_retriever`, and the `crawl4ai` tool (if a specific website is relevant), and if unable to find the answer, advise the student to consult their supervisor or university guidelines.
-7.  When asked to search for something or asked to find or reccomend literature you should use all of your tools 
+7.  When asked to search for something or asked to find or reccomend literature you should use all of your tools
 8.  When asked to find information or literature about a specific author, you should use all of your tools.
 """
 
@@ -96,23 +96,32 @@ else:
     tavily_search = Tool(
         name="tavily_search",
         func=tavily_client.search,
-        description="""Use this tool to search the internet for information. It is good for general information, academic papers, academic authors, and current events. 
+        description="""Use this tool to search the internet for information. It is good for general information, academic papers, academic authors, and current events.
         It returns the most relevant search results with snippets.""",
     )
 
 # --- RAG Setup (Main Dissertation Knowledge Base) ---
-# Define the path for the persistent ChromaDB database
-CHROMA_DB_PATH = "./chroma_db_dissertation"
-# Initialize ChromaDB client for the main knowledge base
-# This uses the default persistent client
-vector_store = Chroma(
-    persist_directory=CHROMA_DB_PATH,
-    embedding_function=embedding_function,
-    collection_name="dissertation_resources" # You can name your collection
-)
+# Define the path for the persistent Qdrant database
+QDRANT_DB_PATH = "./qdrant_db_dissertation" # Changed path name
+COLLECTION_NAME = "dissertation_resources" # Keep the collection name
+
+# Initialize Qdrant vector store for the main knowledge base
+# This uses a local directory for persistence
+try:
+    vector_store = Qdrant(
+        location=QDRANT_DB_PATH, # Use location for local persistence
+        collection_name=COLLECTION_NAME,
+        embeddings=embedding_function,
+    )
+    # Note: Qdrant client is managed internally by langchain_qdrant for local persistence
+    # If using a remote Qdrant instance, you would initialize QdrantClient separately
+    # and pass it via the `client` parameter.
+except Exception as e:
+    st.error(f"Failed to initialize Qdrant vector store: {e}")
+    st.stop() # Stop the app if the vector store cannot be initialized
 
 # Create a retriever from the main vector store
-# `k=3` means it will retrieve the top 3 most relevant documents
+# `k=5` means it will retrieve the top 5 most relevant documents
 retriever = vector_store.as_retriever(search_kwargs={"k": 5})
 
 # Create a RAG tool for the main knowledge base
@@ -120,19 +129,19 @@ rag_tool = create_retriever_tool(
     retriever,
     "dissertation_resource_retriever",
     """Use this tool to retrieve information about literature, references, authors, people, and the MSc dissertation module at UEA, called NBS-7091A.
-    Use this tool to find information about module deadlines, procedures, milestones, specific writing guides, 
+    Use this tool to find information about module deadlines, procedures, milestones, specific writing guides,
     methodology examples, previously discussed concepts, scales, questionnaires, and instruments.
-    If the question is at all related to the module requirements, use this tool first. 
-    Use this tool for anything related to the UEA, research ethics, and ethics applications. 
+    If the question is at all related to the module requirements, use this tool first.
+    Use this tool for anything related to the UEA, research ethics, and ethics applications.
     Use this tool when asked to search for publications of different authors. """,
 )
 
 
 # --- Agent Setup ---
 # Define the base tools the agent can use (main knowledge base and search)
-base_tools = [rag_tool, duckduckgo_search_tool, tavily_search]
-#llm_rag = llm.bind_tools(rag_tool)
-
+base_tools = [rag_tool, duckduckgo_search_tool]
+if tavily_search_tool: # Add Tavily only if initialized
+    base_tools.append(tavily_search_tool)
 
 # Initialize Streamlit UI and session state
 initialize_streamlit()
@@ -158,3 +167,91 @@ display_chat_messages()
 
 # Handle user input using the restored function (which includes agent selection and chat input)
 handle_user_input(st.session_state.agent_executor, llm)
+
+# --- PDF Ingestion Function (Main Knowledge Base) ---
+# Moved this function here from scrape_and_ingest.py to be accessible by app.py
+# It's better to have ingestion as a separate script, but for simplicity in this context,
+# we'll keep the check/ingest logic here if it's intended to run on app startup.
+# However, running ingestion on every app startup is inefficient.
+# A better approach is to run scrape_and_ingest.py separately.
+# For now, I will keep the function here but comment out the call at the end of the file.
+# The call is moved to scrape_and_ingest.py's __main__ block.
+
+# def check_and_ingest_new_pdfs(data_directory: str, vector_store_instance: Qdrant, db_path: str): # Changed type hint
+#     """Checks for new PDFs in data_directory and ingests them into the main vector store."""
+#     log_file_path = os.path.join(db_path, ".ingested_files.log")
+#     ingested_files = set()
+
+#     # Create data directory if it doesn't exist
+#     if not os.path.exists(data_directory):
+#         os.makedirs(data_directory)
+#         print(f"Created data directory: {data_directory}") # Use print for console output
+
+#     # Read list of already ingested files
+#     try:
+#         with open(log_file_path, "r") as f:
+#             ingested_files = set(line.strip() for line in f)
+#         print(f"Found log of {len(ingested_files)} previously ingested files.")
+#     except FileNotFoundError:
+#         print("No ingestion log file found for the main knowledge base. Will process all PDFs in data directory.")
+#     except Exception as e:
+#          print(f"Error reading ingestion log file: {e}")
+
+
+#     # Find current PDF files
+#     current_pdf_files = glob.glob(os.path.join(data_directory, "*.pdf"))
+#     current_filenames = set(os.path.basename(f) for f in current_pdf_files)
+
+#     # Determine new files to ingest
+#     new_filenames = current_filenames - ingested_files
+#     new_file_paths = [os.path.join(data_directory, fname) for fname in new_filenames]
+
+#     if not new_file_paths:
+#         print("Main knowledge base is up-to-date. No new PDFs found to ingest.")
+#         return
+
+#     print(f"Found {len(new_file_paths)} new PDF file(s) to ingest into the main knowledge base. Starting process...")
+
+#     all_new_docs = []
+#     processed_new_files = []
+#     for pdf_path in new_file_paths:
+#         filename = os.path.basename(pdf_path)
+#         try:
+#             print(f"  Loading: {filename}")
+#             loader = PyPDFLoader(pdf_path)
+#             documents = loader.load()
+#             all_new_docs.extend(documents)
+#             processed_new_files.append(filename) # Track successfully loaded files
+#         except Exception as e:
+#             print(f"Error loading {filename}: {e}")
+#             continue # Skip to the next file
+
+#     if not all_new_docs:
+#         print("No new documents were successfully loaded from the PDF files for the main knowledge base.")
+#         return
+
+#     print("Splitting new documents into chunks...")
+#     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+#     splits = text_splitter.split_documents(all_new_docs)
+
+#     if not splits:
+#         print("Failed to split new documents into chunks for the main knowledge base.")
+#         return
+
+#     print(f"Adding {len(splits)} new document chunks to the main vector store...")
+#     try:
+#         # Add the new documents to the vector store
+#         # Qdrant's add_documents handles batching internally
+#         vector_store_instance.add_documents(splits)
+
+#         # Update the log file with newly processed files
+#         with open(log_file_path, "a") as f:
+#             for fname in processed_new_files:
+#                 f.write(f"{fname}\n")
+#         print(f"Successfully ingested {len(processed_new_files)} new PDF file(s) into the main knowledge base!")
+
+#     except Exception as e:
+#         print(f"Error adding new documents to main vector store: {e}")
+
+# print("Checking for new documents to load into the main knowledge base...")
+# check_and_ingest_new_pdfs(DATA_DIR, vector_store, QDRANT_DB_PATH) # Pass the Qdrant instance and new path

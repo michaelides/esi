@@ -2,20 +2,20 @@ import os
 import asyncio
 from dotenv import load_dotenv
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
-from langchain_chroma import Chroma
+from langchain_qdrant import Qdrant # Changed from langchain_chroma
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document
 import logging
 from crawl4ai import AsyncWebCrawler # Import crawl4ai
 import glob
 from langchain_community.document_loaders import PyPDFLoader
-import streamlit as st
+import streamlit as st # Keep streamlit import if needed for st.info/warning, otherwise remove
 
 # Load environment variables from .env file
 load_dotenv()
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
-CHROMA_DB_PATH = "./chroma_db_dissertation"
+QDRANT_DB_PATH = "./qdrant_db_dissertation" # Changed path name
 COLLECTION_NAME = "dissertation_resources" # Assuming the same collection name as in app.py
 
 # List of URLs to scrape
@@ -36,14 +36,16 @@ except Exception as e:
     exit(1)
 
 try:
-    vector_store = Chroma(
-        persist_directory=CHROMA_DB_PATH,
-        embedding_function=embedding_function,
-        collection_name=COLLECTION_NAME
+    # Initialize Qdrant vector store for the main knowledge base
+    # This uses a local directory for persistence
+    vector_store = Qdrant(
+        location=QDRANT_DB_PATH, # Use location for local persistence
+        collection_name=COLLECTION_NAME,
+        embeddings=embedding_function,
     )
-    logging.info(f"Connected to Chroma DB at {CHROMA_DB_PATH} with collection '{COLLECTION_NAME}'")
+    logging.info(f"Connected to Qdrant DB at {QDRANT_DB_PATH} with collection '{COLLECTION_NAME}'")
 except Exception as e:
-    logging.error(f"Failed to connect to Chroma DB: {e}")
+    logging.error(f"Failed to connect to Qdrant DB: {e}")
     exit(1)
 
 # Initialize crawl4ai with Markdown output and PDF extraction
@@ -52,7 +54,7 @@ text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=20
 
 # --- Core Logic ---
 async def scrape_and_store():
-    """Scrapes URLs using crawl4ai, splits content, and adds to Chroma DB."""
+    """Scrapes URLs using crawl4ai, splits content, and adds to Qdrant DB.""" # Updated description
     logging.info("Starting web scraping process with crawl4ai...")
     all_splits = []
     processed_urls = 0
@@ -104,31 +106,20 @@ async def scrape_and_store():
 
         logging.info(f"Split content into {len(all_splits)} chunks.")
 
-        # Add documents to Chroma DB
-        logging.info("Adding documents to Chroma DB...")
+        # Add documents to Qdrant DB
+        logging.info("Adding documents to Qdrant DB...") # Updated message
+        # Qdrant's add_documents handles batching internally
         vector_store.add_documents(all_splits)
-        logging.info("Successfully added documents to Chroma DB.")
+        logging.info("Successfully added documents to Qdrant DB.") # Updated message
 
-        # Optional: Persist changes explicitly if needed (Chroma usually auto-persists)
-        # vector_store.persist()
-        # logging.info("Chroma DB changes persisted.")
+        # Optional: Persist changes explicitly if needed (Qdrant usually auto-persists with local storage)
+        # vector_store.persist() # Qdrant doesn't have a .persist() method like Chroma
 
     except Exception as e:
         logging.error(f"An error occurred during scraping or storing: {e}", exc_info=True)
 
-# --- Main Execution ---
-DATA_DIR = "./data"  # Directory to store PDF files - ADDED
-if __name__ == "__main__":
-    if not URLS_TO_SCRAPE:
-        logging.warning("No URLs provided in URLS_TO_SCRAPE list. Exiting.")
-    else:
-        # Run the asynchronous function
-        asyncio.run(scrape_and_store())
-        logging.info("Script finished.")
-
-
 # --- PDF Ingestion Function (Main Knowledge Base) ---
-def check_and_ingest_new_pdfs(data_directory: str, vector_store_instance: Chroma, db_path: str):
+def check_and_ingest_new_pdfs(data_directory: str, vector_store_instance: Qdrant, db_path: str): # Changed type hint
     """Checks for new PDFs in data_directory and ingests them into the main vector store."""
     log_file_path = os.path.join(db_path, ".ingested_files.log")
     ingested_files = set()
@@ -136,15 +127,18 @@ def check_and_ingest_new_pdfs(data_directory: str, vector_store_instance: Chroma
     # Create data directory if it doesn't exist
     if not os.path.exists(data_directory):
         os.makedirs(data_directory)
-        st.info(f"Created data directory: {data_directory}")
+        print(f"Created data directory: {data_directory}") # Use print for console output
 
     # Read list of already ingested files
     try:
         with open(log_file_path, "r") as f:
             ingested_files = set(line.strip() for line in f)
-        # st.info(f"Found log of {len(ingested_files)} previously ingested files.") # Keep this less verbose
+        print(f"Found log of {len(ingested_files)} previously ingested files.")
     except FileNotFoundError:
         print("No ingestion log file found for the main knowledge base. Will process all PDFs in data directory.")
+    except Exception as e:
+         print(f"Error reading ingestion log file: {e}")
+
 
     # Find current PDF files
     current_pdf_files = glob.glob(os.path.join(data_directory, "*.pdf"))
@@ -188,13 +182,9 @@ def check_and_ingest_new_pdfs(data_directory: str, vector_store_instance: Chroma
 
     print(f"Adding {len(splits)} new document chunks to the main vector store...")
     try:
-        # Add only the new documents to the vector store
-        # vector_store_instance.add_documents(splits) # This is limited to a max batch size of 5461
-        # To circumvent the max-batch size for the vector store split the documents into smaller batches
-        batch_size = 5461  # Set to the maximum allowed batch size
-        for i in range(0, len(splits), batch_size):
-            batch = splits[i:i + batch_size]
-            vector_store_instance.add_documents(batch)
+        # Add the new documents to the vector store
+        # Qdrant's add_documents handles batching internally
+        vector_store_instance.add_documents(splits)
 
         # Update the log file with newly processed files
         with open(log_file_path, "a") as f:
@@ -206,5 +196,20 @@ def check_and_ingest_new_pdfs(data_directory: str, vector_store_instance: Chroma
         print(f"Error adding new documents to main vector store: {e}")
 
 
-print("Checking for new documents to load into the main knowledge base...")
-check_and_ingest_new_pdfs(DATA_DIR, vector_store, CHROMA_DB_PATH)
+# --- Main Execution ---
+DATA_DIR = "./data"  # Directory to store PDF files
+if __name__ == "__main__":
+    # Run web scraping and ingestion
+    if not URLS_TO_SCRAPE:
+        logging.warning("No URLs provided in URLS_TO_SCRAPE list. Skipping web scraping.")
+    else:
+        # Run the asynchronous function
+        asyncio.run(scrape_and_store())
+        logging.info("Web scraping script finished.")
+
+    # Run PDF ingestion
+    print("Checking for new documents to load into the main knowledge base...")
+    check_and_ingest_new_pdfs(DATA_DIR, vector_store, QDRANT_DB_PATH) # Pass the Qdrant instance and new path
+    print("PDF ingestion script finished.")
+
+    logging.info("Script finished.")

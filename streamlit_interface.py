@@ -92,10 +92,8 @@ def handle_user_input(agent_executor, llm):
                 st.write("Data loaded successfully. Here's a preview:")
                 st.dataframe(df.head())
 
-                # Get analysis prompt from the user
-                analysis_prompt = st.text_area("Enter your data analysis prompt:")
-
-                if analysis_prompt:
+                # Get analysis prompt from the user using chat input
+                if analysis_prompt := st.chat_input("Enter your data analysis prompt:"):
                     # Create PandasAI agent
                     # Assuming the Google API key is already available in the environment
                     google_api_key = os.getenv("GOOGLE_API_KEY")  # Access the Google API key from environment variable

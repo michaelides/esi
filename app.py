@@ -4,12 +4,12 @@ from dotenv import load_dotenv
 import io  # Import io for handling file streams
 import uuid  # Import uuid for generating unique IDs
 
-# Import qdrant client (optional, langchain_qdrant handles client internally for local persistence)
-# from qdrant_client import QdrantClient, models
+# Import qdrant client
+from qdrant_client import QdrantClient # Import QdrantClient
+from langchain_qdrant import QdrantVectorStore # Changed from langchain_qdrant import Qdrant
 
 # Use Google Generative AI
 from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
-from langchain_qdrant import Qdrant # Changed from langchain_chroma
 from langchain_community.tools import DuckDuckGoSearchRun
 from langchain.agents import AgentExecutor, create_tool_calling_agent
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
@@ -102,20 +102,24 @@ else:
 
 # --- RAG Setup (Main Dissertation Knowledge Base) ---
 # Define the path for the persistent Qdrant database
-QDRANT_DB_PATH = "./qdrant_db_dissertation" # Changed path name
+QDRANT_DB_PATH = "./qdrant_db" # Changed path name to match scrape_and_ingest.py
 COLLECTION_NAME = "dissertation_resources" # Keep the collection name
 
 # Initialize Qdrant vector store for the main knowledge base
 # This uses a local directory for persistence
 try:
-    vector_store = Qdrant(
-        location=QDRANT_DB_PATH, # Use location for local persistence
+    # Initialize Qdrant client for local persistence
+    # Use the 'path' argument for local storage
+    client = QdrantClient(path=QDRANT_DB_PATH)
+
+    # Initialize Qdrant vector store using the client
+    # Use QdrantVectorStore as recommended by the deprecation warning
+    vector_store = QdrantVectorStore(
+        client=client, # Pass the initialized client
         collection_name=COLLECTION_NAME,
-        embeddings=embedding_function,
+        embedding=embedding_function, # Use 'embedding' keyword
     )
-    # Note: Qdrant client is managed internally by langchain_qdrant for local persistence
-    # If using a remote Qdrant instance, you would initialize QdrantClient separately
-    # and pass it via the `client` parameter.
+    st.info(f"Connected to Qdrant DB at {QDRANT_DB_PATH} with collection '{COLLECTION_NAME}'")
 except Exception as e:
     st.error(f"Failed to initialize Qdrant vector store: {e}")
     st.stop() # Stop the app if the vector store cannot be initialized
@@ -177,7 +181,7 @@ handle_user_input(st.session_state.agent_executor, llm)
 # For now, I will keep the function here but comment out the call at the end of the file.
 # The call is moved to scrape_and_ingest.py's __main__ block.
 
-# def check_and_ingest_new_pdfs(data_directory: str, vector_store_instance: Qdrant, db_path: str): # Changed type hint
+# def check_and_ingest_new_pdfs(data_directory: str, vector_store_instance: QdrantVectorStore, db_path: str): # Changed type hint
 #     """Checks for new PDFs in data_directory and ingests them into the main vector store."""
 #     log_file_path = os.path.join(db_path, ".ingested_files.log")
 #     ingested_files = set()

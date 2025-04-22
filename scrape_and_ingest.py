@@ -22,7 +22,8 @@ GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 QDRANT_DB_PATH = "./qdrant_db"
 COLLECTION_NAME = "dissertation_resources"
 # Define vector parameters for the collection (based on the embedding model)
-VECTOR_SIZE = 3072 # Dimension for models/text-embedding-004
+# Corrected VECTOR_SIZE based on the error message (768 instead of 3072)
+VECTOR_SIZE = 768 # Dimension for models/text-embedding-004 (as reported by error)
 DISTANCE_METRIC = models.Distance.COSINE # Common distance metric
 
 # List of URLs to scrape

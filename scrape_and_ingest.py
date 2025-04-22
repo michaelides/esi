@@ -2,7 +2,8 @@ import os
 import asyncio
 from dotenv import load_dotenv
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
-from langchain_qdrant import Qdrant # Changed from langchain_chroma
+from langchain_qdrant import QdrantVectorStore # Changed from langchain_qdrant import Qdrant
+from qdrant_client import QdrantClient # Import QdrantClient
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document
 import logging
@@ -36,16 +37,20 @@ except Exception as e:
     exit(1)
 
 try:
-    # Initialize Qdrant vector store for the main knowledge base
-    # This uses a local directory for persistence
-    vector_store = Qdrant(
-        location=QDRANT_DB_PATH, # Use location for local persistence
+    # Initialize Qdrant client for local persistence
+    # Use the 'path' argument for local storage
+    client = QdrantClient(path=QDRANT_DB_PATH)
+
+    # Initialize Qdrant vector store using the client
+    # Use QdrantVectorStore as recommended by the deprecation warning
+    vector_store = QdrantVectorStore(
+        client=client, # Pass the initialized client
         collection_name=COLLECTION_NAME,
         embeddings=embedding_function,
     )
     logging.info(f"Connected to Qdrant DB at {QDRANT_DB_PATH} with collection '{COLLECTION_NAME}'")
 except Exception as e:
-    logging.error(f"Failed to connect to Qdrant DB: {e}")
+    logging.error(f"Failed to connect to Qdrant DB: {e}", exc_info=True) # Added exc_info for detailed traceback
     exit(1)
 
 # Initialize crawl4ai with Markdown output and PDF extraction
@@ -119,7 +124,7 @@ async def scrape_and_store():
         logging.error(f"An error occurred during scraping or storing: {e}", exc_info=True)
 
 # --- PDF Ingestion Function (Main Knowledge Base) ---
-def check_and_ingest_new_pdfs(data_directory: str, vector_store_instance: Qdrant, db_path: str): # Changed type hint
+def check_and_ingest_new_pdfs(data_directory: str, vector_store_instance: QdrantVectorStore, db_path: str): # Changed type hint
     """Checks for new PDFs in data_directory and ingests them into the main vector store."""
     log_file_path = os.path.join(db_path, ".ingested_files.log")
     ingested_files = set()

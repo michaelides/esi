@@ -46,7 +46,7 @@ try:
     vector_store = QdrantVectorStore(
         client=client, # Pass the initialized client
         collection_name=COLLECTION_NAME,
-        embeddings=embedding_function,
+        embedding=embedding_function, # Changed 'embeddings' to 'embedding'
     )
     logging.info(f"Connected to Qdrant DB at {QDRANT_DB_PATH} with collection '{COLLECTION_NAME}'")
 except Exception as e:

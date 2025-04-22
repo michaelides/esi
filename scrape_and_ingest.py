@@ -9,17 +9,9 @@ from langchain_core.documents import Document
 import logging
 from crawl4ai import AsyncWebCrawler # Import crawl4ai
 
-# Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-
 # Load environment variables from .env file
 load_dotenv()
-
-# --- Configuration (Mimicking app.py based on summaries) ---
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
-if not GOOGLE_API_KEY:
-    logging.error("GOOGLE_API_KEY environment variable not set.")
-    exit(1)
 
 CHROMA_DB_PATH = "./chroma_db_dissertation"
 COLLECTION_NAME = "dissertation_resources" # Assuming the same collection name as in app.py
@@ -130,3 +122,81 @@ if __name__ == "__main__":
         # Run the asynchronous function
         asyncio.run(scrape_and_store())
         logging.info("Script finished.")
+
+
+# --- PDF Ingestion Function (Main Knowledge Base) ---
+def check_and_ingest_new_pdfs(data_directory: str, vector_store_instance: Chroma, db_path: str):
+    """Checks for new PDFs in data_directory and ingests them into the main vector store."""
+    log_file_path = os.path.join(db_path, ".ingested_files.log")
+    ingested_files = set()
+
+    # Create data directory if it doesn't exist
+    if not os.path.exists(data_directory):
+        os.makedirs(data_directory)
+        st.info(f"Created data directory: {data_directory}")
+
+    # Read list of already ingested files
+    try:
+        with open(log_file_path, "r") as f:
+            ingested_files = set(line.strip() for line in f)
+        # st.info(f"Found log of {len(ingested_files)} previously ingested files.") # Keep this less verbose
+    except FileNotFoundError:
+        print("No ingestion log file found for the main knowledge base. Will process all PDFs in data directory.")
+
+    # Find current PDF files
+    current_pdf_files = glob.glob(os.path.join(data_directory, "*.pdf"))
+    current_filenames = set(os.path.basename(f) for f in current_pdf_files)
+
+    # Determine new files to ingest
+    new_filenames = current_filenames - ingested_files
+    new_file_paths = [os.path.join(data_directory, fname) for fname in new_filenames]
+
+    if not new_file_paths:
+        print("Main knowledge base is up-to-date. No new PDFs found to ingest.")
+        return
+
+    print(f"Found {len(new_file_paths)} new PDF file(s) to ingest into the main knowledge base. Starting process...")
+
+    all_new_docs = []
+    processed_new_files = []
+    for pdf_path in new_file_paths:
+        filename = os.path.basename(pdf_path)
+        try:
+            print(f"  Loading: {filename}")
+            loader = PyPDFLoader(pdf_path)
+            documents = loader.load()
+            all_new_docs.extend(documents)
+            processed_new_files.append(filename) # Track successfully loaded files
+        except Exception as e:
+            print(f"Error loading {filename}: {e}")
+            continue # Skip to the next file
+
+    if not all_new_docs:
+        print("No new documents were successfully loaded from the PDF files for the main knowledge base.")
+        return
+
+    print("Splitting new documents into chunks...")
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+    splits = text_splitter.split_documents(all_new_docs)
+
+    if not splits:
+        print("Failed to split new documents into chunks for the main knowledge base.")
+        return
+
+    print(f"Adding {len(splits)} new document chunks to the main vector store...")
+    try:
+        # Add only the new documents to the vector store
+        vector_store_instance.add_documents(splits)
+
+        # Update the log file with newly processed files
+        with open(log_file_path, "a") as f:
+            for fname in processed_new_files:
+                f.write(f"{fname}\n")
+        print(f"Successfully ingested {len(processed_new_files)} new PDF file(s) into the main knowledge base!")
+
+    except Exception as e:
+        print(f"Error adding new documents to main vector store: {e}")
+
+
+with print("Checking for new documents to load into the main knowledge base..."):
+    check_and_ingest_new_pdfs(DATA_DIR, vector_store, CHROMA_DB_PATH)

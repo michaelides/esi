@@ -7,6 +7,9 @@ from langchain_core.runnables import chain
 import uuid
 from pandas_agent import create_pandas_ai_agent, analyze_data, load_data
 
+
+st.set_page_config(layout="wide")
+
 def initialize_streamlit():
     """Initializes the Streamlit UI, including title, caption, and session state."""
     st.title("🎓 ESI: ESI Scholarly Instructor")

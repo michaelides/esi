@@ -144,19 +144,23 @@ def handle_user_input(agent_executor, llm):
     """Handles user input via chat_input or suggestion buttons, and agent selection."""
 
     # --- Check for Selected Prompt from Button Click ---
-    selected_prompt = st.session_state.get("selected_prompt")
-    if selected_prompt:
-        prompt_to_process = selected_prompt
+    # We store this to check later if we need to process input
+    prompt_from_suggestion_button = st.session_state.get("selected_prompt")
+    prompt_processed_this_run = False # Flag to track if input was handled
+
+    if prompt_from_suggestion_button:
+        st.session_state.suggested_prompts = [] # Clear suggestions before processing
+        prompt_to_process = prompt_from_suggestion_button
         st.session_state.selected_prompt = None # Consume the selected prompt
         # Ensure agent type is Dissertation Agent if a suggestion was clicked
-        # (This assumes suggestions are only shown for Dissertation Agent)
         agent_type = "Dissertation Agent"
-        st.session_state.agent_selector = "Dissertation Agent" # Update selectbox state if needed
+        st.session_state.agent_selector = "Dissertation Agent" # Update selectbox state
         process_user_input(agent_executor, llm, prompt_to_process)
-        # Suggestions will be regenerated later in this run if needed
+        prompt_processed_this_run = True
+        # Suggestions will be regenerated later in this run
 
     # --- Agent Selection ---
-    # Use on_change to clear suggestions if agent type changes
+    # Use on_change to clear suggestions if agent type changes away from Dissertation
     def clear_suggestions_on_agent_change():
         st.session_state.suggested_prompts = []
         # Also clear loaded data if switching away from Data Analysis? Optional.
@@ -165,25 +169,27 @@ def handle_user_input(agent_executor, llm):
         #     st.session_state.last_uploaded_filename = None
 
     agent_type = st.selectbox(
-        "Choose an agent:",
         ["Dissertation Agent", "Data Analysis Agent"],
         key="agent_selector",
-        on_change=clear_suggestions_on_agent_change
+        on_change=clear_state_on_agent_change # Use updated callback name
     )
 
     # --- Agent-Specific UI and Input ---
+    # Check for input only if a suggestion button wasn't clicked this run
     prompt_from_chat_input = None
-    if agent_type == "Dissertation Agent":
-        # Use chat_input for the dissertation agent
-        prompt_from_chat_input = st.chat_input("What's on your mind regarding your dissertation?")
-        if prompt_from_chat_input and not selected_prompt: # Process only if no button was clicked in this run
-            process_user_input(agent_executor, llm, prompt_from_chat_input)
+    if not prompt_from_suggestion_button:
+        if agent_type == "Dissertation Agent":
+            prompt_from_chat_input = st.chat_input("What's on your mind regarding your dissertation?")
+            if prompt_from_chat_input:
+                st.session_state.suggested_prompts = [] # Clear suggestions before processing
+                process_user_input(agent_executor, llm, prompt_from_chat_input)
+                prompt_processed_this_run = True
 
-    elif agent_type == "Data Analysis Agent":
-        # Clear suggestions just in case
-        st.session_state.suggested_prompts = []
-        # File uploader for data analysis
-        uploaded_file = st.file_uploader(
+        elif agent_type == "Data Analysis Agent":
+            # Clear suggestions explicitly when this agent is active
+            st.session_state.suggested_prompts = []
+            # File uploader for data analysis
+            uploaded_file = st.file_uploader(
             "Upload a CSV, Excel, RData, or SAV file for analysis",
             type=["csv", "xlsx", "xls", "rda", "rdata", "sav"],
             key="data_uploader"
@@ -229,31 +235,30 @@ def handle_user_input(agent_executor, llm):
                                     st.markdown(response) # Display result directly
                                     # Add AI analysis response to chat history
                                     st.session_state.messages.append(AIMessage(content=response))
+                                    prompt_processed_this_run = True # Mark that an interaction happened
                         else:
                             st.error("Failed to initialize data analysis agent.")
-        else:
-             # Clear data if no file is uploaded
-             st.session_state.loaded_df = None
-             st.session_state.last_uploaded_filename = None
+            else:
+                 # Clear data if no file is uploaded
+                 st.session_state.loaded_df = None
+                 st.session_state.last_uploaded_filename = None
 
-    # --- Display Suggestions (only for Dissertation Agent after input processing) ---
-    # Check if the agent is Dissertation, if we are not currently processing a selected prompt,
-    # and if either a chat input was just processed OR the page loaded without input (initial state/after rerun)
-    should_generate_suggestions = (
-        agent_type == "Dissertation Agent" and
-        not selected_prompt and # Don't generate if we just clicked a button
-        (prompt_from_chat_input or not st.session_state.messages[-1].type == 'human') # Generate if input was processed OR last msg wasn't human
-    )
+    # --- Generate and Display Suggestions (only for Dissertation Agent) ---
+    # Generate suggestions if the agent is Dissertation and no suggestions currently exist
+    # This runs after any potential input processing within this script run.
+    if agent_type == "Dissertation Agent" and not st.session_state.suggested_prompts:
+         # Check if there's history to base suggestions on
+         if st.session_state.messages:
+             with st.spinner("Generating suggestions..."):
+                 st.session_state.suggested_prompts = generate_suggested_prompts(llm, st.session_state.messages)
 
-    # Generate suggestions if needed and not already generated in this run
-    if should_generate_suggestions and not st.session_state.suggested_prompts:
-         with st.spinner("Generating suggestions..."):
-             st.session_state.suggested_prompts = generate_suggested_prompts(llm, st.session_state.messages)
-
-    # Display suggestions if available
-    if agent_type == "Dissertation Agent" and st.session_state.suggested_prompts:
+    # Display suggestions if they exist (will only be true if agent is Dissertation)
+    if st.session_state.suggested_prompts:
         st.write("Suggestions:") # Add a label
-        cols = st.columns(len(st.session_state.suggested_prompts))
+        # Ensure we don't try to create 0 columns if suggestions somehow become empty after generation
+        num_suggestions = len(st.session_state.suggested_prompts)
+        if num_suggestions > 0:
+            cols = st.columns(num_suggestions)
         for i, suggestion in enumerate(st.session_state.suggested_prompts):
             with cols[i]:
                 st.button(

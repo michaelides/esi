@@ -35,6 +35,13 @@ def initialize_streamlit():
 
         # st.session_state.agent_prompt = ChatPromptTemplate.from_messages(prompt_messages)
 
+    # --- Data Loading State (Keep for handle_user_input) ---
+    # Note: These might be better placed elsewhere if handle_user_input is refactored
+    if "loaded_df" not in st.session_state:
+        st.session_state.loaded_df = None
+    if "last_uploaded_filename" not in st.session_state:
+        st.session_state.last_uploaded_filename = None
+
 
 def display_chat_messages():
     """Displays chat messages from history."""
@@ -47,7 +54,7 @@ def display_chat_messages():
                 st.markdown(message.content)
 
 def process_user_input(agent_executor, llm, prompt):
-    """Processes user input and generates AI response."""
+    """Processes user input for the Dissertation Agent and generates AI response."""
     # Add user message to chat history
     st.session_state.messages.append(HumanMessage(content=prompt))
     # Display user message in chat message container
@@ -77,42 +84,71 @@ def process_user_input(agent_executor, llm, prompt):
     return ai_response_content
 
 
+# --- Restored Input Handling Logic ---
+
 def handle_user_input(agent_executor, llm):
-    """Handles user input from chat input."""
-    # Add a selectbox to choose between the two agents
-    agent_type = st.selectbox("Choose an agent:", ["Dissertation Agent", "Data Analysis Agent"])
+    """Handles user input using st.chat_input and agent selection."""
+    agent_type = st.selectbox("Choose an agent:", ["Dissertation Agent", "Data Analysis Agent"], key="agent_selector")
 
     if agent_type == "Dissertation Agent":
-        # Handle chat input for the dissertation agent
+        # Use chat_input for the dissertation agent
         if prompt := st.chat_input("What's on your mind regarding your dissertation?"):
-            process_user_input(agent_executor, llm, prompt)
+            process_user_input(agent_executor, llm, prompt) # Use the main agent executor
+
     elif agent_type == "Data Analysis Agent":
-        # Handle data analysis agent
-        uploaded_file = st.file_uploader("Upload a CSV, Excel, RData, or SAV file", type=["csv", "xlsx", "xls", "rda", "rdata", "sav"])
+        # File uploader for data analysis
+        uploaded_file = st.file_uploader(
+            "Upload a CSV, Excel, RData, or SAV file for analysis",
+            type=["csv", "xlsx", "xls", "rda", "rdata", "sav"],
+            key="data_uploader"
+        )
+
         if uploaded_file is not None:
-            df = load_data(uploaded_file)
-            if df is not None:
-                st.write("Data loaded successfully. Here's a preview:")
-                st.dataframe(df.head())
+            # Check if it's a new file or the same one to avoid reloading unnecessarily
+            if st.session_state.last_uploaded_filename != uploaded_file.name:
+                with st.spinner(f"Loading '{uploaded_file.name}'..."):
+                    df = load_data(uploaded_file)
+                    if df is not None:
+                        st.session_state.loaded_df = df
+                        st.session_state.last_uploaded_filename = uploaded_file.name
+                        st.success(f"'{uploaded_file.name}' loaded successfully. Preview:")
+                        st.dataframe(df.head())
+                    else:
+                        st.session_state.loaded_df = None # Clear if loading failed
+                        st.session_state.last_uploaded_filename = None
+            # Display preview if already loaded
+            elif st.session_state.loaded_df is not None:
+                 st.write("Current data preview:")
+                 st.dataframe(st.session_state.loaded_df.head())
 
-                # Get analysis prompt from the user using chat input
+            # Only show chat input for analysis *after* data is loaded
+            if st.session_state.loaded_df is not None:
                 if analysis_prompt := st.chat_input("Enter your data analysis prompt:"):
-                    # Create PandasAI agent
-                    # Assuming the Google API key is already available in the environment
-                    google_api_key = os.getenv("GOOGLE_API_KEY")  # Access the Google API key from environment variable
+                    df = st.session_state.loaded_df # Use the loaded df from session state
+                    google_api_key = os.getenv("GOOGLE_API_KEY")
                     if not google_api_key:
-                        st.error("GOOGLE_API_KEY not found in environment variables. Please set it.")
-                        return
-                    pandas_ai_agent = create_pandas_ai_agent(google_api_key, df)
-                    
-                    if pandas_ai_agent is None:
-                        st.error("Failed to initialize data analysis agent.")
-                        return
+                        st.error("GOOGLE_API_KEY not found.")
+                    else:
+                        pandas_ai_agent = create_pandas_ai_agent(google_api_key, df)
+                        if pandas_ai_agent:
+                            # Add user analysis request to chat history
+                            st.session_state.messages.append(HumanMessage(content=f"Analysis request: {analysis_prompt}"))
+                            with st.chat_message("user"):
+                                st.markdown(f"Analysis request: {analysis_prompt}")
 
-                    # Analyze data and display the response
-                    response = analyze_data(pandas_ai_agent, df, analysis_prompt)
-                    st.write("Analysis Result:")
-                    st.write(response)
+                            # Get analysis result and display it
+                            with st.chat_message("assistant"):
+                                with st.spinner("Analyzing data..."):
+                                    response = analyze_data(pandas_ai_agent, df, analysis_prompt)
+                                    st.markdown(response) # Display result directly
+                                    # Add AI analysis response to chat history
+                                    st.session_state.messages.append(AIMessage(content=response))
+                        else:
+                            st.error("Failed to initialize data analysis agent.")
+        else:
+             # Clear data if no file is uploaded
+             st.session_state.loaded_df = None
+             st.session_state.last_uploaded_filename = None
 
 
 def display_sidebar():

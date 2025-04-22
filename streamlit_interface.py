@@ -187,13 +187,14 @@ def handle_user_input(agent_executor, llm):
         # Clear suggestions explicitly when this agent is active
         st.session_state.suggested_prompts = []
         # File uploader for data analysis
-            uploaded_file = st.file_uploader(
+        # Correct indentation for the file uploader call
+        uploaded_file = st.file_uploader(
             "Upload a CSV, Excel, RData, or SAV file for analysis",
             type=["csv", "xlsx", "xls", "rda", "rdata", "sav"],
             key="data_uploader"
         )
 
-            # --- Indentation corrected for this block ---
+        # --- Indentation corrected for this block ---
             if uploaded_file is not None:
                 # Check if it's a new file or the same one to avoid reloading unnecessarily
                 if st.session_state.last_uploaded_filename != uploaded_file.name:

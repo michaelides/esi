@@ -178,20 +178,15 @@ def handle_user_input(agent_executor, llm):
     )
 
     # --- Agent-Specific UI and Input ---
-    # Check for input only if a suggestion button wasn't clicked this run
-    prompt_from_chat_input = None
-    if not prompt_from_suggestion_button:
-        if agent_type == "Dissertation Agent":
-            prompt_from_chat_input = st.chat_input("What's on your mind regarding your dissertation?")
-            if prompt_from_chat_input:
-                st.session_state.suggested_prompts = [] # Clear suggestions before processing
-                process_user_input(agent_executor, llm, prompt_from_chat_input)
-                prompt_processed_this_run = True
 
-        elif agent_type == "Data Analysis Agent":
-            # Clear suggestions explicitly when this agent is active
-            st.session_state.suggested_prompts = []
-            # File uploader for data analysis
+    # Display chat input based on agent type (always visible)
+    prompt_from_chat_input = None
+    if agent_type == "Dissertation Agent":
+        prompt_from_chat_input = st.chat_input("What's on your mind regarding your dissertation?", key="dissertation_chat_input")
+    elif agent_type == "Data Analysis Agent":
+        # Clear suggestions explicitly when this agent is active
+        st.session_state.suggested_prompts = []
+        # File uploader for data analysis
             uploaded_file = st.file_uploader(
             "Upload a CSV, Excel, RData, or SAV file for analysis",
             type=["csv", "xlsx", "xls", "rda", "rdata", "sav"],

@@ -1,12 +1,9 @@
+pandas
 streamlit
 langchain
-langchain-openai
 langchain-community
 langchainhub
 chromadb
-google-search-results
-faiss-cpu # or faiss-gpu if you have CUDA installed
-tiktoken
 python-dotenv
 langchain-google-genai
 duckduckgo-search
@@ -16,6 +13,4 @@ google-api-python-client
 langchain-google-community
 crawl4ai
 tavily-python
-pandas==1.5.3
-pandasai==2.3.0
-pandas==1.5.3
+pandasai

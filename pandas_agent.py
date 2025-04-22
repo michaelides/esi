@@ -5,7 +5,7 @@ import io
 import os
 from langchain_google_genai import ChatGoogleGenerativeAI
 
-def create_pandas_ai_agent(api_key: str):
+def create_pandas_ai_agent(api_key: str, df: pd.DataFrame):
     """Creates a PandasAI agent with the given API key."""
     llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=0.7, google_api_key=api_key)
     try:

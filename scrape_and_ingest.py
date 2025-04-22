@@ -32,20 +32,12 @@ URLS_TO_SCRAPE = [
     # Add more relevant URLs here
 ]
 
-# --- Initialization (Client and Embeddings) ---
+# --- Initialization (Embeddings) ---
 try:
     embedding_function = GoogleGenerativeAIEmbeddings(model="models/text-embedding-004", google_api_key=GOOGLE_API_KEY)
     logging.info("GoogleGenerativeAIEmbeddings initialized.")
 except Exception as e:
     logging.error(f"Failed to initialize GoogleGenerativeAIEmbeddings: {e}")
-    exit(1)
-
-try:
-    # Initialize Qdrant client for local persistence
-    client = QdrantClient(path=QDRANT_DB_PATH)
-    logging.info(f"Qdrant client initialized at {QDRANT_DB_PATH}")
-except Exception as e:
-    logging.error(f"Failed to initialize Qdrant client: {e}", exc_info=True)
     exit(1)
 
 # Initialize crawl4ai with Markdown output and PDF extraction
@@ -193,6 +185,17 @@ if __name__ == "__main__":
 
     logging.info(f"Total documents collected for ingestion: {len(all_documents_to_ingest)}")
 
+    # Initialize Qdrant client to check for collection existence
+    # This client is only used for the existence check and potentially for add_documents
+    # when the collection already exists.
+    try:
+        client = QdrantClient(path=QDRANT_DB_PATH)
+        logging.info(f"Qdrant client initialized at {QDRANT_DB_PATH} for existence check.")
+    except Exception as e:
+        logging.error(f"Failed to initialize Qdrant client for existence check: {e}", exc_info=True)
+        exit(1)
+
+
     # Check if the collection exists
     collection_exists = False
     try:
@@ -209,9 +212,9 @@ if __name__ == "__main__":
 
     try:
         if collection_exists:
-            # If collection exists, initialize vector store and add documents
+            # If collection exists, initialize vector store using the existing client and add documents
             vector_store = QdrantVectorStore(
-                client=client,
+                client=client, # Use the pre-initialized client
                 collection_name=COLLECTION_NAME,
                 embedding=embedding_function,
             )
@@ -220,12 +223,15 @@ if __name__ == "__main__":
             logging.info("Successfully added documents to existing Qdrant DB.")
 
         else:
-            # If collection does not exist, use from_documents to create and populate
-            logging.info(f"Creating collection '{COLLECTION_NAME}' and adding {len(all_documents_to_ingest)} documents...")
+            # If collection does not exist, use from_documents to create and populate.
+            # Pass the path here, and from_documents will create its own internal client.
+            # This avoids passing the potentially problematic pre-initialized client object
+            # into the from_documents flow.
+            logging.info(f"Creating collection '{COLLECTION_NAME}' and adding {len(all_documents_to_ingest)} documents using from_documents...")
             vector_store = QdrantVectorStore.from_documents(
                 all_documents_to_ingest,
                 embedding_function,
-                client=client,
+                path=QDRANT_DB_PATH, # Pass path instead of client
                 collection_name=COLLECTION_NAME,
             )
             logging.info(f"Successfully created collection '{COLLECTION_NAME}' and added documents.")

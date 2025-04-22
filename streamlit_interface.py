@@ -198,10 +198,11 @@ def handle_user_input(agent_executor, llm):
             key="data_uploader"
         )
 
-        if uploaded_file is not None:
-            # Check if it's a new file or the same one to avoid reloading unnecessarily
-            if st.session_state.last_uploaded_filename != uploaded_file.name:
-                with st.spinner(f"Loading '{uploaded_file.name}'..."):
+            # --- Indentation corrected for this block ---
+            if uploaded_file is not None:
+                # Check if it's a new file or the same one to avoid reloading unnecessarily
+                if st.session_state.last_uploaded_filename != uploaded_file.name:
+                    with st.spinner(f"Loading '{uploaded_file.name}'..."):
                     df = load_data(uploaded_file)
                     if df is not None:
                         st.session_state.loaded_df = df
@@ -210,17 +211,17 @@ def handle_user_input(agent_executor, llm):
                         st.dataframe(df.head())
                     else:
                         st.session_state.loaded_df = None # Clear if loading failed
-                        st.session_state.last_uploaded_filename = None
-            # Display preview if already loaded
-            elif st.session_state.loaded_df is not None:
-                 st.write("Current data preview:")
-                 st.dataframe(st.session_state.loaded_df.head())
+                            st.session_state.last_uploaded_filename = None
+                # Display preview if already loaded
+                elif st.session_state.loaded_df is not None:
+                     st.write("Current data preview:")
+                     st.dataframe(st.session_state.loaded_df.head())
 
-            # Only show chat input for analysis *after* data is loaded
-            if st.session_state.loaded_df is not None:
-                if analysis_prompt := st.chat_input("Enter your data analysis prompt:"):
-                    df = st.session_state.loaded_df # Use the loaded df from session state
-                    google_api_key = os.getenv("GOOGLE_API_KEY")
+                # Only show chat input for analysis *after* data is loaded
+                if st.session_state.loaded_df is not None:
+                    if analysis_prompt := st.chat_input("Enter your data analysis prompt:"):
+                        df = st.session_state.loaded_df # Use the loaded df from session state
+                        google_api_key = os.getenv("GOOGLE_API_KEY")
                     if not google_api_key:
                         st.error("GOOGLE_API_KEY not found.")
                     else:

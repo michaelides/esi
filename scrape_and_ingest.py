@@ -2,22 +2,25 @@ import os
 import asyncio
 from dotenv import load_dotenv
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
-from langchain_qdrant import QdrantVectorStore # Changed from langchain_qdrant import Qdrant
-from qdrant_client import QdrantClient # Import QdrantClient
+from langchain_qdrant import QdrantVectorStore
+from qdrant_client import QdrantClient
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document
 import logging
-from crawl4ai import AsyncWebCrawler # Import crawl4ai
+from crawl4ai import AsyncWebCrawler
 import glob
 from langchain_community.document_loaders import PyPDFLoader
-import streamlit as st # Keep streamlit import if needed for st.info/warning, otherwise remove
+# import streamlit as st # Removed streamlit import as it's not used in this script
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Load environment variables from .env file
 load_dotenv()
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
-QDRANT_DB_PATH = "./qdrant_db" # Changed path name
-COLLECTION_NAME = "dissertation_resources" # Assuming the same collection name as in app.py
+QDRANT_DB_PATH = "./qdrant_db"
+COLLECTION_NAME = "dissertation_resources"
 
 # List of URLs to scrape
 URLS_TO_SCRAPE = [
@@ -29,121 +32,90 @@ URLS_TO_SCRAPE = [
     # Add more relevant URLs here
 ]
 
-# --- Initialization ---
+# --- Initialization (Client and Embeddings) ---
 try:
     embedding_function = GoogleGenerativeAIEmbeddings(model="models/text-embedding-004", google_api_key=GOOGLE_API_KEY)
+    logging.info("GoogleGenerativeAIEmbeddings initialized.")
 except Exception as e:
     logging.error(f"Failed to initialize GoogleGenerativeAIEmbeddings: {e}")
     exit(1)
 
 try:
     # Initialize Qdrant client for local persistence
-    # Use the 'path' argument for local storage
     client = QdrantClient(path=QDRANT_DB_PATH)
-
-    # Initialize Qdrant vector store using the client
-    # Use QdrantVectorStore as recommended by the deprecation warning
-    vector_store = QdrantVectorStore(
-        client=client, # Pass the initialized client
-        collection_name=COLLECTION_NAME,
-        embedding=embedding_function, # Changed 'embeddings' to 'embedding'
-    )
-    logging.info(f"Connected to Qdrant DB at {QDRANT_DB_PATH} with collection '{COLLECTION_NAME}'")
+    logging.info(f"Qdrant client initialized at {QDRANT_DB_PATH}")
 except Exception as e:
-    logging.error(f"Failed to connect to Qdrant DB: {e}", exc_info=True) # Added exc_info for detailed traceback
+    logging.error(f"Failed to initialize Qdrant client: {e}", exc_info=True)
     exit(1)
 
 # Initialize crawl4ai with Markdown output and PDF extraction
 crawler = AsyncWebCrawler(output_format="markdown", extract_pdf=True)
-text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200) # Keep chunk size reasonable for Markdown
+text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
 
 # --- Core Logic ---
-async def scrape_and_store():
-    """Scrapes URLs using crawl4ai, splits content, and adds to Qdrant DB.""" # Updated description
+async def scrape_and_collect_documents():
+    """Scrapes URLs using crawl4ai, splits content, and returns documents."""
     logging.info("Starting web scraping process with crawl4ai...")
     all_splits = []
     processed_urls = 0
     failed_urls = []
 
-    try:
-        for url in URLS_TO_SCRAPE:
-            logging.info(f"Attempting to crawl: {url}")
-            try:
-                # Use crawl4ai to get content (Markdown + PDFs) for each URL
-                # arun returns a CrawlResultContainer
-                crawl_result_container = await crawler.arun(url)
+    for url in URLS_TO_SCRAPE:
+        logging.info(f"Attempting to crawl: {url}")
+        try:
+            crawl_result_container = await crawler.arun(url)
 
-                if crawl_result_container:
-                    logging.info(f"Successfully crawled content from: {url}.")
-                    # Extract markdown content if available
-                    page_content = crawl_result_container.markdown # Access the markdown attribute
-                    source_url = url  #crawl_result_container.url # Get the specific source URL (could be original or PDF link)
+            if crawl_result_container:
+                logging.info(f"Successfully crawled content from: {url}.")
+                page_content = crawl_result_container.markdown
+                source_url = url
 
-                    if page_content:
-                        # Create a Document object for each result (HTML page or PDF)
-                        doc = Document(page_content=page_content, metadata={"source": source_url})
-
-                        # Split the document content
-                        splits = text_splitter.split_documents([doc]) # Pass as list
-                        all_splits.extend(splits)
-                        processed_urls += 1 # Mark the original URL as processed if any content was found
-                    else:
-                        logging.warning(f"No markdown content found for URL: {url}")
-                        failed_urls.append(url)
-
+                if page_content:
+                    doc = Document(page_content=page_content, metadata={"source": source_url})
+                    splits = text_splitter.split_documents([doc])
+                    all_splits.extend(splits)
+                    processed_urls += 1
                 else:
-                    logging.warning(f"No results returned by crawl4ai for URL: {url}")
+                    logging.warning(f"No markdown content found for URL: {url}")
                     failed_urls.append(url)
-
-            except Exception as crawl_error:
-                # Log the specific error, including validation errors
-                logging.error(f"Error processing URL {url}: {crawl_error}", exc_info=True)
+            else:
+                logging.warning(f"No results returned by crawl4ai for URL: {url}")
                 failed_urls.append(url)
-                continue # Move to the next URL
 
-        logging.info(f"Finished crawling. Successfully processed {processed_urls} URLs.")
-        if failed_urls:
-            logging.warning(f"Failed to crawl or get content from {len(failed_urls)} URLs: {failed_urls}")
+        except Exception as crawl_error:
+            logging.error(f"Error processing URL {url}: {crawl_error}", exc_info=True)
+            failed_urls.append(url)
+            continue
 
-        if not all_splits:
-            logging.warning("No content was successfully scraped and split from the provided URLs.")
-            return
+    logging.info(f"Finished crawling. Successfully processed {processed_urls} URLs.")
+    if failed_urls:
+        logging.warning(f"Failed to crawl or get content from {len(failed_urls)} URLs: {failed_urls}")
 
-        logging.info(f"Split content into {len(all_splits)} chunks.")
-
-        # Add documents to Qdrant DB
-        logging.info("Adding documents to Qdrant DB...") # Updated message
-        # Qdrant's add_documents handles batching internally
-        vector_store.add_documents(all_splits)
-        logging.info("Successfully added documents to Qdrant DB.") # Updated message
-
-        # Optional: Persist changes explicitly if needed (Qdrant usually auto-persists with local storage)
-        # vector_store.persist() # Qdrant doesn't have a .persist() method like Chroma
-
-    except Exception as e:
-        logging.error(f"An error occurred during scraping or storing: {e}", exc_info=True)
+    logging.info(f"Collected {len(all_splits)} document chunks from web scraping.")
+    return all_splits
 
 # --- PDF Ingestion Function (Main Knowledge Base) ---
-def check_and_ingest_new_pdfs(data_directory: str, vector_store_instance: QdrantVectorStore, db_path: str): # Changed type hint
-    """Checks for new PDFs in data_directory and ingests them into the main vector store."""
+def check_and_collect_new_pdfs(data_directory: str, db_path: str):
+    """Checks for new PDFs in data_directory, loads and splits them, and returns documents."""
     log_file_path = os.path.join(db_path, ".ingested_files.log")
     ingested_files = set()
+    all_new_docs = []
+    processed_new_files = []
 
     # Create data directory if it doesn't exist
     if not os.path.exists(data_directory):
         os.makedirs(data_directory)
-        print(f"Created data directory: {data_directory}") # Use print for console output
+        logging.info(f"Created data directory: {data_directory}")
 
     # Read list of already ingested files
     try:
         with open(log_file_path, "r") as f:
             ingested_files = set(line.strip() for line in f)
-        print(f"Found log of {len(ingested_files)} previously ingested files.")
+        logging.info(f"Found log of {len(ingested_files)} previously ingested files.")
     except FileNotFoundError:
-        print("No ingestion log file found for the main knowledge base. Will process all PDFs in data directory.")
+        logging.info("No ingestion log file found for the main knowledge base. Will process all PDFs in data directory.")
     except Exception as e:
-         print(f"Error reading ingestion log file: {e}")
-
+         logging.error(f"Error reading ingestion log file: {e}")
 
     # Find current PDF files
     current_pdf_files = glob.glob(os.path.join(data_directory, "*.pdf"))
@@ -154,67 +126,117 @@ def check_and_ingest_new_pdfs(data_directory: str, vector_store_instance: Qdrant
     new_file_paths = [os.path.join(data_directory, fname) for fname in new_filenames]
 
     if not new_file_paths:
-        print("Main knowledge base is up-to-date. No new PDFs found to ingest.")
-        return
+        logging.info("Main knowledge base is up-to-date. No new PDFs found to ingest.")
+        return [], [] # Return empty list of docs and processed files
 
-    print(f"Found {len(new_file_paths)} new PDF file(s) to ingest into the main knowledge base. Starting process...")
+    logging.info(f"Found {len(new_file_paths)} new PDF file(s) to ingest into the main knowledge base. Starting process...")
 
-    all_new_docs = []
-    processed_new_files = []
     for pdf_path in new_file_paths:
         filename = os.path.basename(pdf_path)
         try:
-            print(f"  Loading: {filename}")
+            logging.info(f"  Loading: {filename}")
             loader = PyPDFLoader(pdf_path)
             documents = loader.load()
             all_new_docs.extend(documents)
             processed_new_files.append(filename) # Track successfully loaded files
         except Exception as e:
-            print(f"Error loading {filename}: {e}")
+            logging.error(f"Error loading {filename}: {e}")
             continue # Skip to the next file
 
     if not all_new_docs:
-        print("No new documents were successfully loaded from the PDF files for the main knowledge base.")
-        return
+        logging.warning("No new documents were successfully loaded from the PDF files for the main knowledge base.")
+        return [], [] # Return empty list of docs and processed files
 
-    print("Splitting new documents into chunks...")
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+    logging.info("Splitting new documents into chunks...")
     splits = text_splitter.split_documents(all_new_docs)
 
     if not splits:
-        print("Failed to split new documents into chunks for the main knowledge base.")
-        return
+        logging.warning("Failed to split new documents into chunks for the main knowledge base.")
+        return [], [] # Return empty list of docs and processed files
 
-    print(f"Adding {len(splits)} new document chunks to the main vector store...")
-    try:
-        # Add the new documents to the vector store
-        # Qdrant's add_documents handles batching internally
-        vector_store_instance.add_documents(splits)
-
-        # Update the log file with newly processed files
-        with open(log_file_path, "a") as f:
-            for fname in processed_new_files:
-                f.write(f"{fname}\n")
-        print(f"Successfully ingested {len(processed_new_files)} new PDF file(s) into the main knowledge base!")
-
-    except Exception as e:
-        print(f"Error adding new documents to main vector store: {e}")
-
+    logging.info(f"Collected {len(splits)} new document chunks from PDFs.")
+    return splits, processed_new_files # Return the splits and the list of successfully processed filenames
 
 # --- Main Execution ---
 DATA_DIR = "./data"  # Directory to store PDF files
+
 if __name__ == "__main__":
-    # Run web scraping and ingestion
+    all_documents_to_ingest = []
+    successfully_processed_pdf_filenames = []
+
+    # Collect documents from web scraping
     if not URLS_TO_SCRAPE:
         logging.warning("No URLs provided in URLS_TO_SCRAPE list. Skipping web scraping.")
     else:
-        # Run the asynchronous function
-        asyncio.run(scrape_and_store())
-        logging.info("Web scraping script finished.")
+        scraped_docs = asyncio.run(scrape_and_collect_documents())
+        all_documents_to_ingest.extend(scraped_docs)
+        logging.info(f"Collected {len(scraped_docs)} documents from web scraping.")
 
-    # Run PDF ingestion
-    print("Checking for new documents to load into the main knowledge base...")
-    check_and_ingest_new_pdfs(DATA_DIR, vector_store, QDRANT_DB_PATH) # Pass the Qdrant instance and new path
-    print("PDF ingestion script finished.")
+    # Collect documents from PDF ingestion
+    logging.info("Checking for new documents to load into the main knowledge base...")
+    pdf_docs, processed_pdf_filenames = check_and_collect_new_pdfs(DATA_DIR, QDRANT_DB_PATH)
+    all_documents_to_ingest.extend(pdf_docs)
+    successfully_processed_pdf_filenames.extend(processed_pdf_filenames)
+    logging.info(f"Collected {len(pdf_docs)} documents from PDF ingestion.")
 
-    logging.info("Script finished.")
+
+    if not all_documents_to_ingest:
+        logging.info("No new documents found from either web scraping or PDF ingestion. Nothing to add to Qdrant.")
+        exit(0) # Exit successfully as there's nothing to do
+
+    logging.info(f"Total documents collected for ingestion: {len(all_documents_to_ingest)}")
+
+    # Check if the collection exists
+    collection_exists = False
+    try:
+        client.get_collection(collection_name=COLLECTION_NAME)
+        collection_exists = True
+        logging.info(f"Collection '{COLLECTION_NAME}' already exists.")
+    except ValueError: # Qdrant client raises ValueError if collection not found
+        collection_exists = False
+        logging.info(f"Collection '{COLLECTION_NAME}' not found. Will create it.")
+    except Exception as e:
+        logging.error(f"Error checking for collection existence: {e}", exc_info=True)
+        exit(1)
+
+
+    try:
+        if collection_exists:
+            # If collection exists, initialize vector store and add documents
+            vector_store = QdrantVectorStore(
+                client=client,
+                collection_name=COLLECTION_NAME,
+                embedding=embedding_function,
+            )
+            logging.info(f"Adding {len(all_documents_to_ingest)} documents to existing collection '{COLLECTION_NAME}'...")
+            vector_store.add_documents(all_documents_to_ingest)
+            logging.info("Successfully added documents to existing Qdrant DB.")
+
+        else:
+            # If collection does not exist, use from_documents to create and populate
+            logging.info(f"Creating collection '{COLLECTION_NAME}' and adding {len(all_documents_to_ingest)} documents...")
+            vector_store = QdrantVectorStore.from_documents(
+                all_documents_to_ingest,
+                embedding_function,
+                client=client,
+                collection_name=COLLECTION_NAME,
+            )
+            logging.info(f"Successfully created collection '{COLLECTION_NAME}' and added documents.")
+
+        # Update the PDF ingestion log file with newly processed files
+        if successfully_processed_pdf_filenames:
+            log_file_path = os.path.join(QDRANT_DB_PATH, ".ingested_files.log")
+            try:
+                with open(log_file_path, "a") as f:
+                    for fname in successfully_processed_pdf_filenames:
+                        f.write(f"{fname}\n")
+                logging.info(f"Updated ingestion log with {len(successfully_processed_pdf_filenames)} new PDF file(s).")
+            except Exception as e:
+                logging.error(f"Error writing to ingestion log file: {e}")
+
+
+    except Exception as e:
+        logging.error(f"An error occurred during Qdrant ingestion: {e}", exc_info=True)
+        exit(1)
+
+    logging.info("Ingestion script finished.")

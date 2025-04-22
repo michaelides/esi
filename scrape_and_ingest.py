@@ -189,7 +189,12 @@ def check_and_ingest_new_pdfs(data_directory: str, vector_store_instance: Chroma
     print(f"Adding {len(splits)} new document chunks to the main vector store...")
     try:
         # Add only the new documents to the vector store
-        vector_store_instance.add_documents(splits)
+        # vector_store_instance.add_documents(splits) # This is limited to a max batch size of 5461
+        # To circumvent the max-batch size for the vector store split the documents into smaller batches
+        batch_size = 5461  # Set to the maximum allowed batch size
+        for i in range(0, len(splits), batch_size):
+            batch = splits[i:i + batch_size]
+            vector_store_instance.add_documents(batch)
 
         # Update the log file with newly processed files
         with open(log_file_path, "a") as f:

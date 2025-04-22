@@ -3,7 +3,7 @@ import asyncio
 from dotenv import load_dotenv
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_qdrant import QdrantVectorStore
-from qdrant_client import QdrantClient
+from qdrant_client import QdrantClient, models # Import models for VectorParams
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document
 import logging
@@ -21,6 +21,9 @@ GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
 QDRANT_DB_PATH = "./qdrant_db"
 COLLECTION_NAME = "dissertation_resources"
+# Define vector parameters for the collection (based on the embedding model)
+VECTOR_SIZE = 3072 # Dimension for models/text-embedding-004
+DISTANCE_METRIC = models.Distance.COSINE # Common distance metric
 
 # List of URLs to scrape
 URLS_TO_SCRAPE = [
@@ -204,37 +207,30 @@ if __name__ == "__main__":
         logging.info(f"Collection '{COLLECTION_NAME}' not found. Will create it.")
     except Exception as e:
         logging.error(f"Error checking for collection existence: {e}", exc_info=True)
-        # It's possible the client initialized but can't check collections,
-        # but the most likely scenario is a client init failure handled above.
-        # If we reach here, the client is likely okay, but the collection check failed.
-        # We can proceed assuming it doesn't exist or handle the specific error.
-        # For simplicity, we'll re-raise or exit if the check itself fails unexpectedly.
-        exit(1)
+        exit(1) # Exit if collection check fails unexpectedly
 
 
     try:
-        if collection_exists:
-            # If collection exists, initialize vector store using the existing client and add documents
-            vector_store = QdrantVectorStore(
-                client=client, # Use the pre-initialized client
+        if not collection_exists:
+            # If collection does not exist, create it manually
+            logging.info(f"Creating collection '{COLLECTION_NAME}'...")
+            client.create_collection(
                 collection_name=COLLECTION_NAME,
-                embedding=embedding_function,
+                vectors_config=models.VectorParams(size=VECTOR_SIZE, distance=DISTANCE_METRIC),
             )
-            logging.info(f"Adding {len(all_documents_to_ingest)} documents to existing collection '{COLLECTION_NAME}'...")
-            vector_store.add_documents(all_documents_to_ingest)
-            logging.info("Successfully added documents to existing Qdrant DB.")
+            logging.info(f"Collection '{COLLECTION_NAME}' created.")
 
-        else:
-            # If collection does not exist, use from_documents to create and populate.
-            # Pass the *existing* client instance here.
-            logging.info(f"Creating collection '{COLLECTION_NAME}' and adding {len(all_documents_to_ingest)} documents using from_documents...")
-            vector_store = QdrantVectorStore.from_documents(
-                all_documents_to_ingest,
-                embedding_function,
-                client=client, # Pass the existing client instance
-                collection_name=COLLECTION_NAME,
-            )
-            logging.info(f"Successfully created collection '{COLLECTION_NAME}' and added documents.")
+        # Initialize vector store using the existing client (whether it existed or was just created)
+        vector_store = QdrantVectorStore(
+            client=client, # Use the pre-initialized client
+            collection_name=COLLECTION_NAME,
+            embedding=embedding_function,
+        )
+
+        # Add documents to the collection using add_documents
+        logging.info(f"Adding {len(all_documents_to_ingest)} documents to collection '{COLLECTION_NAME}'...")
+        vector_store.add_documents(all_documents_to_ingest)
+        logging.info("Successfully added documents to Qdrant DB.")
 
         # Update the PDF ingestion log file with newly processed files
         if successfully_processed_pdf_filenames:

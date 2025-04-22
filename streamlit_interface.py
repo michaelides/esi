@@ -1,4 +1,5 @@
 import streamlit as st
+import os
 from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.prompts import MessagesPlaceholder, ChatPromptTemplate
 import random

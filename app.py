@@ -26,6 +26,9 @@ import streamlit as st
 from streamlit_interface import display_chat_messages, handle_user_input, display_sidebar, initialize_streamlit
 from langchain_core.messages import AIMessage, HumanMessage
 
+# --- Embedding Model Setup ---
+embedding_function = GoogleGenerativeAIEmbeddings(model="models/text-embedding-001")
+
 
 # --- Configuration ---
 load_dotenv()
@@ -102,9 +105,6 @@ crawl4ai_tool = Tool(
 # --- RAG Setup (Main Dissertation Knowledge Base) ---
 # Define the path for the persistent ChromaDB database
 CHROMA_DB_PATH = "./chroma_db_dissertation"
-# Use Google Generative AI embeddings
-embedding_function = GoogleGenerativeAIEmbeddings(model="models/text-embedding-004") # Updated model name
-
 # Initialize ChromaDB client for the main knowledge base
 # This uses the default persistent client
 vector_store = Chroma(
@@ -135,8 +135,6 @@ llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=0.7)
 base_tools = [rag_tool, duckduckgo_search_tool, crawl4ai_tool]
 if tavily_search:
     base_tools.append(tavily_search)
-
-embedding_function = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
 
 # Define the system message and prompt structure globally
 system_message = f"""{instruction}

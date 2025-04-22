@@ -28,8 +28,8 @@ COLLECTION_NAME = "dissertation_resources" # Assuming the same collection name a
 URLS_TO_SCRAPE = [
     "https://www.uea.ac.uk/course/postgraduate/msc-management", # Example URL 1
     "https://www.uea.ac.uk/about/university-information/campus-map", # Example URL 2
-    "https://www.uea.ac.uk/course/postgraduate/msc-organisational-psychology"
-    "https://scholar.google.co.uk/citations?user=v9Rzv3kAAAAJ&hl=en"
+    "https://www.uea.ac.uk/course/postgraduate/msc-organisational-psychology", # Added comma
+    "https://scholar.google.co.uk/citations?user=v9Rzv3kAAAAJ&hl=en", # Added comma
     "https://research-portal.uea.ac.uk/en/persons/kevin-daniels/publications/"
     # Add more relevant URLs here
 ]
@@ -52,9 +52,9 @@ except Exception as e:
     logging.error(f"Failed to connect to Chroma DB: {e}")
     exit(1)
 
-# Initialize crawl4ai
-crawler = AsyncWebCrawler()
-text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+# Initialize crawl4ai with Markdown output and PDF extraction
+crawler = AsyncWebCrawler(output_format="markdown", extract_pdf=True)
+text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200) # Keep chunk size reasonable for Markdown
 
 # --- Core Logic ---
 async def scrape_and_store():
@@ -68,25 +68,42 @@ async def scrape_and_store():
         for url in URLS_TO_SCRAPE:
             logging.info(f"Attempting to crawl: {url}")
             try:
-                # Use crawl4ai to get content for each URL
-                # Assuming arun returns the main text content as a string
-                content = await crawler.arun(url)
+                # Use crawl4ai to get content (Markdown + PDFs) for each URL
+                # arun returns a CrawlResultContainer
+                crawl_result_container = await crawler.arun(url)
 
-                if content:
-                    logging.info(f"Successfully crawled content from: {url}")
-                    # Create a Document object
-                    doc = Document(page_content=content, metadata={"source": url})
+                if crawl_result_container and crawl_result_container.results:
+                    logging.info(f"Successfully crawled content from: {url}. Found {len(crawl_result_container.results)} result(s).")
+                    url_processed = False
+                    for result in crawl_result_container.results:
+                        # Extract markdown content if available
+                        page_content = result.markdown # Access the markdown attribute
+                        source_url = result.url # Get the specific source URL (could be original or PDF link)
 
-                    # Split the document content
-                    splits = text_splitter.split_documents([doc]) # Pass as list
-                    all_splits.extend(splits)
-                    processed_urls += 1
+                        if page_content:
+                            # Create a Document object for each result (HTML page or PDF)
+                            doc = Document(page_content=page_content, metadata={"source": source_url})
+
+                            # Split the document content
+                            splits = text_splitter.split_documents([doc]) # Pass as list
+                            all_splits.extend(splits)
+                            url_processed = True # Mark the original URL as processed if any content was found
+                        else:
+                            logging.warning(f"No markdown content found in result for source: {source_url} (original URL: {url})")
+
+                    if url_processed:
+                        processed_urls += 1
+                    else:
+                        logging.warning(f"No processable content (markdown) found for URL: {url}")
+                        failed_urls.append(url)
+
                 else:
-                    logging.warning(f"No content returned by crawl4ai for URL: {url}")
+                    logging.warning(f"No results returned by crawl4ai for URL: {url}")
                     failed_urls.append(url)
 
             except Exception as crawl_error:
-                logging.error(f"Error crawling URL {url}: {crawl_error}")
+                # Log the specific error, including validation errors
+                logging.error(f"Error processing URL {url}: {crawl_error}", exc_info=True)
                 failed_urls.append(url)
                 continue # Move to the next URL
 

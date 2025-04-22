@@ -14,3 +14,4 @@ langchain-google-community
 crawl4ai
 tavily-python
 pandasai
+polars

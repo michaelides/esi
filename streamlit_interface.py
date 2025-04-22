@@ -101,6 +101,10 @@ def handle_user_input(agent_executor, llm):
                         st.error("GOOGLE_API_KEY not found in environment variables. Please set it.")
                         return
                     pandas_ai_agent = create_pandas_ai_agent(google_api_key)
+                    
+                    if pandas_ai_agent is None:
+                        st.error("Failed to initialize data analysis agent.")
+                        return
 
                     # Analyze data and display the response
                     response = analyze_data(pandas_ai_agent, df, analysis_prompt)

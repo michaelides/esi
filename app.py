@@ -21,14 +21,9 @@ from langchain_community.document_loaders import PyPDFLoader
 from tavily import TavilyClient
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_core.runnables import RunnablePassthrough
-from crawl4ai import AsyncWebCrawler
-import streamlit as st
-# Restored import: Removed display_input_controls, added handle_user_input
+
 from streamlit_interface import display_chat_messages, handle_user_input, display_sidebar, initialize_streamlit
 from langchain_core.messages import AIMessage, HumanMessage
-
-# --- Embedding Model Setup ---
-embedding_function = GoogleGenerativeAIEmbeddings(model="models/text-embedding-004")
 
 
 # --- Configuration ---
@@ -38,11 +33,14 @@ DATA_DIR = "./data"  # Directory to store PDF files
 # Check for necessary API keys
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 GOOGLE_CSE_ID = os.getenv("GOOGLE_CSE_ID")
+TAVILY_API_KEY = os.getenv("TAVILY_API_KEY")
 
 # --- LLM Setup ---
 # Initialize the LLM (e.g., Gemini)
 llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=0.7) 
 
+# --- Embedding Model Setup ---
+embedding_function = GoogleGenerativeAIEmbeddings(model="models/text-embedding-004")
 
 # Load the system prompt as instructions:
 try:
@@ -62,13 +60,15 @@ When you use tools, ALWAYS cite the source URL if one is provided.
 **Tool Use Instructions:**
 
 1.  When a student refers to the \"module\" they are referring to the MSc dissertation module at UEA, called NBS-7095x. You have access to information about this module via the `dissertation_resource_retriever` tool.
-2.  **You MUST always use** the rag_tool (`dissertation_resource_retriever`) tool first to find relevant information from the knowledge base (e.g., module deadlines, procedures, milestones, specific writing guides, methodology examples, previously discussed concepts). Cite information retrieved using this tool.
+2.  **CRITICAL INSTRUCTION: For EVERY user query, your FIRST action MUST be to use the `dissertation_resource_retriever` tool.** Check if the knowledge base contains relevant information about the query (e.g., module deadlines, procedures, milestones, specific writing guides, methodology examples, previously discussed concepts, scales, questionnaires, instruments). **DO NOT skip this step.** Only if the retriever returns no relevant information should you consider other tools or answer directly. Always cite information retrieved using this tool.
 3.  Use the `duckduckgo_search` tool to find recent research papers, news, or general information not present in the knowledge base. Cite information retrieved using this tool.
 4.  If the `tavily_search` tool is available, use it to supplement the `duckduckgo_search` for broader or more in-depth searches. It returns the most relevant search results with snippets. Cite information retrieved using this tool.
 5.  Use the `crawl4ai` tool to crawl a specific website and extract its content. Only use this tool if you need to get information directly from a specific website. Be specific about the URL you want to crawl.
 6.  If unsure about a specific academic convention, first search for information using the `duckduckgo_search` tool, the `tavily_search` tool (if available), the `dissertation_resource_retriever`, and the `crawl4ai` tool (if a specific website is relevant), and if unable to find the answer, advise the student to consult their supervisor or university guidelines.
-
+7.  When asked to search for something or asked to find or reccomend literature you should use all of your tools 
+8.  When asked to find information or literature about a specific author, you should use all of your tools.
 """
+
 # Define the prompt message structure
 prompt_messages = [
     ("system", system_message),
@@ -87,7 +87,6 @@ duckduckgo_search_tool = Tool(
 )
 
 # --- Tavily Tool Setup ---
-TAVILY_API_KEY = os.getenv("TAVILY_API_KEY")
 if not TAVILY_API_KEY:
     st.warning("TAVILY_API_KEY not found. Tavily Search tool will be disabled. Set TAVILY_API_KEY in .env if needed.")
     tavily_search_tool = None
@@ -96,17 +95,9 @@ else:
     tavily_search = Tool(
         name="tavily_search",
         func=tavily_client.search,
-        description="Use this tool to search the internet for information. It is good for general information, academic papers, and current events. It returns the most relevant search results with snippets.",
+        description="""Use this tool to search the internet for information. It is good for general information, academic papers, academic authors, and current events. 
+        It returns the most relevant search results with snippets.""",
     )
-
-# --- Crawl4AI Tool Setup ---
-
-crawl4ai = AsyncWebCrawler()
-crawl4ai_tool = Tool(
-    name="crawl4ai",
-    func=crawl4ai.arun,
-    description="Use this tool to crawl a website and extract its content. Input should be a valid URL. Only use this tool if you need to get information directly from a specific website. Be specific about the URL you want to crawl.",
-)
 
 # --- RAG Setup (Main Dissertation Knowledge Base) ---
 # Define the path for the persistent ChromaDB database
@@ -127,43 +118,19 @@ retriever = vector_store.as_retriever(search_kwargs={"k": 5})
 rag_tool = create_retriever_tool(
     retriever,
     "dissertation_resource_retriever",
-    """Use this tool to retrieve information about the MSc dissertation module at UEA, called NBS-7091A.
-    Specifically, use this tool to find information about module deadlines, procedures, milestones, specific writing guides, methodology examples, previously discussed concepts, scales, questionnaires, and instruments.
-    If the question is at all related to the module requirements, use this tool first.""",
+    """Use this tool to retrieve information about literature, references, authors, people, and the MSc dissertation module at UEA, called NBS-7091A.
+    Use this tool to find information about module deadlines, procedures, milestones, specific writing guides, 
+    methodology examples, previously discussed concepts, scales, questionnaires, and instruments.
+    If the question is at all related to the module requirements, use this tool first. 
+    Use this tool for anything related to the UEA, research ethics, and ethics applications. 
+    Use this tool when asked to search for publications of different authors. """,
 )
 
 
 # --- Agent Setup ---
 # Define the base tools the agent can use (main knowledge base and search)
-base_tools = [rag_tool, duckduckgo_search_tool, crawl4ai_tool]
-if tavily_search:
-    base_tools.append(tavily_search)
-
-# Define the system message and prompt structure globally
-system_message = f"""{instruction}
-You are a helpful AI assistant designed to support university students with their dissertations.
-Your goal is to help them brainstorm research ideas, structure their work, understand methodologies, and overcome challenges.
-
-When you use tools, ALWAYS cite the source URL if one is provided.
-
-**Tool Use Instructions:**
-
-1.  When a student refers to the \"module\" they are referring to the MSc dissertation module at UEA, called NBS-7095x. You have access to information about this module via the `dissertation_resource_retriever` tool.
-2.  **CRITICAL INSTRUCTION: For EVERY user query, your FIRST action MUST be to use the `dissertation_resource_retriever` tool.** Check if the knowledge base contains relevant information about the query (e.g., module deadlines, procedures, milestones, specific writing guides, methodology examples, previously discussed concepts, scales, questionnaires, instruments). **DO NOT skip this step.** Only if the retriever returns no relevant information should you consider other tools or answer directly. Always cite information retrieved using this tool.
-3.  If the `dissertation_resource_retriever` tool does not provide a sufficient answer, use the `duckduckgo_search` tool to find recent research papers, news, or general information not present in the knowledge base. Cite information retrieved using this tool.
-4.  If the `tavily_search` tool is available, use it to supplement the `duckduckgo_search` for broader or more in-depth searches *after* checking the `dissertation_resource_retriever`. It returns the most relevant search results with snippets. Cite information retrieved using this tool.
-5.  Use the `crawl4ai` tool to crawl a specific website and extract its content *only* if you need information from a specific URL that wasn't found via other tools. Be specific about the URL you want to crawl.
-6.  If unsure about a specific academic convention, first search for information using the `duckduckgo_search` tool, the `tavily_search` tool (if available), the `dissertation_resource_retriever`, and the `crawl4ai` tool (if a specific website is relevant), and if unable to find the answer, advise the student to consult their supervisor or university guidelines.
-
-"""
-
-# Define the prompt message structure
-prompt_messages = [
-    ("system", system_message),
-    MessagesPlaceholder(variable_name="chat_history"),
-    ("human", "{input}"),
-    MessagesPlaceholder(variable_name="agent_scratchpad"),
-]
+base_tools = [rag_tool, duckduckgo_search_tool, tavily_search]
+#llm_rag = llm.bind_tools(rag_tool)
 
 
 # --- PDF Ingestion Function (Main Knowledge Base) ---

@@ -160,18 +160,20 @@ def handle_user_input(agent_executor, llm):
         # Suggestions will be regenerated later in this run
 
     # --- Agent Selection ---
-    # Use on_change to clear suggestions if agent type changes away from Dissertation
-    def clear_suggestions_on_agent_change():
-        st.session_state.suggested_prompts = []
-        # Also clear loaded data if switching away from Data Analysis? Optional.
-        # if st.session_state.agent_selector != "Data Analysis Agent":
-        #     st.session_state.loaded_df = None
-        #     st.session_state.last_uploaded_filename = None
+    # Use on_change to clear suggestions and data analysis state if agent type changes
+    def clear_state_on_agent_change():
+        # Clear suggestions if switching away from Dissertation Agent
+        if st.session_state.agent_selector != "Dissertation Agent":
+             st.session_state.suggested_prompts = []
+        # Clear data analysis state if switching away from Data Analysis Agent
+        if st.session_state.agent_selector != "Data Analysis Agent":
+            st.session_state.loaded_df = None
+            st.session_state.last_uploaded_filename = None
 
     agent_type = st.selectbox(
         ["Dissertation Agent", "Data Analysis Agent"],
         key="agent_selector",
-        on_change=clear_state_on_agent_change # Use updated callback name
+        on_change=clear_state_on_agent_change # Ensure this matches the function name above
     )
 
     # --- Agent-Specific UI and Input ---

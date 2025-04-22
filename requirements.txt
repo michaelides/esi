@@ -10,3 +10,5 @@ pypdf
 langchain-google-community
 tavily-python
 pandasai=2.0.24
+crawl4ai # Added based on scrape_and_ingest.py import
+qdrant-client # Added based on scrape_and_ingest.py import

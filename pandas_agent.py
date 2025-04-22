@@ -12,7 +12,7 @@ def create_pandas_ai_agent(api_key: str, df: pd.DataFrame):
         if not isinstance(df, pd.DataFrame):
             st.error("Data is not a valid Pandas DataFrame.")
             return None
-        return SmartDataframe(df, llm=llm)
+        return SmartDataframe(df)
     except Exception as e:
         st.error(f"Error initializing SmartDataframe: {e}")
         return None

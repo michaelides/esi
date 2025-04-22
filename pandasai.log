@@ -1,0 +1,1234 @@
+2025-04-22 01:22:16 [INFO] Question: describe the data
+2025-04-22 01:22:34 [INFO] Question: provide a summary
+2025-04-22 01:22:39 [INFO] Question: hgethdgft
+2025-04-22 01:39:16 [INFO] Question: summarise the data
+2025-04-22 11:04:42 [INFO] Question: can you describe the data set?
+2025-04-22 11:27:37 [INFO] Question: summarise data
+2025-04-22 11:28:39 [INFO] Question: summarise data
+2025-04-22 11:28:39 [INFO] Running PandasAI with langchain_chat-google-generative-ai LLM...
+2025-04-22 11:28:39 [INFO] Prompt ID: fda48d6e-4f90-4c2b-ad81-2f308a7d648d
+2025-04-22 11:28:39 [INFO] Executing Pipeline: GenerateChatPipeline
+2025-04-22 11:28:39 [INFO] Executing Step 0: ValidatePipelineInput
+2025-04-22 11:28:39 [INFO] Executing Step 1: CacheLookup
+2025-04-22 11:28:39 [INFO] Executing Step 2: PromptGeneration
+2025-04-22 11:28:39 [INFO] Using prompt: dfs[0]:
+  name: null
+  description: null
+  type: pd.DataFrame
+  rows: 13
+  columns: 11
+  schema:
+    fields:
+    - name: Ticker Symbol
+      type: object
+      samples:
+      - EQQQ.L
+      - AAPL
+      - INRG.L
+    - name: type
+      type: object
+      samples:
+      - Dividend
+      - Dividend
+      - Dividend
+    - name: Date
+      type: int64
+      samples:
+      - 20230402
+      - 20231221
+      - 20230531
+    - name: Value
+      type: float64
+      samples:
+      - 2.46
+      - 5.09
+      - 14.92
+    - name: Transaction currency
+      type: object
+      samples:
+      - GBP
+      - GBP
+      - GBP
+    - name: Gross Amount
+      type: float64
+      samples:
+      - 9.93
+      - 3.65
+      - 5.09
+    - name: Currency gross amount
+      type: object
+      samples:
+      - GBP
+      - USD
+      - GBX
+    - name: Exchange Rate
+      type: int64
+      samples:
+      - 1
+      - 1
+      - 1
+    - name: Note
+      type: object
+      samples:
+      - INRG divident
+      - Divident
+      - EQQQ divident
+    - name: Securities Account
+      type: object
+      samples:
+      - SIPP
+      - SIPP
+      - SIPP
+    - name: Cash Account
+      type: object
+      samples:
+      - SIPP_cash
+      - SIPP_cash
+      - SIPP_cash
+
+
+
+
+Update this initial code:
+```python
+# TODO: import the required dependencies
+import pandas as pd
+
+# Write code here
+
+# Declare result var: 
+type (possible values "string", "number", "dataframe", "plot"). Examples: { "type": "string", "value": f"The highest salary is {highest_salary}." } or { "type": "number", "value": 125 } or { "type": "dataframe", "value": pd.DataFrame({...}) } or { "type": "plot", "value": "temp_chart.png" }
+
+```
+
+
+
+### QUERY
+ summarise data
+
+Variable `dfs: list[pd.DataFrame]` is already declared.
+
+At the end, declare "result" variable as a dictionary of type and value.
+
+If you are asked to plot a chart, use "matplotlib" for charts, save as png.
+
+
+Generate python code and return full updated code:
+2025-04-22 11:28:39 [INFO] Executing Step 3: CodeGenerator
+2025-04-22 11:28:40 [INFO] Prompt used:
+            
+dfs[0]:
+  name: null
+  description: null
+  type: pd.DataFrame
+  rows: 13
+  columns: 11
+  schema:
+    fields:
+    - name: Ticker Symbol
+      type: object
+      samples:
+      - EQQQ.L
+      - AAPL
+      - INRG.L
+    - name: type
+      type: object
+      samples:
+      - Dividend
+      - Dividend
+      - Dividend
+    - name: Date
+      type: int64
+      samples:
+      - 20230402
+      - 20231221
+      - 20230531
+    - name: Value
+      type: float64
+      samples:
+      - 2.46
+      - 5.09
+      - 14.92
+    - name: Transaction currency
+      type: object
+      samples:
+      - GBP
+      - GBP
+      - GBP
+    - name: Gross Amount
+      type: float64
+      samples:
+      - 9.93
+      - 3.65
+      - 5.09
+    - name: Currency gross amount
+      type: object
+      samples:
+      - GBP
+      - USD
+      - GBX
+    - name: Exchange Rate
+      type: int64
+      samples:
+      - 1
+      - 1
+      - 1
+    - name: Note
+      type: object
+      samples:
+      - INRG divident
+      - Divident
+      - EQQQ divident
+    - name: Securities Account
+      type: object
+      samples:
+      - SIPP
+      - SIPP
+      - SIPP
+    - name: Cash Account
+      type: object
+      samples:
+      - SIPP_cash
+      - SIPP_cash
+      - SIPP_cash
+
+
+
+
+Update this initial code:
+```python
+# TODO: import the required dependencies
+import pandas as pd
+
+# Write code here
+
+# Declare result var: 
+type (possible values "string", "number", "dataframe", "plot"). Examples: { "type": "string", "value": f"The highest salary is {highest_salary}." } or { "type": "number", "value": 125 } or { "type": "dataframe", "value": pd.DataFrame({...}) } or { "type": "plot", "value": "temp_chart.png" }
+
+```
+
+
+
+### QUERY
+ summarise data
+
+Variable `dfs: list[pd.DataFrame]` is already declared.
+
+At the end, declare "result" variable as a dictionary of type and value.
+
+If you are asked to plot a chart, use "matplotlib" for charts, save as png.
+
+
+Generate python code and return full updated code:
+            
+2025-04-22 11:28:40 [INFO] Code generated:
+            ```
+            # TODO: import the required dependencies
+import pandas as pd
+
+# Write code here
+df = dfs[0]
+
+summary = df.describe(include='all')
+
+# Declare result var: 
+# type (possible values "string", "number", "dataframe", "plot"). Examples: { "type": "string", "value": f"The highest salary is {highest_salary}." } or { "type": "number", "value": 125 } or { "type": "dataframe", "value": pd.DataFrame({...}) } or { "type": "plot", "value": "temp_chart.png" }
+result = { "type": "dataframe", "value": summary }
+            ```
+            
+2025-04-22 11:28:40 [INFO] Executing Step 4: CachePopulation
+2025-04-22 11:28:40 [INFO] Executing Step 5: CodeCleaning
+2025-04-22 11:28:40 [INFO] Saving charts to /home/george/Documents/Research/aiplay/esi-aider/exports/charts/temp_chart.png
+2025-04-22 11:28:40 [INFO] 
+Code running:
+```
+df = dfs[0]
+summary = df.describe(include='all')
+result = {'type': 'dataframe', 'value': summary}
+        ```
+2025-04-22 11:28:40 [INFO] Executing Step 6: CodeExecution
+2025-04-22 11:28:40 [INFO] Executing Step 7: ResultValidation
+2025-04-22 11:28:40 [INFO] Answer: {'type': 'dataframe', 'value':        Ticker Symbol      type  ...  Securities Account  Cash Account
+count             13        13  ...                  13            13
+unique             4         1  ...                   1             1
+top           VUSA.L  Dividend  ...                SIPP     SIPP_cash
+freq               5        13  ...                  13            13
+mean             NaN       NaN  ...                 NaN           NaN
+std              NaN       NaN  ...                 NaN           NaN
+min              NaN       NaN  ...                 NaN           NaN
+25%              NaN       NaN  ...                 NaN           NaN
+50%              NaN       NaN  ...                 NaN           NaN
+75%              NaN       NaN  ...                 NaN           NaN
+max              NaN       NaN  ...                 NaN           NaN
+
+[11 rows x 11 columns]}
+2025-04-22 11:28:40 [INFO] Executing Step 8: ResultParsing
+2025-04-22 11:29:39 [INFO] Question: create a plot to show price comparisons between appl and eqqq.l
+2025-04-22 11:29:39 [INFO] Running PandasAI with langchain_chat-google-generative-ai LLM...
+2025-04-22 11:29:39 [INFO] Prompt ID: 45615003-04fd-4685-b898-8a5dd29c7a32
+2025-04-22 11:29:39 [INFO] Executing Pipeline: GenerateChatPipeline
+2025-04-22 11:29:39 [INFO] Executing Step 0: ValidatePipelineInput
+2025-04-22 11:29:39 [INFO] Executing Step 1: CacheLookup
+2025-04-22 11:29:39 [INFO] Executing Step 2: PromptGeneration
+2025-04-22 11:29:39 [INFO] Using prompt: dfs[0]:
+  name: null
+  description: null
+  type: pd.DataFrame
+  rows: 13
+  columns: 11
+  schema:
+    fields:
+    - name: Ticker Symbol
+      type: object
+      samples:
+      - INRG.L
+      - EQQQ.L
+      - VUSA.L
+    - name: type
+      type: object
+      samples:
+      - Dividend
+      - Dividend
+      - Dividend
+    - name: Date
+      type: int64
+      samples:
+      - 20230323
+      - 20231227
+      - 20230818
+    - name: Value
+      type: float64
+      samples:
+      - 13.11
+      - 2.45
+      - 13.35
+    - name: Transaction currency
+      type: object
+      samples:
+      - GBP
+      - GBP
+      - GBP
+    - name: Gross Amount
+      type: float64
+      samples:
+      - 2.4
+      - 13.35
+      - 13.11
+    - name: Currency gross amount
+      type: object
+      samples:
+      - USD
+      - GBP
+      - GBX
+    - name: Exchange Rate
+      type: int64
+      samples:
+      - 1
+      - 1
+      - 1
+    - name: Note
+      type: object
+      samples:
+      - VUSA divident
+      - EQQQ
+      - EQQQ divident
+    - name: Securities Account
+      type: object
+      samples:
+      - SIPP
+      - SIPP
+      - SIPP
+    - name: Cash Account
+      type: object
+      samples:
+      - SIPP_cash
+      - SIPP_cash
+      - SIPP_cash
+
+
+
+
+Update this initial code:
+```python
+# TODO: import the required dependencies
+import pandas as pd
+
+# Write code here
+
+# Declare result var: 
+type (possible values "string", "number", "dataframe", "plot"). Examples: { "type": "string", "value": f"The highest salary is {highest_salary}." } or { "type": "number", "value": 125 } or { "type": "dataframe", "value": pd.DataFrame({...}) } or { "type": "plot", "value": "temp_chart.png" }
+
+```
+
+
+
+### QUERY
+ create a plot to show price comparisons between appl and eqqq.l
+
+Variable `dfs: list[pd.DataFrame]` is already declared.
+
+At the end, declare "result" variable as a dictionary of type and value.
+
+If you are asked to plot a chart, use "matplotlib" for charts, save as png.
+
+
+Generate python code and return full updated code:
+2025-04-22 11:29:39 [INFO] Executing Step 3: CodeGenerator
+2025-04-22 11:29:42 [INFO] Prompt used:
+            
+dfs[0]:
+  name: null
+  description: null
+  type: pd.DataFrame
+  rows: 13
+  columns: 11
+  schema:
+    fields:
+    - name: Ticker Symbol
+      type: object
+      samples:
+      - INRG.L
+      - EQQQ.L
+      - VUSA.L
+    - name: type
+      type: object
+      samples:
+      - Dividend
+      - Dividend
+      - Dividend
+    - name: Date
+      type: int64
+      samples:
+      - 20230323
+      - 20231227
+      - 20230818
+    - name: Value
+      type: float64
+      samples:
+      - 13.11
+      - 2.45
+      - 13.35
+    - name: Transaction currency
+      type: object
+      samples:
+      - GBP
+      - GBP
+      - GBP
+    - name: Gross Amount
+      type: float64
+      samples:
+      - 2.4
+      - 13.35
+      - 13.11
+    - name: Currency gross amount
+      type: object
+      samples:
+      - USD
+      - GBP
+      - GBX
+    - name: Exchange Rate
+      type: int64
+      samples:
+      - 1
+      - 1
+      - 1
+    - name: Note
+      type: object
+      samples:
+      - VUSA divident
+      - EQQQ
+      - EQQQ divident
+    - name: Securities Account
+      type: object
+      samples:
+      - SIPP
+      - SIPP
+      - SIPP
+    - name: Cash Account
+      type: object
+      samples:
+      - SIPP_cash
+      - SIPP_cash
+      - SIPP_cash
+
+
+
+
+Update this initial code:
+```python
+# TODO: import the required dependencies
+import pandas as pd
+
+# Write code here
+
+# Declare result var: 
+type (possible values "string", "number", "dataframe", "plot"). Examples: { "type": "string", "value": f"The highest salary is {highest_salary}." } or { "type": "number", "value": 125 } or { "type": "dataframe", "value": pd.DataFrame({...}) } or { "type": "plot", "value": "temp_chart.png" }
+
+```
+
+
+
+### QUERY
+ create a plot to show price comparisons between appl and eqqq.l
+
+Variable `dfs: list[pd.DataFrame]` is already declared.
+
+At the end, declare "result" variable as a dictionary of type and value.
+
+If you are asked to plot a chart, use "matplotlib" for charts, save as png.
+
+
+Generate python code and return full updated code:
+            
+2025-04-22 11:29:42 [INFO] Code generated:
+            ```
+            # TODO: import the required dependencies
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# Write code here
+
+# Filter for appl and EQQQ.L
+appl_data = None
+eqqq_data = None
+
+for df in dfs:
+    if df is not None and 'Ticker Symbol' in df.columns:
+        if 'AAPL' in df['Ticker Symbol'].values:
+            appl_data = df[df['Ticker Symbol'] == 'AAPL']
+        if 'EQQQ.L' in df['Ticker Symbol'].values:
+            eqqq_data = df[df['Ticker Symbol'] == 'EQQQ.L']
+
+if appl_data is not None and eqqq_data is not None:
+    # Convert 'Date' to datetime objects
+    appl_data['Date'] = pd.to_datetime(appl_data['Date'], format='%Y%m%d')
+    eqqq_data['Date'] = pd.to_datetime(eqqq_data['Date'], format='%Y%m%d')
+
+    # Set 'Date' as index
+    appl_data = appl_data.set_index('Date')
+    eqqq_data = eqqq_data.set_index('Date')
+
+    # Plot the 'Value' for both stocks
+    plt.figure(figsize=(12, 6))
+    plt.plot(appl_data.index, appl_data['Value'], label='AAPL')
+    plt.plot(eqqq_data.index, eqqq_data['Value'], label='EQQQ.L')
+    plt.xlabel('Date')
+    plt.ylabel('Value')
+    plt.title('Price Comparison between AAPL and EQQQ.L')
+    plt.legend()
+    plt.grid(True)
+    plt.xticks(rotation=45)  # Rotate x-axis labels for better readability
+    plt.tight_layout()  # Adjust layout to prevent labels from overlapping
+
+    # Save the plot to a file
+    plot_filename = 'price_comparison.png'
+    plt.savefig(plot_filename)
+    plt.close()
+    result = { "type": "plot", "value": plot_filename }
+else:
+    result = { "type": "string", "value": "AAPL or EQQQ.L data not found in the provided DataFrames." }
+
+# Declare result var: 
+# type (possible values "string", "number", "dataframe", "plot"). Examples: { "type": "string", "value": f"The highest salary is {highest_salary}." } or { "type": "number", "value": 125 } or { "type": "dataframe", "value": pd.DataFrame({...}) } or { "type": "plot", "value": "temp_chart.png" }
+            ```
+            
+2025-04-22 11:29:42 [INFO] Executing Step 4: CachePopulation
+2025-04-22 11:29:42 [INFO] Executing Step 5: CodeCleaning
+2025-04-22 11:29:42 [INFO] Saving charts to /home/george/Documents/Research/aiplay/esi-aider/exports/charts/temp_chart.png
+2025-04-22 11:29:42 [INFO] 
+Code running:
+```
+appl_data = None
+eqqq_data = None
+for df in dfs:
+    if df is not None and 'Ticker Symbol' in df.columns:
+        if 'AAPL' in df['Ticker Symbol'].values:
+            appl_data = df[df['Ticker Symbol'] == 'AAPL']
+        if 'EQQQ.L' in df['Ticker Symbol'].values:
+            eqqq_data = df[df['Ticker Symbol'] == 'EQQQ.L']
+if appl_data is not None and eqqq_data is not None:
+    appl_data['Date'] = pd.to_datetime(appl_data['Date'], format='%Y%m%d')
+    eqqq_data['Date'] = pd.to_datetime(eqqq_data['Date'], format='%Y%m%d')
+    appl_data = appl_data.set_index('Date')
+    eqqq_data = eqqq_data.set_index('Date')
+    plt.figure(figsize=(12, 6))
+    plt.plot(appl_data.index, appl_data['Value'], label='AAPL')
+    plt.plot(eqqq_data.index, eqqq_data['Value'], label='EQQQ.L')
+    plt.xlabel('Date')
+    plt.ylabel('Value')
+    plt.title('Price Comparison between AAPL and EQQQ.L')
+    plt.legend()
+    plt.grid(True)
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    plot_filename = '/home/george/Documents/Research/aiplay/esi-aider/exports/charts/temp_chart.png'
+    plt.savefig(plot_filename)
+    plt.close()
+    result = {'type': 'plot', 'value': plot_filename}
+else:
+    result = {'type': 'string', 'value': 'AAPL or EQQQ.L data not found in the provided DataFrames.'}
+        ```
+2025-04-22 11:29:42 [INFO] Executing Step 6: CodeExecution
+2025-04-22 11:29:44 [INFO] Executing Step 7: ResultValidation
+2025-04-22 11:29:44 [INFO] Answer: {'type': 'plot', 'value': '/home/george/Documents/Research/aiplay/esi-aider/exports/charts/temp_chart.png'}
+2025-04-22 11:29:44 [INFO] Executing Step 8: ResultParsing
+2025-04-22 11:30:19 [INFO] Question: evaluate the hypothesis that there are significant differences betwen appl and eqq.l
+2025-04-22 11:30:19 [INFO] Running PandasAI with langchain_chat-google-generative-ai LLM...
+2025-04-22 11:30:19 [INFO] Prompt ID: 5bd4ff72-adab-4997-8741-cbd12eb28adb
+2025-04-22 11:30:19 [INFO] Executing Pipeline: GenerateChatPipeline
+2025-04-22 11:30:19 [INFO] Executing Step 0: ValidatePipelineInput
+2025-04-22 11:30:19 [INFO] Executing Step 1: CacheLookup
+2025-04-22 11:30:19 [INFO] Executing Step 2: PromptGeneration
+2025-04-22 11:30:19 [INFO] Using prompt: dfs[0]:
+  name: null
+  description: null
+  type: pd.DataFrame
+  rows: 13
+  columns: 11
+  schema:
+    fields:
+    - name: Ticker Symbol
+      type: object
+      samples:
+      - AAPL
+      - INRG.L
+      - VUSA.L
+    - name: type
+      type: object
+      samples:
+      - Dividend
+      - Dividend
+      - Dividend
+    - name: Date
+      type: int64
+      samples:
+      - 20230924
+      - 20230927
+      - 20230818
+    - name: Value
+      type: float64
+      samples:
+      - 13.3
+      - 14.92
+      - 13.23
+    - name: Transaction currency
+      type: object
+      samples:
+      - GBP
+      - GBP
+      - GBP
+    - name: Gross Amount
+      type: float64
+      samples:
+      - 5.09
+      - 13.23
+      - 13.11
+    - name: Currency gross amount
+      type: object
+      samples:
+      - USD
+      - GBP
+      - GBX
+    - name: Exchange Rate
+      type: int64
+      samples:
+      - 1
+      - 1
+      - 1
+    - name: Note
+      type: object
+      samples:
+      - INRG divident
+      - Divident
+      - Divident AAPL
+    - name: Securities Account
+      type: object
+      samples:
+      - SIPP
+      - SIPP
+      - SIPP
+    - name: Cash Account
+      type: object
+      samples:
+      - SIPP_cash
+      - SIPP_cash
+      - SIPP_cash
+
+
+
+
+Update this initial code:
+```python
+# TODO: import the required dependencies
+import pandas as pd
+
+# Write code here
+
+# Declare result var: 
+type (possible values "string", "number", "dataframe", "plot"). Examples: { "type": "string", "value": f"The highest salary is {highest_salary}." } or { "type": "number", "value": 125 } or { "type": "dataframe", "value": pd.DataFrame({...}) } or { "type": "plot", "value": "temp_chart.png" }
+
+```
+
+
+
+### QUERY
+ evaluate the hypothesis that there are significant differences betwen appl and eqq.l
+
+Variable `dfs: list[pd.DataFrame]` is already declared.
+
+At the end, declare "result" variable as a dictionary of type and value.
+
+If you are asked to plot a chart, use "matplotlib" for charts, save as png.
+
+
+Generate python code and return full updated code:
+2025-04-22 11:30:19 [INFO] Executing Step 3: CodeGenerator
+2025-04-22 11:30:22 [ERROR] Pipeline failed on step 3: No code found in the response
+2025-04-22 11:31:19 [INFO] Question: used t-test to evaluate the hypothesis that there are significant differences between  aapl and eqqq.l
+2025-04-22 11:31:19 [INFO] Running PandasAI with langchain_chat-google-generative-ai LLM...
+2025-04-22 11:31:19 [INFO] Prompt ID: dc87d6e2-18b5-4360-a993-32d060816246
+2025-04-22 11:31:19 [INFO] Executing Pipeline: GenerateChatPipeline
+2025-04-22 11:31:19 [INFO] Executing Step 0: ValidatePipelineInput
+2025-04-22 11:31:19 [INFO] Executing Step 1: CacheLookup
+2025-04-22 11:31:19 [INFO] Executing Step 2: PromptGeneration
+2025-04-22 11:31:19 [INFO] Using prompt: dfs[0]:
+  name: null
+  description: null
+  type: pd.DataFrame
+  rows: 13
+  columns: 11
+  schema:
+    fields:
+    - name: Ticker Symbol
+      type: object
+      samples:
+      - EQQQ.L
+      - INRG.L
+      - AAPL
+    - name: type
+      type: object
+      samples:
+      - Dividend
+      - Dividend
+      - Dividend
+    - name: Date
+      type: int64
+      samples:
+      - 20230627
+      - 20230402
+      - 20230818
+    - name: Value
+      type: float64
+      samples:
+      - 14.12
+      - 2.46
+      - 9.25
+    - name: Transaction currency
+      type: object
+      samples:
+      - GBP
+      - GBP
+      - GBP
+    - name: Gross Amount
+      type: float64
+      samples:
+      - 14.12
+      - 3.65
+      - 13.35
+    - name: Currency gross amount
+      type: object
+      samples:
+      - USD
+      - GBX
+      - GBP
+    - name: Exchange Rate
+      type: int64
+      samples:
+      - 1
+      - 1
+      - 1
+    - name: Note
+      type: object
+      samples:
+      - Apple divident
+      - EQQQ divident
+      - EQQQ - divident
+    - name: Securities Account
+      type: object
+      samples:
+      - SIPP
+      - SIPP
+      - SIPP
+    - name: Cash Account
+      type: object
+      samples:
+      - SIPP_cash
+      - SIPP_cash
+      - SIPP_cash
+
+
+
+
+Update this initial code:
+```python
+# TODO: import the required dependencies
+import pandas as pd
+
+# Write code here
+
+# Declare result var: 
+type (possible values "string", "number", "dataframe", "plot"). Examples: { "type": "string", "value": f"The highest salary is {highest_salary}." } or { "type": "number", "value": 125 } or { "type": "dataframe", "value": pd.DataFrame({...}) } or { "type": "plot", "value": "temp_chart.png" }
+
+```
+
+
+
+### QUERY
+ used t-test to evaluate the hypothesis that there are significant differences between  aapl and eqqq.l
+
+Variable `dfs: list[pd.DataFrame]` is already declared.
+
+At the end, declare "result" variable as a dictionary of type and value.
+
+If you are asked to plot a chart, use "matplotlib" for charts, save as png.
+
+
+Generate python code and return full updated code:
+2025-04-22 11:31:19 [INFO] Executing Step 3: CodeGenerator
+2025-04-22 11:31:22 [INFO] Prompt used:
+            
+dfs[0]:
+  name: null
+  description: null
+  type: pd.DataFrame
+  rows: 13
+  columns: 11
+  schema:
+    fields:
+    - name: Ticker Symbol
+      type: object
+      samples:
+      - EQQQ.L
+      - INRG.L
+      - AAPL
+    - name: type
+      type: object
+      samples:
+      - Dividend
+      - Dividend
+      - Dividend
+    - name: Date
+      type: int64
+      samples:
+      - 20230627
+      - 20230402
+      - 20230818
+    - name: Value
+      type: float64
+      samples:
+      - 14.12
+      - 2.46
+      - 9.25
+    - name: Transaction currency
+      type: object
+      samples:
+      - GBP
+      - GBP
+      - GBP
+    - name: Gross Amount
+      type: float64
+      samples:
+      - 14.12
+      - 3.65
+      - 13.35
+    - name: Currency gross amount
+      type: object
+      samples:
+      - USD
+      - GBX
+      - GBP
+    - name: Exchange Rate
+      type: int64
+      samples:
+      - 1
+      - 1
+      - 1
+    - name: Note
+      type: object
+      samples:
+      - Apple divident
+      - EQQQ divident
+      - EQQQ - divident
+    - name: Securities Account
+      type: object
+      samples:
+      - SIPP
+      - SIPP
+      - SIPP
+    - name: Cash Account
+      type: object
+      samples:
+      - SIPP_cash
+      - SIPP_cash
+      - SIPP_cash
+
+
+
+
+Update this initial code:
+```python
+# TODO: import the required dependencies
+import pandas as pd
+
+# Write code here
+
+# Declare result var: 
+type (possible values "string", "number", "dataframe", "plot"). Examples: { "type": "string", "value": f"The highest salary is {highest_salary}." } or { "type": "number", "value": 125 } or { "type": "dataframe", "value": pd.DataFrame({...}) } or { "type": "plot", "value": "temp_chart.png" }
+
+```
+
+
+
+### QUERY
+ used t-test to evaluate the hypothesis that there are significant differences between  aapl and eqqq.l
+
+Variable `dfs: list[pd.DataFrame]` is already declared.
+
+At the end, declare "result" variable as a dictionary of type and value.
+
+If you are asked to plot a chart, use "matplotlib" for charts, save as png.
+
+
+Generate python code and return full updated code:
+            
+2025-04-22 11:31:22 [INFO] Code generated:
+            ```
+            # TODO: import the required dependencies
+import pandas as pd
+from scipy import stats
+
+# Write code here
+
+# Assuming dfs[0] contains the data
+df = dfs[0]
+
+# Filter the DataFrame for AAPL and EQQQ.L
+aapl_dividends = df[(df['Ticker Symbol'] == 'AAPL') & (df['type'] == 'Dividend')]['Value']
+eqqq_dividends = df[(df['Ticker Symbol'] == 'EQQQ.L') & (df['type'] == 'Dividend')]['Value']
+
+# Perform the t-test
+if not aapl_dividends.empty and not eqqq_dividends.empty:
+    t_statistic, p_value = stats.ttest_ind(aapl_dividends, eqqq_dividends, equal_var=False)  # Assuming unequal variances
+    
+    # Determine significance (e.g., alpha = 0.05)
+    alpha = 0.05
+    if p_value < alpha:
+        result_string = f"There is a statistically significant difference in dividends between AAPL and EQQQ.L (p-value: {p_value:.3f})"
+    else:
+        result_string = f"There is no statistically significant difference in dividends between AAPL and EQQQ.L (p-value: {p_value:.3f})"
+    
+    result = {
+        "type": "string",
+        "value": result_string
+    }
+else:
+    result = {
+        "type": "string",
+        "value": "Insufficient data to perform t-test. Check if AAPL and EQQQ.L dividends are present in the dataframe."
+    }
+
+
+# Declare result var: 
+# type (possible values "string", "number", "dataframe", "plot"). Examples: { "type": "string", "value": f"The highest salary is {highest_salary}." } or { "type": "number", "value": 125 } or { "type": "dataframe", "value": pd.DataFrame({...}) } or { "type": "plot", "value": "temp_chart.png" }
+            ```
+            
+2025-04-22 11:31:22 [INFO] Executing Step 4: CachePopulation
+2025-04-22 11:31:22 [INFO] Executing Step 5: CodeCleaning
+2025-04-22 11:31:22 [INFO] Saving charts to /home/george/Documents/Research/aiplay/esi-aider/exports/charts/temp_chart.png
+2025-04-22 11:31:22 [INFO] 
+Code running:
+```
+df = dfs[0]
+aapl_dividends = df[(df['Ticker Symbol'] == 'AAPL') & (df['type'] == 'Dividend')]['Value']
+eqqq_dividends = df[(df['Ticker Symbol'] == 'EQQQ.L') & (df['type'] == 'Dividend')]['Value']
+if not aapl_dividends.empty and not eqqq_dividends.empty:
+    t_statistic, p_value = stats.ttest_ind(aapl_dividends, eqqq_dividends, equal_var=False)
+    alpha = 0.05
+    if p_value < alpha:
+        result_string = f'There is a statistically significant difference in dividends between AAPL and EQQQ.L (p-value: {p_value:.3f})'
+    else:
+        result_string = f'There is no statistically significant difference in dividends between AAPL and EQQQ.L (p-value: {p_value:.3f})'
+    result = {'type': 'string', 'value': result_string}
+else:
+    result = {'type': 'string', 'value': 'Insufficient data to perform t-test. Check if AAPL and EQQQ.L dividends are present in the dataframe.'}
+        ```
+2025-04-22 11:31:22 [INFO] Executing Step 6: CodeExecution
+2025-04-22 11:31:24 [INFO] Executing Step 7: ResultValidation
+2025-04-22 11:31:24 [INFO] Answer: {'type': 'string', 'value': 'There is a statistically significant difference in dividends between AAPL and EQQQ.L (p-value: 0.049)'}
+2025-04-22 11:31:24 [INFO] Executing Step 8: ResultParsing
+2025-04-22 11:31:38 [INFO] Question: do the same with an anova
+2025-04-22 11:31:38 [INFO] Running PandasAI with langchain_chat-google-generative-ai LLM...
+2025-04-22 11:31:38 [INFO] Prompt ID: 8ee514fe-3c6f-42fa-8cd6-85621d0d4a81
+2025-04-22 11:31:38 [INFO] Executing Pipeline: GenerateChatPipeline
+2025-04-22 11:31:38 [INFO] Executing Step 0: ValidatePipelineInput
+2025-04-22 11:31:38 [INFO] Executing Step 1: CacheLookup
+2025-04-22 11:31:38 [INFO] Executing Step 2: PromptGeneration
+2025-04-22 11:31:38 [INFO] Using prompt: dfs[0]:
+  name: null
+  description: null
+  type: pd.DataFrame
+  rows: 13
+  columns: 11
+  schema:
+    fields:
+    - name: Ticker Symbol
+      type: object
+      samples:
+      - AAPL
+      - VUSA.L
+      - EQQQ.L
+    - name: type
+      type: object
+      samples:
+      - Dividend
+      - Dividend
+      - Dividend
+    - name: Date
+      type: int64
+      samples:
+      - 20230818
+      - 20231221
+      - 20230323
+    - name: Value
+      type: float64
+      samples:
+      - 2.46
+      - 2.4
+      - 14.92
+    - name: Transaction currency
+      type: object
+      samples:
+      - GBP
+      - GBP
+      - GBP
+    - name: Gross Amount
+      type: float64
+      samples:
+      - 13.35
+      - 13.23
+      - 9.25
+    - name: Currency gross amount
+      type: object
+      samples:
+      - USD
+      - GBP
+      - GBX
+    - name: Exchange Rate
+      type: int64
+      samples:
+      - 1
+      - 1
+      - 1
+    - name: Note
+      type: object
+      samples:
+      - EQQQ
+      - EQQQ divident
+      - Divident AAPL
+    - name: Securities Account
+      type: object
+      samples:
+      - SIPP
+      - SIPP
+      - SIPP
+    - name: Cash Account
+      type: object
+      samples:
+      - SIPP_cash
+      - SIPP_cash
+      - SIPP_cash
+
+
+
+
+Update this initial code:
+```python
+# TODO: import the required dependencies
+import pandas as pd
+
+# Write code here
+
+# Declare result var: 
+type (possible values "string", "number", "dataframe", "plot"). Examples: { "type": "string", "value": f"The highest salary is {highest_salary}." } or { "type": "number", "value": 125 } or { "type": "dataframe", "value": pd.DataFrame({...}) } or { "type": "plot", "value": "temp_chart.png" }
+
+```
+
+
+
+### QUERY
+ do the same with an anova
+
+Variable `dfs: list[pd.DataFrame]` is already declared.
+
+At the end, declare "result" variable as a dictionary of type and value.
+
+If you are asked to plot a chart, use "matplotlib" for charts, save as png.
+
+
+Generate python code and return full updated code:
+2025-04-22 11:31:38 [INFO] Executing Step 3: CodeGenerator
+2025-04-22 11:31:40 [INFO] Prompt used:
+            
+dfs[0]:
+  name: null
+  description: null
+  type: pd.DataFrame
+  rows: 13
+  columns: 11
+  schema:
+    fields:
+    - name: Ticker Symbol
+      type: object
+      samples:
+      - AAPL
+      - VUSA.L
+      - EQQQ.L
+    - name: type
+      type: object
+      samples:
+      - Dividend
+      - Dividend
+      - Dividend
+    - name: Date
+      type: int64
+      samples:
+      - 20230818
+      - 20231221
+      - 20230323
+    - name: Value
+      type: float64
+      samples:
+      - 2.46
+      - 2.4
+      - 14.92
+    - name: Transaction currency
+      type: object
+      samples:
+      - GBP
+      - GBP
+      - GBP
+    - name: Gross Amount
+      type: float64
+      samples:
+      - 13.35
+      - 13.23
+      - 9.25
+    - name: Currency gross amount
+      type: object
+      samples:
+      - USD
+      - GBP
+      - GBX
+    - name: Exchange Rate
+      type: int64
+      samples:
+      - 1
+      - 1
+      - 1
+    - name: Note
+      type: object
+      samples:
+      - EQQQ
+      - EQQQ divident
+      - Divident AAPL
+    - name: Securities Account
+      type: object
+      samples:
+      - SIPP
+      - SIPP
+      - SIPP
+    - name: Cash Account
+      type: object
+      samples:
+      - SIPP_cash
+      - SIPP_cash
+      - SIPP_cash
+
+
+
+
+Update this initial code:
+```python
+# TODO: import the required dependencies
+import pandas as pd
+
+# Write code here
+
+# Declare result var: 
+type (possible values "string", "number", "dataframe", "plot"). Examples: { "type": "string", "value": f"The highest salary is {highest_salary}." } or { "type": "number", "value": 125 } or { "type": "dataframe", "value": pd.DataFrame({...}) } or { "type": "plot", "value": "temp_chart.png" }
+
+```
+
+
+
+### QUERY
+ do the same with an anova
+
+Variable `dfs: list[pd.DataFrame]` is already declared.
+
+At the end, declare "result" variable as a dictionary of type and value.
+
+If you are asked to plot a chart, use "matplotlib" for charts, save as png.
+
+
+Generate python code and return full updated code:
+            
+2025-04-22 11:31:40 [INFO] Code generated:
+            ```
+            # TODO: import the required dependencies
+import pandas as pd
+from scipy import stats
+
+# Write code here
+
+# Perform ANOVA test
+try:
+    # Group the 'Value' column by 'Ticker Symbol'
+    grouped_data = dfs[0].groupby('Ticker Symbol')['Value'].apply(list)
+
+    # Perform ANOVA test
+    f_statistic, p_value = stats.f_oneway(*grouped_data)
+
+    # Interpret the results
+    if p_value < 0.05:
+        result_string = f"The p-value is {p_value:.3f}, which is less than 0.05. There is a statistically significant difference in 'Value' among the different 'Ticker Symbol' groups."
+    else:
+        result_string = f"The p-value is {p_value:.3f}, which is not less than 0.05. There is no statistically significant difference in 'Value' among the different 'Ticker Symbol' groups."
+
+    # Declare result var:
+    result = { "type": "string", "value": result_string }
+
+except Exception as e:
+    result = { "type": "string", "value": f"An error occurred: {e}" }
+            ```
+            
+2025-04-22 11:31:40 [INFO] Executing Step 4: CachePopulation
+2025-04-22 11:31:40 [INFO] Executing Step 5: CodeCleaning
+2025-04-22 11:31:40 [INFO] 
+Code running:
+```
+try:
+    grouped_data = dfs[0].groupby('Ticker Symbol')['Value'].apply(list)
+    f_statistic, p_value = stats.f_oneway(*grouped_data)
+    if p_value < 0.05:
+        result_string = f"The p-value is {p_value:.3f}, which is less than 0.05. There is a statistically significant difference in 'Value' among the different 'Ticker Symbol' groups."
+    else:
+        result_string = f"The p-value is {p_value:.3f}, which is not less than 0.05. There is no statistically significant difference in 'Value' among the different 'Ticker Symbol' groups."
+    result = {'type': 'string', 'value': result_string}
+except Exception as e:
+    result = {'type': 'string', 'value': f'An error occurred: {e}'}
+        ```
+2025-04-22 11:31:40 [INFO] Executing Step 6: CodeExecution
+2025-04-22 11:31:40 [INFO] Executing Step 7: ResultValidation
+2025-04-22 11:31:40 [INFO] Answer: {'type': 'string', 'value': "The p-value is 0.008, which is less than 0.05. There is a statistically significant difference in 'Value' among the different 'Ticker Symbol' groups."}
+2025-04-22 11:31:40 [INFO] Executing Step 8: ResultParsing

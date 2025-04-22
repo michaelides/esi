@@ -22,10 +22,23 @@ def analyze_data(agent: SmartDataframe, data: pd.DataFrame, prompt: str):
     if agent is None:
         return "Data analysis agent could not be initialized."
     try:
+        # Log the prompt for debugging
+        print(f"DEBUG: Sending prompt to PandasAI: {prompt}")
         response = agent.chat(prompt)
+        # Log the response type and value for debugging
+        print(f"DEBUG: Received response from PandasAI: type={type(response)}, value='{response}'")
+        # Check if the response is None, which might be unexpected
+        if response is None:
+            print("ERROR: PandasAI agent.chat() returned None.")
+            return "PandasAI returned an empty response. This might indicate an internal issue. Please check the logs or try rephrasing your request."
         return response
     except Exception as e:
-        return f"An error occurred during analysis: {e}"
+        # Log the full traceback for detailed debugging
+        import traceback
+        traceback_str = traceback.format_exc()
+        print(f"ERROR in analyze_data: {type(e).__name__} - {e}\n{traceback_str}")
+        # Return a more informative error message, including the exception type
+        return f"An error occurred during analysis: {type(e).__name__} - {e}. Check the application logs (console output) for more details."
 
 def load_data(uploaded_file):
     """Loads data from the uploaded file into a Pandas DataFrame."""

@@ -25,7 +25,6 @@ from crawl4ai import AsyncWebCrawler
 import streamlit as st
 from streamlit_interface import display_chat_messages, handle_user_input, display_sidebar, initialize_streamlit
 from langchain_core.messages import AIMessage, HumanMessage
-from streamlit_interface import initialize_streamlit
 
 
 # --- Configuration ---
@@ -139,11 +138,6 @@ if tavily_search:
     base_tools.append(tavily_search)
 
 embedding_function = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
-
-# Define the system message and prompt structure globally
-system_message = f"""{instruction}
-You are a helpful AI assistant designed to support university students with their dissertations.
-Your goal is to help them brainstorm research ideas, structure their work, understand methodologies, and overcome challenges.
 
 When you use tools, ALWAYS cite the source URL if one is provided.
 

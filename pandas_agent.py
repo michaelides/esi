@@ -1,4 +1,3 @@
-import streamlit as st
 from pandasai import SmartDataframe
 import pandas as pd
 import io

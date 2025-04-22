@@ -171,9 +171,10 @@ def handle_user_input(agent_executor, llm):
             st.session_state.last_uploaded_filename = None
 
     agent_type = st.selectbox(
-        ["Dissertation Agent", "Data Analysis Agent"],
+        "Choose an agent:", # Add the missing label argument
+        options=["Dissertation Agent", "Data Analysis Agent"], # Use the 'options' keyword argument
         key="agent_selector",
-        on_change=clear_state_on_agent_change # Ensure this matches the function name above
+        on_change=clear_state_on_agent_change
     )
 
     # --- Agent-Specific UI and Input ---

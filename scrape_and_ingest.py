@@ -3,10 +3,11 @@ import asyncio
 from dotenv import load_dotenv
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_chroma import Chroma
-from langchain_community.document_loaders.async_html import AsyncHtmlLoader
+# Removed AsyncHtmlLoader import
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document
 import logging
+from crawl4ai import AsyncWebCrawler # Import crawl4ai
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -51,35 +52,50 @@ except Exception as e:
     logging.error(f"Failed to connect to Chroma DB: {e}")
     exit(1)
 
-# Using AsyncHtmlLoader as a basic async web scraper similar to crawl4ai's likely function
-# If crawl4ai is a custom class with specific methods, this might need adjustment
-# For now, using a standard Langchain loader.
-loader = AsyncHtmlLoader(URLS_TO_SCRAPE)
+# Initialize crawl4ai
+crawler = AsyncWebCrawler()
 text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
 
 # --- Core Logic ---
 async def scrape_and_store():
-    """Scrapes URLs, splits content, and adds to Chroma DB."""
-    logging.info("Starting web scraping process...")
-    try:
-        # Load content using AsyncHtmlLoader
-        html_docs = await loader.aload()
-        logging.info(f"Successfully loaded content from {len(html_docs)} URLs.")
+    """Scrapes URLs using crawl4ai, splits content, and adds to Chroma DB."""
+    logging.info("Starting web scraping process with crawl4ai...")
+    all_splits = []
+    processed_urls = 0
+    failed_urls = []
 
-        all_splits = []
-        for doc in html_docs:
-            if doc.page_content:
-                # Split the document content
-                splits = text_splitter.split_text(doc.page_content)
-                # Create Document objects for each split, preserving metadata
-                for split_content in splits:
-                    split_doc = Document(page_content=split_content, metadata=doc.metadata.copy())
-                    all_splits.append(split_doc)
-            else:
-                logging.warning(f"No content found for URL: {doc.metadata.get('source', 'Unknown URL')}")
+    try:
+        for url in URLS_TO_SCRAPE:
+            logging.info(f"Attempting to crawl: {url}")
+            try:
+                # Use crawl4ai to get content for each URL
+                # Assuming arun returns the main text content as a string
+                content = await crawler.arun(url)
+
+                if content:
+                    logging.info(f"Successfully crawled content from: {url}")
+                    # Create a Document object
+                    doc = Document(page_content=content, metadata={"source": url})
+
+                    # Split the document content
+                    splits = text_splitter.split_documents([doc]) # Pass as list
+                    all_splits.extend(splits)
+                    processed_urls += 1
+                else:
+                    logging.warning(f"No content returned by crawl4ai for URL: {url}")
+                    failed_urls.append(url)
+
+            except Exception as crawl_error:
+                logging.error(f"Error crawling URL {url}: {crawl_error}")
+                failed_urls.append(url)
+                continue # Move to the next URL
+
+        logging.info(f"Finished crawling. Successfully processed {processed_urls} URLs.")
+        if failed_urls:
+            logging.warning(f"Failed to crawl or get content from {len(failed_urls)} URLs: {failed_urls}")
 
         if not all_splits:
-            logging.warning("No content was successfully split from the provided URLs.")
+            logging.warning("No content was successfully scraped and split from the provided URLs.")
             return
 
         logging.info(f"Split content into {len(all_splits)} chunks.")

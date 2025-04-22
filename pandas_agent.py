@@ -9,7 +9,7 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 def create_pandas_ai_agent(api_key: str):
     """Creates a PandasAI agent with the given API key."""
     llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=0.7, google_api_key=api_key)
-    return SmartDataframe(llm, conversational=False)
+    return SmartDataframe(llm)
 
 def analyze_data(agent: SmartDataframe, data: pd.DataFrame, prompt: str):
     """Analyzes the data using the PandasAI agent and the given prompt."""

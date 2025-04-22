@@ -106,11 +106,14 @@ def check_and_collect_new_pdfs(data_directory: str, db_path: str):
 
     # Read list of already ingested files
     try:
-        with open(log_file_path, "r") as f:
-            ingested_files = set(line.strip() for line in f)
-        logging.info(f"Found log of {len(ingested_files)} previously ingested files.")
-    except FileNotFoundError:
-        logging.info("No ingestion log file found for the main knowledge base. Will process all PDFs in data directory.")
+        # Check if log file exists before trying to open
+        if os.path.exists(log_file_path):
+            with open(log_file_path, "r") as f:
+                ingested_files = set(line.strip() for line in f)
+            logging.info(f"Found log of {len(ingested_files)} previously ingested files.")
+        else:
+             logging.info("No ingestion log file found for the main knowledge base.")
+
     except Exception as e:
          logging.error(f"Error reading ingestion log file: {e}")
 
@@ -164,6 +167,46 @@ def check_and_collect_new_pdfs(data_directory: str, db_path: str):
 DATA_DIR = "./data"  # Directory to store PDF files
 
 if __name__ == "__main__":
+    # Initialize Qdrant client ONCE for the local persistence path
+    try:
+        client = QdrantClient(path=QDRANT_DB_PATH)
+        logging.info(f"Qdrant client initialized at {QDRANT_DB_PATH}.")
+    except Exception as e:
+        logging.error(f"Failed to initialize Qdrant client: {e}", exc_info=True)
+        exit(1)
+
+    # Check if the collection exists
+    collection_exists = False
+    try:
+        client.get_collection(collection_name=COLLECTION_NAME)
+        collection_exists = True
+        logging.info(f"Collection '{COLLECTION_NAME}' already exists.")
+    except ValueError: # Qdrant client raises ValueError if collection not found
+        collection_exists = False
+        logging.info(f"Collection '{COLLECTION_NAME}' not found.")
+    except Exception as e:
+        logging.error(f"Error checking for collection existence: {e}", exc_info=True)
+        # If we can't even check existence, something is very wrong. Exit.
+        exit(1)
+
+    # If collection exists, delete it and the log file to ensure a clean state
+    if collection_exists:
+        logging.warning(f"Deleting existing collection '{COLLECTION_NAME}' to ensure compatibility...")
+        try:
+            client.delete_collection(collection_name=COLLECTION_NAME)
+            logging.warning(f"Collection '{COLLECTION_NAME}' deleted.")
+
+            # Delete the ingestion log file as the collection is being rebuilt
+            log_file_path = os.path.join(QDRANT_DB_PATH, ".ingested_files.log")
+            if os.path.exists(log_file_path):
+                 logging.info(f"Deleting ingestion log file {log_file_path} due to collection recreation.")
+                 os.remove(log_file_path)
+
+        except Exception as e:
+             logging.error(f"Error deleting collection or log file: {e}", exc_info=True)
+             exit(1) # Exit if deletion fails
+
+    # Collect documents *after* potentially deleting the old log file
     all_documents_to_ingest = []
     successfully_processed_pdf_filenames = []
 
@@ -177,6 +220,7 @@ if __name__ == "__main__":
 
     # Collect documents from PDF ingestion
     logging.info("Checking for new documents to load into the main knowledge base...")
+    # Pass the QDRANT_DB_PATH to check_and_collect_new_pdfs so it can find the log file
     pdf_docs, processed_pdf_filenames = check_and_collect_new_pdfs(DATA_DIR, QDRANT_DB_PATH)
     all_documents_to_ingest.extend(pdf_docs)
     successfully_processed_pdf_filenames.extend(processed_pdf_filenames)
@@ -189,56 +233,21 @@ if __name__ == "__main__":
 
     logging.info(f"Total documents collected for ingestion: {len(all_documents_to_ingest)}")
 
-    # Initialize Qdrant client ONCE for the local persistence path
+    # Create the collection (it won't exist at this point if it was deleted or never existed)
+    logging.info(f"Creating collection '{COLLECTION_NAME}' with vector size {VECTOR_SIZE}...")
     try:
-        client = QdrantClient(path=QDRANT_DB_PATH)
-        logging.info(f"Qdrant client initialized at {QDRANT_DB_PATH}.")
+        client.create_collection(
+            collection_name=COLLECTION_NAME,
+            vectors_config=models.VectorParams(size=VECTOR_SIZE, distance=DISTANCE_METRIC),
+        )
+        logging.info(f"Collection '{COLLECTION_NAME}' created.")
     except Exception as e:
-        logging.error(f"Failed to initialize Qdrant client: {e}", exc_info=True)
+        logging.error(f"Error creating collection: {e}", exc_info=True)
         exit(1)
 
-    # Check if the collection exists and its vector configuration
-    collection_exists = False
-    collection_needs_recreate = False
-    try:
-        collection_info = client.get_collection(collection_name=COLLECTION_NAME)
-        collection_exists = True
-        logging.info(f"Collection '{COLLECTION_NAME}' already exists.")
-
-        # Check vector configuration
-        # Assuming a single vector config for simplicity
-        if collection_info.vectors_config.params.size != VECTOR_SIZE:
-             logging.warning(f"Existing collection '{COLLECTION_NAME}' has vector size {collection_info.vectors_config.params.size}, expected {VECTOR_SIZE}.")
-             collection_needs_recreate = True
-        else:
-             logging.info(f"Existing collection '{COLLECTION_NAME}' has compatible vector size {VECTOR_SIZE}.")
-
-    except ValueError: # Qdrant client raises ValueError if collection not found
-        collection_exists = False
-        logging.info(f"Collection '{COLLECTION_NAME}' not found. Will create it.")
-    except Exception as e:
-        logging.error(f"Error checking for collection existence or config: {e}", exc_info=True)
-        exit(1) # Exit if collection check fails unexpectedly
-
 
     try:
-        if collection_needs_recreate:
-             # Delete the incompatible collection
-             logging.warning(f"Deleting incompatible collection '{COLLECTION_NAME}'...")
-             client.delete_collection(collection_name=COLLECTION_NAME)
-             logging.warning(f"Collection '{COLLECTION_NAME}' deleted.")
-             collection_exists = False # Mark as not existing so it gets recreated
-
-        if not collection_exists:
-            # If collection does not exist (either initially or after deletion), create it manually
-            logging.info(f"Creating collection '{COLLECTION_NAME}' with vector size {VECTOR_SIZE}...")
-            client.create_collection(
-                collection_name=COLLECTION_NAME,
-                vectors_config=models.VectorParams(size=VECTOR_SIZE, distance=DISTANCE_METRIC),
-            )
-            logging.info(f"Collection '{COLLECTION_NAME}' created.")
-
-        # Initialize vector store using the existing client (whether it existed or was just created)
+        # Initialize vector store using the existing client and the newly created collection
         vector_store = QdrantVectorStore(
             client=client, # Use the pre-initialized client
             collection_name=COLLECTION_NAME,
@@ -254,6 +263,8 @@ if __name__ == "__main__":
         if successfully_processed_pdf_filenames:
             log_file_path = os.path.join(QDRANT_DB_PATH, ".ingested_files.log")
             try:
+                # Use 'a' mode to append to the log file. If the collection was recreated,
+                # the log file was deleted, so 'a' will create a new one.
                 with open(log_file_path, "a") as f:
                     for fname in successfully_processed_pdf_filenames:
                         f.write(f"{fname}\n")

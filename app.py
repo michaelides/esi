@@ -81,7 +81,7 @@ prompt_messages = [
 
 # Using DuckDuckGo Search as a free alternative
 search = DuckDuckGoSearchRun()
-duckduckgo_search_tool = Tool(
+duckduckgo_search = Tool(
     name="duckduckgo_search",
     func=search.run,
     description="Use this tool to search the internet for information. Use it to find recent research papers, news, or general information not present in the knowledge base. If the user is asking about something that is not specific to the module, use this tool.",
@@ -90,7 +90,7 @@ duckduckgo_search_tool = Tool(
 # --- Tavily Tool Setup ---
 if not TAVILY_API_KEY:
     st.warning("TAVILY_API_KEY not found. Tavily Search tool will be disabled. Set TAVILY_API_KEY in .env if needed.")
-    tavily_search_tool = None
+    tavily_search = None
 else:
     tavily_client = TavilyClient(api_key=TAVILY_API_KEY)
     tavily_search = Tool(
@@ -143,9 +143,7 @@ rag_tool = create_retriever_tool(
 
 # --- Agent Setup ---
 # Define the base tools the agent can use (main knowledge base and search)
-base_tools = [rag_tool, duckduckgo_search_tool]
-if tavily_search_tool: # Add Tavily only if initialized
-    base_tools.append(tavily_search_tool)
+base_tools = [rag_tool, duckduckgo_search, tavily_search]
 
 # Initialize Streamlit UI and session state
 initialize_streamlit()

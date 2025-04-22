@@ -22,7 +22,6 @@ from tavily import TavilyClient
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_core.runnables import RunnablePassthrough
 from crawl4ai import AsyncWebCrawler
-import asyncio # Import asyncio
 import streamlit as st
 # Restored import: Removed display_input_controls, added handle_user_input
 from streamlit_interface import display_chat_messages, handle_user_input, display_sidebar, initialize_streamlit
@@ -39,6 +38,11 @@ DATA_DIR = "./data"  # Directory to store PDF files
 # Check for necessary API keys
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 GOOGLE_CSE_ID = os.getenv("GOOGLE_CSE_ID")
+
+# --- LLM Setup ---
+# Initialize the LLM (e.g., Gemini)
+llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=0.7) 
+
 
 # Load the system prompt as instructions:
 try:
@@ -58,7 +62,7 @@ When you use tools, ALWAYS cite the source URL if one is provided.
 **Tool Use Instructions:**
 
 1.  When a student refers to the \"module\" they are referring to the MSc dissertation module at UEA, called NBS-7095x. You have access to information about this module via the `dissertation_resource_retriever` tool.
-2.  **You MUST always use** the `dissertation_resource_retriever` tool first to find relevant information from the knowledge base (e.g., module deadlines, procedures, milestones, specific writing guides, methodology examples, previously discussed concepts). Cite information retrieved using this tool.
+2.  **You MUST always use** the rag_tool (`dissertation_resource_retriever`) tool first to find relevant information from the knowledge base (e.g., module deadlines, procedures, milestones, specific writing guides, methodology examples, previously discussed concepts). Cite information retrieved using this tool.
 3.  Use the `duckduckgo_search` tool to find recent research papers, news, or general information not present in the knowledge base. Cite information retrieved using this tool.
 4.  If the `tavily_search` tool is available, use it to supplement the `duckduckgo_search` for broader or more in-depth searches. It returns the most relevant search results with snippets. Cite information retrieved using this tool.
 5.  Use the `crawl4ai` tool to crawl a specific website and extract its content. Only use this tool if you need to get information directly from a specific website. Be specific about the URL you want to crawl.
@@ -98,19 +102,9 @@ else:
 # --- Crawl4AI Tool Setup ---
 
 crawl4ai = AsyncWebCrawler()
-
-# Define a synchronous wrapper for the async function
-def run_crawl4ai_sync(url: str) -> str:
-    """Synchronous wrapper to run the async crawl4ai.arun function."""
-    try:
-        # Use asyncio.run to execute the async function and return the result
-        return asyncio.run(crawl4ai.arun(url=url))
-    except Exception as e:
-        return f"Error during crawling {url}: {e}"
-
 crawl4ai_tool = Tool(
     name="crawl4ai",
-    func=run_crawl4ai_sync, # Use the synchronous wrapper function
+    func=crawl4ai.arun,
     description="Use this tool to crawl a website and extract its content. Input should be a valid URL. Only use this tool if you need to get information directly from a specific website. Be specific about the URL you want to crawl.",
 )
 
@@ -138,9 +132,6 @@ rag_tool = create_retriever_tool(
     If the question is at all related to the module requirements, use this tool first.""",
 )
 
-# --- LLM Setup ---
-# Initialize the LLM (e.g., Gemini)
-llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=0.7) 
 
 # --- Agent Setup ---
 # Define the base tools the agent can use (main knowledge base and search)

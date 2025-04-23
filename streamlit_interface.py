@@ -7,8 +7,9 @@ from langchain_core.runnables import chain
 import uuid
 import re # Import regex for parsing suggestions
 # Updated import to use the new dfpanda_agent.py file
-from dfpanda_agent import create_dfpanda_agent, run_dfpanda_analysis, load_data
+from dfpanda_agent import create_dfpanda_agent, run_dfpanda_analysis, load_data, PLOT_SAVE_PATH # Import PLOT_SAVE_PATH
 from langchain_core.language_models import BaseChatModel # Import for type hinting
+import time # Import time for potential small delay
 
 
 st.set_page_config(layout="wide")
@@ -56,7 +57,22 @@ def display_chat_messages():
     for message in st.session_state.messages:
         if isinstance(message, AIMessage):
             with st.chat_message("assistant"):
-                st.markdown(message.content)
+                # Check if the message content is a string path to an image
+                # This is a simple heuristic; a more robust solution might involve
+                # storing image paths/data separately in session state.
+                if isinstance(message.content, str) and message.content.startswith("PLOT_PATH:"):
+                    plot_path = message.content.replace("PLOT_PATH:", "").strip()
+                    if os.path.exists(plot_path):
+                        try:
+                            st.image(plot_path, caption="Generated Plot")
+                            # Optionally remove the file after displaying
+                            # os.remove(plot_path) # Decide if you want to keep or remove the file
+                        except Exception as e:
+                            st.warning(f"Could not display plot from {plot_path}: {e}")
+                    # else: # Removed this else block to avoid showing the raw path if file is missing
+                    #      st.warning(f"Plot file not found at {plot_path}")
+                else:
+                    st.markdown(message.content)
         elif isinstance(message, HumanMessage):
             with st.chat_message("user"):
                 st.markdown(message.content)
@@ -266,6 +282,23 @@ def handle_user_input(agent_executor, llm: BaseChatModel):
                         st.markdown(response_str) # Display result directly
                         # Add AI analysis response to chat history
                         st.session_state.messages.append(AIMessage(content=response_str)) # Use the string version
+
+                        # --- Check for and display plot ---
+                        # Give the file system a moment to catch up
+                        time.sleep(0.1) # Small delay
+                        if os.path.exists(PLOT_SAVE_PATH):
+                            try:
+                                st.image(PLOT_SAVE_PATH, caption="Generated Plot")
+                                # Add a placeholder message to history indicating a plot was shown
+                                # This helps the chat history display the plot on rerun
+                                st.session_state.messages.append(AIMessage(content=f"PLOT_PATH:{PLOT_SAVE_PATH}"))
+                                # Optionally remove the file after displaying
+                                # os.remove(PLOT_SAVE_PATH) # Decide if you want to keep or remove the file
+                            except Exception as e:
+                                st.warning(f"Could not display plot: {e}")
+                                st.session_state.messages.append(AIMessage(content=f"Could not display plot: {e}"))
+                        # --- End plot check ---
+
                         prompt_processed_this_run = True # Mark that an interaction happened
             else:
                 st.error("Failed to initialize data analysis agent.")

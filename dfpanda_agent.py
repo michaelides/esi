@@ -6,6 +6,15 @@ from langchain_experimental.agents.agent_toolkits import create_pandas_dataframe
 from langchain.agents import AgentExecutor # Import for type hinting
 from langchain_core.language_models import BaseChatModel # Import for type hinting
 import streamlit as st # Import streamlit for st.error
+import matplotlib.pyplot as plt # Import matplotlib
+
+# Define the path where plots should be saved
+PLOT_SAVE_DIR = "./exports/charts"
+PLOT_SAVE_PATH = os.path.join(PLOT_SAVE_DIR, "temp_chart.png")
+
+# Ensure the plot save directory exists
+os.makedirs(PLOT_SAVE_DIR, exist_ok=True)
+
 
 def load_data(uploaded_file):
     """
@@ -101,11 +110,29 @@ def run_dfpanda_analysis(agent_executor: AgentExecutor, prompt: str) -> str:
     """
     if agent_executor is None:
          return "Data analysis agent could not be initialized."
+
+    # Add instructions to the prompt about saving plots
+    # Tell the agent to save plots to PLOT_SAVE_PATH and NOT use plt.show()
+    plot_instruction = f"""
+If you generate a plot using matplotlib, save it to the file path '{PLOT_SAVE_PATH}' using `plt.savefig()` and do NOT call `plt.show()`.
+After saving the plot, mention in your final answer that a plot was generated and saved to '{PLOT_SAVE_PATH}'.
+"""
+    full_prompt = prompt + plot_instruction
+
+    # Remove any existing plot file before running the analysis
+    if os.path.exists(PLOT_SAVE_PATH):
+        try:
+            os.remove(PLOT_SAVE_PATH)
+            print(f"DEBUG: Removed existing plot file: {PLOT_SAVE_PATH}")
+        except Exception as e:
+            print(f"DEBUG: Could not remove existing plot file {PLOT_SAVE_PATH}: {e}")
+
+
     try:
         # Log the prompt for debugging
-        print(f"DEBUG: Sending prompt to dfpanda agent: {prompt}")
+        print(f"DEBUG: Sending prompt to dfpanda agent: {full_prompt}")
         # Invoke the agent with the user's prompt
-        response = agent_executor.invoke({"input": prompt})
+        response = agent_executor.invoke({"input": full_prompt})
         # The output is typically in the 'output' key for AgentExecutor
         analysis_result = response.get('output', 'No output received from agent.')
         # Log the response type and value for debugging

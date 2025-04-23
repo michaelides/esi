@@ -12,8 +12,7 @@ from crawl4ai import AsyncWebCrawler
 import glob
 from langchain_community.document_loaders import PyPDFLoader
 # Import LanceDB
-from langchain_community.vectorstores import LanceDB
-import lancedb # Import lancedb client - Uncommented this line
+from langchain_community.vectorstores import LanceDB, lancedb
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')

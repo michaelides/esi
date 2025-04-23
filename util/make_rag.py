@@ -24,7 +24,7 @@ load_dotenv()
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
 # Changed path name for LanceDB
-LANCEDB_DB_PATH = "../lancedb_db"
+LANCEDB_DB_PATH = "../lance"
 COLLECTION_NAME = "dissertation_resources" # This will be the table name in LanceDB
 
 # Define the vector size for the embedding model

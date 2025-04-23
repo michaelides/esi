@@ -169,35 +169,35 @@ initialize_streamlit()
 if "agent_prompt" not in st.session_state:
     st.session_state.agent_prompt = ChatPromptTemplate.from_messages(prompt_messages)
 
-# --- LLM Setup (Moved to after initialize_streamlit) ---
+# --- LLM Setup ---
 # Initialize the LLM (e.g., Gemini) using the temperature from session state
-# Ensure session state has the temperature value (initialized in initialize_streamlit)
-# Re-initialize the LLM and agent executor if the temperature slider value changes
+# This LLM object will be used regardless of whether the agent is re-initialized.
+llm = ChatGoogleGenerativeAI(
+    model="gemini-2.0-flash",
+    temperature=st.session_state.get("llm_temperature", 0.7) # Use the current session state value
+)
+
+# --- Agent Executor Setup ---
+# Re-initialize the agent executor if it doesn't exist or if the temperature slider value changes
 # We store the temperature used for the current agent in session state.
 if "agent_executor" not in st.session_state or \
    "current_agent_temperature" not in st.session_state or \
    st.session_state.current_agent_temperature != st.session_state.llm_temperature:
 
-    print(f"DEBUG: Re-initializing LLM and agent with temperature: {st.session_state.llm_temperature}")
-
-    llm = ChatGoogleGenerativeAI(
-        model="gemini-2.0-flash",
-        temperature=st.session_state.llm_temperature # Use the current session state value
-    )
+    print(f"DEBUG: Re-initializing agent with temperature: {st.session_state.llm_temperature}")
 
     agent_prompt = st.session_state.agent_prompt
     st.session_state.agent_executor = AgentExecutor(
-        agent=create_tool_calling_agent(llm, base_tools, agent_prompt),
+        agent=create_tool_calling_agent(llm, base_tools, agent_prompt), # Use the 'llm' object created above
         tools=base_tools,
         verbose=True
     )
     # Store the temperature used to create this agent
     st.session_state.current_agent_temperature = st.session_state.llm_temperature
 else:
-    # If temperature hasn't changed, use the existing LLM and agent from session state
-    llm = st.session_state.agent_executor.agent.llm # This line is still problematic if agent doesn't expose llm directly
-    # Let's simplify: if the agent doesn't need re-initialization, we don't need to re-assign llm here.
-    # The handle_user_input function receives the agent_executor which already contains the correct LLM.
+    # If temperature hasn't changed, use the existing agent from session state.
+    # The 'llm' object created before the if condition already has the correct temperature.
+    print(f"DEBUG: Using existing agent with temperature: {st.session_state.current_agent_temperature}")
     pass # No action needed if agent is already correct
 
 
@@ -208,10 +208,8 @@ display_sidebar()
 display_chat_messages()
 
 # Handle user input using the restored function (which includes agent selection and chat input)
-# The agent_executor and llm objects are created once per session based on the temperature
-# set when the script first runs or reruns due to interaction.
-# Pass the agent_executor which holds the correct LLM instance
-handle_user_input(st.session_state.agent_executor, st.session_state.agent_executor.agent.llm) # Pass the LLM from the agent
+# Pass the agent_executor and the 'llm' object created earlier.
+handle_user_input(st.session_state.agent_executor, llm) # Pass the 'llm' object directly
 
 
 # --- PDF Ingestion Function (Main Knowledge Base) ---

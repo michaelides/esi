@@ -26,13 +26,21 @@ from langchain_core.messages import AIMessage, HumanMessage
 
 
 # --- Configuration ---
-load_dotenv()
+loaded_env = load_dotenv()
 DATA_DIR = "./data"  # Directory to store PDF files
 
 # Check for necessary API keys
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
-GOOGLE_CSE_ID = os.getenv("GOOGLE_CSE_ID")
-TAVILY_API_KEY = os.getenv("TAVILY_API_KEY")
+if loaded_env: 
+    GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+    GOOGLE_CSE_ID = os.getenv("GOOGLE_CSE_ID")
+    TAVILY_API_KEY = os.getenv("TAVILY_API_KEY")
+else:        
+    GOOGLE_API_KEY = st.secrets.esi.GOOGLE_API_KEY
+    GOOGLE_CSE_ID = st.secrets.esi.GOOGLE_CSE_ID
+    TAVILY_API_KEY = st.secrets.esi.TAVILY_API_KEY
+
+    
+
 
 # --- LLM Setup ---
 # Initialize the LLM (e.g., Gemini)

@@ -19,9 +19,9 @@ def initialize_streamlit():
     # --- Session State Initialization ---
     if "messages" not in st.session_state:
         st.session_state.messages = []
-        # Add initial greeting from AI
+        # Add initial greeting from AI - Made more casual
         st.session_state.messages.append(
-            AIMessage(content="Hello! I'm here to help you with your dissertation. How can I assist you today? Feel free to ask about brainstorming ideas, structuring chapters, finding resources, or anything else!")
+            AIMessage(content="Hey there! Ready to tackle that dissertation? I'm here to help with brainstorming, structure, resources, or whatever you need. What's on your mind?")
         )
 
     # Initialize the agent prompt in session state
@@ -267,7 +267,8 @@ def handle_user_input(agent_executor, llm):
                 st.error("GOOGLE_API_KEY not found.")
             else:
                 pandas_ai_agent = create_pandas_ai_agent(google_api_key, df)
-                if pandas_ai_agent:
+                # Corrected check: check if the agent object is not None
+                if pandas_ai_agent is not None:
                     # Add user analysis request to chat history
                     st.session_state.messages.append(HumanMessage(content=f"Analysis request: {prompt_from_chat_input}"))
                     with st.chat_message("user"):

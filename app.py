@@ -3,11 +3,6 @@ import os
 from dotenv import load_dotenv
 import io  # Import io for handling file streams
 import uuid  # Import uuid for generating unique IDs
-
-# Removed Qdrant imports
-# from qdrant_client import QdrantClient # Import QdrantClient
-# from langchain_qdrant import QdrantVectorStore # Changed from langchain_qdrant import Qdrant
-
 # Import LanceDB
 from langchain_community.vectorstores import LanceDB
 import lancedb # Import lancedb client
@@ -105,7 +100,7 @@ else:
 
 # --- RAG Setup (Main Dissertation Knowledge Base) ---
 # Define the path for the persistent LanceDB database
-LANCEDB_DB_PATH = "./lancedb_db" # Changed path name to match scrape_and_ingest.py
+LANCEDB_DB_PATH = "./lance" # Changed path name to match scrape_and_ingest.py
 COLLECTION_NAME = "dissertation_resources" # This will be the table name in LanceDB
 
 # Initialize LanceDB vector store for the main knowledge base

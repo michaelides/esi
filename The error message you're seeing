@@ -1,2 +1,0 @@
-2025-04-23 17:24:35,254 - ERROR - Existing table 'dissertation_resources' schema is missing the 'source' field.
-2025-04-23 17:24:35,254 - ERROR - Please drop the existing LanceDB table at '../lancedb_db/dissertation_resources.lance' and re-run the script.

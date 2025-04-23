@@ -50,6 +50,9 @@ def initialize_streamlit():
         st.session_state.suggested_prompts = []
     if "selected_prompt" not in st.session_state:
         st.session_state.selected_prompt = None
+    # --- LLM Temperature State ---
+    if "llm_temperature" not in st.session_state:
+        st.session_state.llm_temperature = 0.7 # Default temperature
 
 
 def display_chat_messages():
@@ -336,3 +339,13 @@ def display_sidebar():
         st.info("""ESI uses AI to help you navigate the dissertation process.
         It has access to some of the literature in your reading lists and also uses Search tools for web lookups.""")
         st.warning("⚠️ Remember: Always consult your official supervisor for final guidance and decisions.")
+
+        # Add the creativity slider
+        st.session_state.llm_temperature = st.slider(
+            "Creativity",
+            min_value=0.0,
+            max_value=1.0,
+            value=st.session_state.get("llm_temperature", 0.7), # Use session state value, default if not set
+            step=0.05,
+            help="Controls the randomness of the AI's responses. Higher values mean more creative/random."
+        )

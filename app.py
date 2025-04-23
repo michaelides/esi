@@ -30,21 +30,16 @@ loaded_env = load_dotenv()
 DATA_DIR = "./data"  # Directory to store PDF files
 
 # Check for necessary API keys
-if loaded_env: 
+if loaded_env:
     GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
     GOOGLE_CSE_ID = os.getenv("GOOGLE_CSE_ID")
     TAVILY_API_KEY = os.getenv("TAVILY_API_KEY")
-else:        
+else:
     GOOGLE_API_KEY = st.secrets.esi.GOOGLE_API_KEY
     GOOGLE_CSE_ID = st.secrets.esi.GOOGLE_CSE_ID
     TAVILY_API_KEY = st.secrets.esi.TAVILY_API_KEY
 
-    
 
-
-# --- LLM Setup ---
-# Initialize the LLM (e.g., Gemini)
-llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=0.7)
 
 # --- Embedding Model Setup ---
 embedding_function = GoogleGenerativeAIEmbeddings(model="models/text-embedding-004")
@@ -167,15 +162,30 @@ if tavily_search:
     base_tools.append(tavily_search)
 
 
-# Initialize Streamlit UI and session state
+# Initialize Streamlit UI and session state (This must run before LLM/Agent init)
 initialize_streamlit()
 
 # Initialize the agent prompt in session state
 if "agent_prompt" not in st.session_state:
     st.session_state.agent_prompt = ChatPromptTemplate.from_messages(prompt_messages)
 
-if "agent_executor" not in st.session_state:
-    # Initialize the agent executor with base tools on first run
+# --- LLM Setup (Moved to after initialize_streamlit) ---
+# Initialize the LLM (e.g., Gemini) using the temperature from session state
+# Ensure session state has the temperature value (initialized in initialize_streamlit)
+llm = ChatGoogleGenerativeAI(
+    model="gemini-2.0-flash",
+    temperature=st.session_state.get("llm_temperature", 0.7) # Use session state value, default to 0.7
+)
+
+# --- Agent Executor Setup (Moved to after initialize_streamlit) ---
+# Re-initialize the agent executor if the LLM temperature changes
+# This ensures the agent uses the LLM with the updated temperature
+# We check if the agent_executor exists OR if the LLM temperature has changed since the last run
+# Note: This re-initializes the agent on every rerun if the slider is moved.
+# A more complex approach might involve caching the agent based on temperature.
+# For simplicity, we re-initialize here.
+if "agent_executor" not in st.session_state or st.session_state.agent_executor.agent.llm.temperature != st.session_state.llm_temperature:
+    print(f"DEBUG: Re-initializing agent with temperature: {st.session_state.llm_temperature}")
     agent_prompt = st.session_state.agent_prompt
     st.session_state.agent_executor = AgentExecutor(
         agent=create_tool_calling_agent(llm, base_tools, agent_prompt),
@@ -183,13 +193,16 @@ if "agent_executor" not in st.session_state:
         verbose=True
     )
 
-# Display the sidebar first
+
+# Display the sidebar first (This is where the slider updates session state)
 display_sidebar()
 
 # Display chat messages from history
 display_chat_messages()
 
 # Handle user input using the restored function (which includes agent selection and chat input)
+# The agent_executor and llm objects are created once per session based on the temperature
+# set when the script first runs or reruns due to interaction.
 handle_user_input(st.session_state.agent_executor, llm)
 
 # --- PDF Ingestion Function (Main Knowledge Base) ---

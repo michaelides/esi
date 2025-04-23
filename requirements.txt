@@ -9,3 +9,5 @@ unstructured[pdf]
 pdfminer.six
 lancedb
 pyarrow
+pypdf
+pandas

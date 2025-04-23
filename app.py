@@ -68,10 +68,9 @@ where X is a number. The url for each of these citations should be provided at t
 2.  **CRITICAL INSTRUCTION: For EVERY user query, your FIRST action MUST be to use the `dissertation_resource_retriever` tool.** Check if the knowledge base contains relevant information about the query (e.g., module deadlines, procedures, milestones, specific writing guides, methodology examples, previously discussed concepts, scales, questionnaires, instruments). **DO NOT skip this step.** Only if the retriever returns no relevant information should you consider other tools or answer directly. Always cite information retrieved using this tool.
 3.  Use the `duckduckgo_search` tool to find recent research papers, news, or general information not present in the knowledge base. Cite information retrieved using this tool.
 4.  If the `tavily_search` tool is available, use it to supplement the `duckduckgo_search` for broader or more in-depth searches. It returns the most relevant search results with snippets. Cite information retrieved using this tool.
-5.  Use the `crawl4ai` tool to crawl a specific website and extract its content. Only use this tool if you need to get information directly from a specific website. Be specific about the URL you want to crawl.
-6.  If unsure about a specific academic convention, first search for information using the `duckduckgo_search` tool, the `tavily_search` tool (if available), the `dissertation_resource_retriever`, and the `crawl4ai` tool (if a specific website is relevant), and if unable to find the answer, advise the student to consult their supervisor or university guidelines.
-7.  When asked to search for something or asked to find or reccomend literature you should use all of your tools
-8.  When asked to find information or literature about a specific author, you should use all of your tools.
+5.  If unsure about a specific academic convention, first search for information using the `duckduckgo_search` tool, the `tavily_search` tool (if available), and the `dissertation_resource_retriever`, and if unable to find the answer, advise the student to consult their supervisor or university guidelines.
+6.  When asked to search for something or asked to find or reccomend literature you should use all of your tools
+7.  When asked to find information or literature about a specific author, you should use all of your tools.
 """
 
 # Define the prompt message structure

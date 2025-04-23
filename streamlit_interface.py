@@ -278,9 +278,11 @@ def handle_user_input(agent_executor, llm):
                     with st.chat_message("assistant"):
                         with st.spinner("Analyzing data..."):
                             response = analyze_data(pandas_ai_agent, df, prompt_from_chat_input)
-                            st.markdown(response) # Display result directly
+                            # Convert the response to a string before displaying and adding to history
+                            response_str = str(response)
+                            st.markdown(response_str) # Display result directly
                             # Add AI analysis response to chat history
-                            st.session_state.messages.append(AIMessage(content=response))
+                            st.session_state.messages.append(AIMessage(content=response_str)) # Use the string version
                             prompt_processed_this_run = True # Mark that an interaction happened
                 else:
                     st.error("Failed to initialize data analysis agent.")

@@ -232,34 +232,25 @@ if __name__ == "__main__":
         # Check if the table exists
         table_names = db.table_names()
         if COLLECTION_NAME in table_names:
-            # If table exists, open it and add documents
-            logging.info(f"Table '{COLLECTION_NAME}' already exists. Appending documents.")
+            # If table exists, open it and check schema
+            logging.info(f"Table '{COLLECTION_NAME}' already exists. Checking schema...")
             table = db.open_table(COLLECTION_NAME)
 
-            # Get the existing schema to ensure data conforms
+            # Get the existing schema
             existing_schema = table.schema
-            # Identify field names in the existing schema (excluding 'text' and 'vector' which are standard)
-            # This assumes 'text' and 'vector' are the only standard fields added by LanceDB.from_documents
-            # or explicitly defined in the initial creation.
-            schema_field_names = {field.name for field in existing_schema}
-            # We only care about metadata fields that are actually columns in the table
-            # Filter data_to_add to match the existing schema
-            filtered_data_to_add = []
-            for doc_dict in data_to_add:
-                filtered_doc_dict = {}
-                for key, value in doc_dict.items():
-                    if key in schema_field_names:
-                         filtered_doc_dict[key] = value
-                    else:
-                        # Log a warning if a field is being dropped because it's not in the schema
-                        logging.warning(f"Field '{key}' from document is not in the existing table schema ('{COLLECTION_NAME}') and will be dropped.")
-                filtered_data_to_add.append(filtered_doc_dict)
 
+            # Check if the 'source' field exists in the schema
+            if 'source' not in {field.name for field in existing_schema}:
+                logging.error(f"Existing table '{COLLECTION_NAME}' schema is missing the 'source' field.")
+                logging.error(f"Please drop the existing LanceDB table at '{LANCEDB_DB_PATH}/{COLLECTION_NAME}.lance' and re-run the script.")
+                # Exit the script as we cannot safely add documents with 'source'
+                exit(1)
 
-            # Add the prepared data to the table
-            logging.info(f"Adding {len(filtered_data_to_add)} documents to LanceDB table '{COLLECTION_NAME}'...")
-            # Use the filtered data
-            table.add(filtered_data_to_add)
+            # If 'source' field exists, proceed to add documents
+            logging.info(f"Existing table '{COLLECTION_NAME}' has the correct schema. Appending documents.")
+            # Add the prepared data to the table (data_to_add already includes 'source')
+            logging.info(f"Adding {len(data_to_add)} documents to LanceDB table '{COLLECTION_NAME}'...")
+            table.add(data_to_add)
             logging.info("Successfully added documents to LanceDB.")
 
         else:

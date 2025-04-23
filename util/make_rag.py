@@ -215,7 +215,8 @@ if __name__ == "__main__":
             # If table exists, open it and add documents
             logging.info(f"Table '{COLLECTION_NAME}' already exists. Appending documents.")
             table = db.open_table(COLLECTION_NAME)
-            table.add_documents(all_documents_to_ingest)
+            # Corrected method name from add_documents to add
+            table.add(all_documents_to_ingest)
         else:
             # If table does not exist, create it from documents
             logging.info(f"Table '{COLLECTION_NAME}' not found. Creating table from documents.")

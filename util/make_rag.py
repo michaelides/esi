@@ -179,7 +179,15 @@ if __name__ == "__main__":
     all_documents_to_ingest = []
     successfully_processed_pdf_filenames = []
 
-    # Collect documents from web scraping
+    # Collect documents from PDF ingestion first
+    logging.info("Checking for new documents to load into the main knowledge base from PDFs...")
+    # Pass the LANCEDB_DB_PATH to check_and_collect_new_pdfs so it can find the log file
+    pdf_docs, processed_pdf_filenames = check_and_collect_new_pdfs(DATA_DIR, LANCEDB_DB_PATH)
+    all_documents_to_ingest.extend(pdf_docs)
+    successfully_processed_pdf_filenames.extend(processed_pdf_filenames)
+    logging.info(f"Collected {len(pdf_docs)} documents from PDF ingestion.")
+
+    # Then collect documents from web scraping
     if not URLS_TO_SCRAPE:
         logging.warning("No URLs provided in URLS_TO_SCRAPE list. Skipping web scraping.")
     else:
@@ -187,17 +195,9 @@ if __name__ == "__main__":
         all_documents_to_ingest.extend(scraped_docs)
         logging.info(f"Collected {len(scraped_docs)} documents from web scraping.")
 
-    # Collect documents from PDF ingestion
-    logging.info("Checking for new documents to load into the main knowledge base...")
-    # Pass the LANCEDB_DB_PATH to check_and_collect_new_pdfs so it can find the log file
-    pdf_docs, processed_pdf_filenames = check_and_collect_new_pdfs(DATA_DIR, LANCEDB_DB_PATH)
-    all_documents_to_ingest.extend(pdf_docs)
-    successfully_processed_pdf_filenames.extend(processed_pdf_filenames)
-    logging.info(f"Collected {len(pdf_docs)} documents from PDF ingestion.")
-
 
     if not all_documents_to_ingest:
-        logging.info("No new documents found from either web scraping or PDF ingestion. Nothing to add to LanceDB.")
+        logging.info("No new documents found from either PDF ingestion or web scraping. Nothing to add to LanceDB.")
         exit(0) # Exit successfully as there's nothing to do
 
     logging.info(f"Total documents collected for ingestion: {len(all_documents_to_ingest)}")

@@ -266,6 +266,7 @@ def handle_user_input(agent_executor, llm):
             if not google_api_key:
                 st.error("GOOGLE_API_KEY not found.")
             else:
+                # Note: create_pandas_ai_agent expects the API key and DataFrame
                 pandas_ai_agent = create_pandas_ai_agent(google_api_key, df)
                 # Corrected check: check if the agent object is not None
                 if pandas_ai_agent is not None:
@@ -277,12 +278,13 @@ def handle_user_input(agent_executor, llm):
                     # Get analysis result and display it
                     with st.chat_message("assistant"):
                         with st.spinner("Analyzing data..."):
+                            # Note: analyze_data expects the agent, df, and prompt
                             response = analyze_data(pandas_ai_agent, df, prompt_from_chat_input)
                             # Convert the response to a string before displaying and adding to history
-                            response_str = str(response)
+                            response_str = str(response) # <-- Added this line
                             st.markdown(response_str) # Display result directly
                             # Add AI analysis response to chat history
-                            st.session_state.messages.append(AIMessage(content=response_str)) # Use the string version
+                            st.session_state.messages.append(AIMessage(content=response_str)) # <-- Used response_str here
                             prompt_processed_this_run = True # Mark that an interaction happened
                 else:
                     st.error("Failed to initialize data analysis agent.")

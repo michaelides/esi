@@ -242,31 +242,19 @@ if __name__ == "__main__":
             # Check if the 'source' field exists in the schema
             if 'source' not in {field.name for field in existing_schema}:
                 logging.warning(f"Existing table '{COLLECTION_NAME}' schema is missing the 'source' field.")
-                logging.warning("Attempting to add the 'source' column to the existing table.")
-                try:
-                    # Define the new column schema
-                    new_column_schema = pa.field("source", pa.string())
-                    # Add the column. Existing rows will likely get a default (e.g., None or empty string)
-                    # We don't need to specify a default_value here; LanceDB handles adding the column
-                    # and new data added via table.add will use the source from data_to_add.
-                    table.add_columns({"source": new_column_schema})
-                    logging.info("Successfully added 'source' column to the existing table schema.")
-                    # Now that the schema is updated, proceed to add the new data
-                    logging.info(f"Adding {len(data_to_add)} documents to LanceDB table '{COLLECTION_NAME}'...")
-                    table.add(data_to_add)
-                    logging.info("Successfully added documents to LanceDB.")
-                except Exception as schema_error:
-                    logging.error(f"Failed to add 'source' column to existing table: {schema_error}", exc_info=True)
-                    logging.error(f"Please drop the existing LanceDB table at '{LANCEDB_DB_PATH}/{COLLECTION_NAME}.lance' and re-run the script.")
-                    exit(1) # Exit if schema evolution fails
+                logging.warning("Proceeding to add documents. LanceDB should handle schema evolution automatically.")
+                # Removed the incorrect table.add_columns call
+                # The schema should evolve implicitly when adding data_to_add which includes 'source'
 
             else:
                 # If 'source' field exists, proceed to add documents
-                logging.info(f"Existing table '{COLLECTION_NAME}' has the correct schema. Appending documents.")
-                # Add the prepared data to the table (data_to_add already includes 'source')
-                logging.info(f"Adding {len(data_to_add)} documents to LanceDB table '{COLLECTION_NAME}'...")
-                table.add(data_to_add)
-                logging.info("Successfully added documents to LanceDB.")
+                logging.info(f"Existing table '{COLLECTION_NAME}' has the correct schema.")
+
+            # Add the prepared data to the table (data_to_add already includes 'source')
+            logging.info(f"Adding {len(data_to_add)} documents to LanceDB table '{COLLECTION_NAME}'...")
+            table.add(data_to_add)
+            logging.info("Successfully added documents to LanceDB.")
+
 
         else:
             # If table does not exist, create it using the lancedb client with an explicit schema
@@ -306,6 +294,9 @@ if __name__ == "__main__":
 
     except Exception as e:
         logging.error(f"An error occurred during LanceDB ingestion: {e}", exc_info=True)
+        # If adding data failed after checking schema, it might still be a schema issue
+        # or another ingestion problem. Re-advise dropping the table as a fallback.
+        logging.error(f"If the issue persists, please drop the existing LanceDB table at '{LANCEDB_DB_PATH}/{COLLECTION_NAME}.lance' and re-run the script.")
         exit(1)
 
     logging.info("Ingestion script finished.")

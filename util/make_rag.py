@@ -12,8 +12,9 @@ from crawl4ai import AsyncWebCrawler
 import glob
 from langchain_community.document_loaders import PyPDFLoader
 # Import LanceDB - Corrected import to only get LanceDB class
-from langchain_community.vectorstores import LanceDB
+from langchain_community.vectorstores import LanceDB # Keep this import for potential future use or reference, though we'll use lancedb client directly for creation
 import lancedb # Import lancedb client - This is the correct import for lancedb.connect()
+import pyarrow as pa # Import pyarrow for schema definition
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -26,8 +27,11 @@ GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 LANCEDB_DB_PATH = "../lancedb_db"
 COLLECTION_NAME = "dissertation_resources" # This will be the table name in LanceDB
 
+# Define the vector size for the embedding model
+# models/text-embedding-004 has a dimension of 768
+VECTOR_SIZE = 768
+
 # Removed Qdrant specific vector parameters
-# VECTOR_SIZE = 768 # Dimension for models/text-embedding-004 (as reported by error)
 # DISTANCE_METRIC = models.Distance.COSINE # Common distance metric
 
 # List of URLs to scrape
@@ -205,6 +209,27 @@ if __name__ == "__main__":
         db = lancedb.connect(LANCEDB_DB_PATH)
         logging.info("Connected to LanceDB.")
 
+        # --- Prepare data for LanceDB (Generate Embeddings and format as dictionaries) ---
+        logging.info(f"Generating embeddings for {len(all_documents_to_ingest)} documents...")
+        # Embed all documents in a batch for efficiency
+        texts_to_embed = [doc.page_content for doc in all_documents_to_ingest]
+        embeddings = embedding_function.embed_documents(texts_to_embed)
+        logging.info("Embeddings generated.")
+
+        data_to_add = []
+        for i, doc in enumerate(all_documents_to_ingest):
+            doc_dict = {
+                "vector": embeddings[i],
+                "text": doc.page_content,
+                # Add metadata fields. Assuming 'source' is the only one based on current code.
+                # If there could be other metadata keys, iterate through doc.metadata
+                # We will handle schema matching below when adding to an existing table
+                **doc.metadata # Unpack metadata dictionary
+            }
+            data_to_add.append(doc_dict)
+        # --- End Prepare data ---
+
+
         # Check if the table exists
         table_names = db.table_names()
         if COLLECTION_NAME in table_names:
@@ -216,54 +241,44 @@ if __name__ == "__main__":
             existing_schema = table.schema
             # Identify field names in the existing schema (excluding 'text' and 'vector' which are standard)
             # This assumes 'text' and 'vector' are the only standard fields added by LanceDB.from_documents
+            # or explicitly defined in the initial creation.
             schema_field_names = {field.name for field in existing_schema}
             # We only care about metadata fields that are actually columns in the table
-            metadata_fields_in_schema = schema_field_names - {'text', 'vector'}
-
-
-            # Prepare documents for LanceDB add method (list of dictionaries)
-            # Need to generate embeddings for the documents before adding
-            logging.info(f"Generating embeddings for {len(all_documents_to_ingest)} documents...")
-            # Embed all documents in a batch for efficiency
-            texts_to_embed = [doc.page_content for doc in all_documents_to_ingest]
-            embeddings = embedding_function.embed_documents(texts_to_embed)
-            logging.info("Embeddings generated.")
-
-            data_to_add = []
-            for i, doc in enumerate(all_documents_to_ingest):
-                doc_dict = {
-                    "vector": embeddings[i],
-                    "text": doc.page_content,
-                }
-                # Add only metadata fields that exist in the table's schema
-                for key, value in doc.metadata.items():
-                    if key in metadata_fields_in_schema:
-                        doc_dict[key] = value
+            # Filter data_to_add to match the existing schema
+            filtered_data_to_add = []
+            for doc_dict in data_to_add:
+                filtered_doc_dict = {}
+                for key, value in doc_dict.items():
+                    if key in schema_field_names:
+                         filtered_doc_dict[key] = value
                     else:
-                        # Log a warning if metadata is being dropped
-                        logging.warning(f"Metadata field '{key}' from document is not in the existing table schema ('{COLLECTION_NAME}') and will be dropped.")
+                        # Log a warning if a field is being dropped because it's not in the schema
+                        logging.warning(f"Field '{key}' from document is not in the existing table schema ('{COLLECTION_NAME}') and will be dropped.")
+                filtered_data_to_add.append(filtered_doc_dict)
 
-                data_to_add.append(doc_dict)
 
             # Add the prepared data to the table
-            logging.info(f"Adding {len(data_to_add)} documents to LanceDB table '{COLLECTION_NAME}'...")
-            table.add(data_to_add)
+            logging.info(f"Adding {len(filtered_data_to_add)} documents to LanceDB table '{COLLECTION_NAME}'...")
+            # Use the filtered data
+            table.add(filtered_data_to_add)
             logging.info("Successfully added documents to LanceDB.")
 
         else:
-            # If table does not exist, create it from documents using LangChain's LanceDB class
-            logging.info(f"Table '{COLLECTION_NAME}' not found. Creating table from documents.")
-            # LanceDB.from_documents handles embedding internally and creates the table
-            # This should infer the schema including 'source' if present in initial docs
-            vector_store = LanceDB.from_documents(
-                all_documents_to_ingest,
-                embedding_function,
-                connection=db, # Pass the lancedb connection
-                table_name=COLLECTION_NAME,
-            )
-            # The table is created by the above call. We don't need the vector_store object
-            # for subsequent additions in this script, but the table exists now.
-            logging.info(f"Successfully created table '{COLLECTION_NAME}' from documents.")
+            # If table does not exist, create it using the lancedb client with an explicit schema
+            logging.info(f"Table '{COLLECTION_NAME}' not found. Creating table with explicit schema.")
+
+            # Define the explicit schema
+            schema = pa.schema([
+                pa.field("vector", pa.list_(pa.float32(), list_size=VECTOR_SIZE)),
+                pa.field("text", pa.string()),
+                pa.field("source", pa.string()) # Explicitly include the 'source' field
+            ])
+
+            # Create the table using the lancedb client and the prepared data
+            # The data_to_add already includes 'vector', 'text', and 'source'
+            table = db.create_table(COLLECTION_NAME, data_to_add, schema=schema)
+
+            logging.info(f"Successfully created table '{COLLECTION_NAME}' with explicit schema and added initial documents.")
 
 
         # Update the PDF ingestion log file with newly processed files

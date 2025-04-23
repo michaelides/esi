@@ -117,7 +117,7 @@ def run_dfpanda_analysis(agent_executor: AgentExecutor, prompt: str) -> str:
     # Tell the agent to save plots to PLOT_SAVE_PATH and NOT use plt.show()
     plot_instruction = f"""
 If you generate a plot using matplotlib, save it to the file path '{PLOT_SAVE_PATH}' using `plt.savefig()` and do NOT call `plt.show()`.
-After saving the plot, mention in your final answer that a plot was generated and saved to '{PLOT_SAVE_PATH}'.
+After saving the plot, mention in your final answer that a plot was generated and saved to '{PLOT_SAVE_SAVE_PATH}'.
 """
     full_prompt = prompt + plot_instruction
 

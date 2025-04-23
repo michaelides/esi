@@ -53,6 +53,8 @@ def initialize_streamlit():
     # --- LLM Temperature State ---
     if "llm_temperature" not in st.session_state:
         st.session_state.llm_temperature = 0.7 # Default temperature
+    # --- Current Agent Temperature State (Used to track if agent needs re-init) ---
+    # This is initialized in app.py when the agent is created
 
 
 def display_chat_messages():
@@ -344,7 +346,7 @@ def display_sidebar():
         st.session_state.llm_temperature = st.slider(
             "Creativity",
             min_value=0.0,
-            max_value=1.0,
+            max_value=2.0, # Changed max value to 2.0
             value=st.session_state.get("llm_temperature", 0.7), # Use session state value, default if not set
             step=0.05,
             help="Controls the randomness of the AI's responses. Higher values mean more creative/random."

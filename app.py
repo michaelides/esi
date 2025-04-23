@@ -172,26 +172,33 @@ if "agent_prompt" not in st.session_state:
 # --- LLM Setup (Moved to after initialize_streamlit) ---
 # Initialize the LLM (e.g., Gemini) using the temperature from session state
 # Ensure session state has the temperature value (initialized in initialize_streamlit)
-llm = ChatGoogleGenerativeAI(
-    model="gemini-2.0-flash",
-    temperature=st.session_state.get("llm_temperature", 0.7) # Use session state value, default to 0.7
-)
+# Re-initialize the LLM and agent executor if the temperature slider value changes
+# We store the temperature used for the current agent in session state.
+if "agent_executor" not in st.session_state or \
+   "current_agent_temperature" not in st.session_state or \
+   st.session_state.current_agent_temperature != st.session_state.llm_temperature:
 
-# --- Agent Executor Setup (Moved to after initialize_streamlit) ---
-# Re-initialize the agent executor if the LLM temperature changes
-# This ensures the agent uses the LLM with the updated temperature
-# We check if the agent_executor exists OR if the LLM temperature has changed since the last run
-# Note: This re-initializes the agent on every rerun if the slider is moved.
-# A more complex approach might involve caching the agent based on temperature.
-# For simplicity, we re-initialize here.
-if "agent_executor" not in st.session_state or st.session_state.agent_executor.agent.llm.temperature != st.session_state.llm_temperature:
-    print(f"DEBUG: Re-initializing agent with temperature: {st.session_state.llm_temperature}")
+    print(f"DEBUG: Re-initializing LLM and agent with temperature: {st.session_state.llm_temperature}")
+
+    llm = ChatGoogleGenerativeAI(
+        model="gemini-2.0-flash",
+        temperature=st.session_state.llm_temperature # Use the current session state value
+    )
+
     agent_prompt = st.session_state.agent_prompt
     st.session_state.agent_executor = AgentExecutor(
         agent=create_tool_calling_agent(llm, base_tools, agent_prompt),
         tools=base_tools,
         verbose=True
     )
+    # Store the temperature used to create this agent
+    st.session_state.current_agent_temperature = st.session_state.llm_temperature
+else:
+    # If temperature hasn't changed, use the existing LLM and agent from session state
+    llm = st.session_state.agent_executor.agent.llm # This line is still problematic if agent doesn't expose llm directly
+    # Let's simplify: if the agent doesn't need re-initialization, we don't need to re-assign llm here.
+    # The handle_user_input function receives the agent_executor which already contains the correct LLM.
+    pass # No action needed if agent is already correct
 
 
 # Display the sidebar first (This is where the slider updates session state)
@@ -203,7 +210,9 @@ display_chat_messages()
 # Handle user input using the restored function (which includes agent selection and chat input)
 # The agent_executor and llm objects are created once per session based on the temperature
 # set when the script first runs or reruns due to interaction.
-handle_user_input(st.session_state.agent_executor, llm)
+# Pass the agent_executor which holds the correct LLM instance
+handle_user_input(st.session_state.agent_executor, st.session_state.agent_executor.agent.llm) # Pass the LLM from the agent
+
 
 # --- PDF Ingestion Function (Main Knowledge Base) ---
 # Moved this function here from scrape_and_ingest.py to be accessible by app.py

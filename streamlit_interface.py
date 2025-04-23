@@ -6,7 +6,9 @@ import random
 from langchain_core.runnables import chain
 import uuid
 import re # Import regex for parsing suggestions
-from pandas_agent import create_pandas_ai_agent, analyze_data, load_data
+# Updated import to use the new dfpanda_agent.py file
+from dfpanda_agent import create_dfpanda_agent, run_dfpanda_analysis, load_data
+from langchain_core.language_models import BaseChatModel # Import for type hinting
 
 
 st.set_page_config(layout="wide")
@@ -59,7 +61,7 @@ def display_chat_messages():
             with st.chat_message("user"):
                 st.markdown(message.content)
 
-def process_user_input(agent_executor, llm, prompt):
+def process_user_input(agent_executor, llm: BaseChatModel, prompt: str):
     """Processes user input for the Dissertation Agent and generates AI response."""
     # Add user message to chat history
     st.session_state.messages.append(HumanMessage(content=prompt))
@@ -95,7 +97,7 @@ def process_user_input(agent_executor, llm, prompt):
 
 # --- Suggested Prompts Generation ---
 
-def generate_suggested_prompts(llm, chat_history):
+def generate_suggested_prompts(llm: BaseChatModel, chat_history):
     """Generates suggested follow-up prompts using the LLM."""
     if not chat_history:
         return [] # No history, no suggestions
@@ -140,7 +142,7 @@ def suggestion_button_callback(prompt_text):
 
 # --- Input Handling Logic with Suggestions ---
 
-def handle_user_input(agent_executor, llm):
+def handle_user_input(agent_executor, llm: BaseChatModel):
     """Handles user input via chat_input or suggestion buttons, and agent selection."""
 
     # --- Check for Selected Prompt from Button Click ---
@@ -223,31 +225,8 @@ def handle_user_input(agent_executor, llm):
                 # Assign to prompt_from_chat_input if a value was entered
                 if analysis_prompt:
                      prompt_from_chat_input = analysis_prompt
-                     # This logic will be moved to the processing block below
-                         # df = st.session_state.loaded_df
-                         # google_api_key = os.getenv("GOOGLE_API_KEY")
-                # The check and agent creation logic is moved below
-                # if not google_api_key:
-                #     st.error("GOOGLE_API_KEY not found.")
-                # else:
-                    # This block seems to be leftover from a previous refactor attempt and should be removed
-                    # pandas_ai_agent = create_pandas_ai_agent(google_api_key, df)
-                    # if pandas_ai_agent:
-                    #     # Add user analysis request to chat history
-                    #     st.session_state.messages.append(HumanMessage(content=f"Analysis request: {analysis_prompt}"))
-                    #     with st.chat_message("user"):
-                    #         st.markdown(f"Analysis request: {analysis_prompt}")
 
-                    #     # Get analysis result and display it
-                    #     with st.chat_message("assistant"):
-                    #         with st.spinner("Analyzing data..."):
-                    #             response = analyze_data(pandas_ai_agent, df, analysis_prompt)
-                    #             st.markdown(response) # Display result directly
-                    #             # Add AI analysis response to chat history
-                    #             st.session_state.messages.append(AIMessage(content=response))
-                    #             prompt_processed_this_run = True # Mark that an interaction happened
-                    # else:
-                    #     st.error("Failed to initialize data analysis agent.")
+
         else:
              # Clear data if no file is uploaded
              st.session_state.loaded_df = None
@@ -262,32 +241,34 @@ def handle_user_input(agent_executor, llm):
         elif agent_type == "Data Analysis Agent" and st.session_state.loaded_df is not None:
             # Data analysis processing logic moved here
             df = st.session_state.loaded_df
-            google_api_key = os.getenv("GOOGLE_API_KEY")
-            if not google_api_key:
-                st.error("GOOGLE_API_KEY not found.")
-            else:
-                # Note: create_pandas_ai_agent expects the API key and DataFrame
-                pandas_ai_agent = create_pandas_ai_agent(google_api_key, df)
-                # Corrected check: check if the agent object is not None
-                if pandas_ai_agent is not None:
-                    # Add user analysis request to chat history
-                    st.session_state.messages.append(HumanMessage(content=f"Analysis request: {prompt_from_chat_input}"))
-                    with st.chat_message("user"):
-                        st.markdown(f"Analysis request: {prompt_from_chat_input}")
+            # Removed GOOGLE_API_KEY check as create_pandas_langchain_agent takes LLM directly
+            # google_api_key = os.getenv("GOOGLE_API_KEY")
+            # if not google_api_key:
+            #     st.error("GOOGLE_API_KEY not found.")
+            # else:
+            # Use the llm object available in this function scope
+            # Call the new LangChain agent creation function from dfpanda_agent
+            pandas_agent_executor = create_dfpanda_agent(llm, df)
+            # Corrected check: check if the agent object is not None
+            if pandas_agent_executor is not None:
+                # Add user analysis request to chat history
+                st.session_state.messages.append(HumanMessage(content=f"Analysis request: {prompt_from_chat_input}"))
+                with st.chat_message("user"):
+                    st.markdown(f"Analysis request: {prompt_from_chat_input}")
 
-                    # Get analysis result and display it
-                    with st.chat_message("assistant"):
-                        with st.spinner("Analyzing data..."):
-                            # Note: analyze_data expects the agent, df, and prompt
-                            response = analyze_data(pandas_ai_agent, df, prompt_from_chat_input)
-                            # Convert the response to a string before displaying and adding to history
-                            response_str = str(response) # <-- Added this line
-                            st.markdown(response_str) # Display result directly
-                            # Add AI analysis response to chat history
-                            st.session_state.messages.append(AIMessage(content=response_str)) # <-- Used response_str here
-                            prompt_processed_this_run = True # Mark that an interaction happened
-                else:
-                    st.error("Failed to initialize data analysis agent.")
+                # Get analysis result and display it
+                with st.chat_message("assistant"):
+                    with st.spinner("Analyzing data..."):
+                        # Call the new run_dfpanda_analysis function
+                        response = run_dfpanda_analysis(pandas_agent_executor, prompt_from_chat_input)
+                        # Convert the response to a string before displaying and adding to history
+                        response_str = str(response)
+                        st.markdown(response_str) # Display result directly
+                        # Add AI analysis response to chat history
+                        st.session_state.messages.append(AIMessage(content=response_str)) # Use the string version
+                        prompt_processed_this_run = True # Mark that an interaction happened
+            else:
+                st.error("Failed to initialize data analysis agent.")
 
     # --- Generate and Display Suggestions (only for Dissertation Agent) ---
     # Generate suggestions if the agent is Dissertation and no suggestions currently exist

@@ -114,18 +114,20 @@ try:
     # Connect to the LanceDB database
     db = lancedb.connect(LANCEDB_DB_PATH)
 
-    # Check if the table exists before opening
+    # Check if the table exists before trying to initialize the vector store
     table_names = db.table_names()
     if COLLECTION_NAME not in table_names:
         st.error(f"LanceDB table '{COLLECTION_NAME}' not found at {LANCEDB_DB_PATH}.")
         st.info("Please run the ingestion script (`python scrape_and_ingest.py`) first to create and populate the database.")
         st.stop() # Stop the app if the database/table is not ready
 
-    # Open the existing table
-    table = db.open_table(COLLECTION_NAME)
-
-    # Initialize LanceDB vector store from the table
-    vector_store = LanceDB(table, embedding_function)
+    # Initialize LanceDB vector store using the connection and table name
+    # Pass the connection object, table name, and embedding function
+    vector_store = LanceDB(
+        connection=db, # Pass the LanceDB connection object
+        table_name=COLLECTION_NAME, # Pass the table name
+        embedding=embedding_function # Pass the embedding function
+    )
 
     st.info(f"Connected to LanceDB database at {LANCEDB_DB_PATH} and table '{COLLECTION_NAME}'")
 

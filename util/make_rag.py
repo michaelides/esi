@@ -67,6 +67,7 @@ async def scrape_and_collect_documents():
     for url in URLS_TO_SCRAPE:
         logging.info(f"Attempting to crawl: {url}")
         try:
+            # Use await here as we are inside an async function
             crawl_result_container = await crawler.arun(url)
 
             if crawl_result_container:
@@ -172,14 +173,13 @@ def check_and_collect_new_pdfs(data_directory: str, db_path: str):
     logging.info(f"Collected {len(splits)} new document chunks from PDFs.")
     return splits, processed_new_files # Return the splits and the list of successfully processed filenames
 
-# --- Main Execution ---
-DATA_DIR = "./data"  # Directory to store PDF files
-
-if __name__ == "__main__":
+# --- Main Execution Function ---
+async def main():
+    """Main asynchronous function to orchestrate ingestion."""
     all_documents_to_ingest = []
     successfully_processed_pdf_filenames = []
 
-    # Collect documents from PDF ingestion first
+    # Collect documents from PDF ingestion first (synchronous call)
     logging.info("Checking for new documents to load into the main knowledge base from PDFs...")
     # Pass the LANCEDB_DB_PATH to check_and_collect_new_pdfs so it can find the log file
     pdf_docs, processed_pdf_filenames = check_and_collect_new_pdfs(DATA_DIR, LANCEDB_DB_PATH)
@@ -187,18 +187,19 @@ if __name__ == "__main__":
     successfully_processed_pdf_filenames.extend(processed_pdf_filenames)
     logging.info(f"Collected {len(pdf_docs)} documents from PDF ingestion.")
 
-    # Then collect documents from web scraping
+    # Then collect documents from web scraping (asynchronous call)
     if not URLS_TO_SCRAPE:
         logging.warning("No URLs provided in URLS_TO_SCRAPE list. Skipping web scraping.")
     else:
-        scraped_docs = asyncio.run(scrape_and_collect_documents())
+        # Use await here because scrape_and_collect_documents is now an async function
+        scraped_docs = await scrape_and_collect_documents()
         all_documents_to_ingest.extend(scraped_docs)
         logging.info(f"Collected {len(scraped_docs)} documents from web scraping.")
 
 
     if not all_documents_to_ingest:
         logging.info("No new documents found from either PDF ingestion or web scraping. Nothing to add to LanceDB.")
-        exit(0) # Exit successfully as there's nothing to do
+        return # Use return instead of exit(0) in async function
 
     logging.info(f"Total documents collected for ingestion: {len(all_documents_to_ingest)}")
 
@@ -213,6 +214,7 @@ if __name__ == "__main__":
         logging.info(f"Generating embeddings for {len(all_documents_to_ingest)} documents...")
         # Embed all documents in a batch for efficiency
         texts_to_embed = [doc.page_content for doc in all_documents_to_ingest]
+        # Embedding is typically synchronous, no await needed here
         embeddings = embedding_function.embed_documents(texts_to_embed)
         logging.info("Embeddings generated.")
 
@@ -297,6 +299,20 @@ if __name__ == "__main__":
         # If adding data failed after checking schema, it might still be a schema issue
         # or another ingestion problem. Re-advise dropping the table as a fallback.
         logging.error(f"If the issue persists, please drop the existing LanceDB table at '{LANCEDB_DB_PATH}/{COLLECTION_NAME}.lance' and re-run the script.")
-        exit(1)
+        # Use raise instead of exit(1) in async function to propagate the error
+        raise
+
 
     logging.info("Ingestion script finished.")
+
+# --- Entry Point ---
+DATA_DIR = "./data"  # Directory to store PDF files
+
+if __name__ == "__main__":
+    # Run the main async function
+    try:
+        asyncio.run(main())
+    except Exception as e:
+        # Catch exceptions raised from the main async function
+        logging.error(f"Script execution failed: {e}")
+        exit(1) # Exit with a non-zero code on failure

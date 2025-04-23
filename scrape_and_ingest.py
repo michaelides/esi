@@ -13,7 +13,7 @@ import glob
 from langchain_community.document_loaders import PyPDFLoader
 # Import LanceDB
 from langchain_community.vectorstores import LanceDB
-import lancedb # Import lancedb client
+#import lancedb # Import lancedb client
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')

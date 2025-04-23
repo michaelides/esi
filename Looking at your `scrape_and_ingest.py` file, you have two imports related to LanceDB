@@ -1,2 +1,0 @@
-from langchain_community.vectorstores import LanceDB, lancedb # <-- Importing lancedb from here
-import lancedb # Import lancedb client # <-- Importing the main lancedb here

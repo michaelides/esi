@@ -23,7 +23,7 @@ load_dotenv()
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
 # Changed path name for LanceDB
-LANCEDB_DB_PATH = "./lancedb_db"
+LANCEDB_DB_PATH = "../lancedb_db"
 COLLECTION_NAME = "dissertation_resources" # This will be the table name in LanceDB
 
 # Removed Qdrant specific vector parameters
@@ -35,8 +35,8 @@ URLS_TO_SCRAPE = [
 #    "https://www.uea.ac.uk/course/postgraduate/msc-management", # Example URL 1
 #    "https://www.uea.ac.uk/about/university-information/campus-map", # Example URL 2
 #    "https://www.uea.ac.uk/course/postgraduate/msc-organisational-psychology", # Added comma
-#    "https://scholar.google.co.uk/citations?user=v9Rzv3kAAAAJ&hl=en", # Added comma
-    "https://research-portal.uea.ac.uk/en/persons/kevin-daniels/publications/"
+    "https://scholar.google.co.uk/citations?user=v9Rzv3kAAAAJ&hl=en", # Added comma
+#    "https://research-portal.uea.ac.uk/en/persons/kevin-daniels/publications/"
     # Add more relevant URLs here
 ]
 

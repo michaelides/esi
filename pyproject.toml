@@ -5,7 +5,6 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "crawl4ai>=0.5.0.post8",
     "duckduckgo-search>=8.0.1",
     "lancedb>=0.21.2",
     "langchain>=0.3.23",

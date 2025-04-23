@@ -11,8 +11,9 @@ import logging
 from crawl4ai import AsyncWebCrawler
 import glob
 from langchain_community.document_loaders import PyPDFLoader
-# Import LanceDB
-from langchain_community.vectorstores import LanceDB, lancedb
+# Import LanceDB - Corrected import to only get LanceDB class
+from langchain_community.vectorstores import LanceDB
+import lancedb # Import lancedb client - This is the correct import for lancedb.connect()
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -200,6 +201,7 @@ if __name__ == "__main__":
     try:
         # Connect to or create the LanceDB database
         logging.info(f"Connecting to LanceDB database at {LANCEDB_DB_PATH}...")
+        # Use the correctly imported lancedb for connect
         db = lancedb.connect(LANCEDB_DB_PATH)
         logging.info("Connected to LanceDB.")
 

@@ -1,5 +1,6 @@
 import streamlit as st
 from pandasai import SmartDataframe
+import sklearn
 import pandas as pd
 import io
 import os

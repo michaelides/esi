@@ -83,11 +83,13 @@ def create_dfpanda_agent(llm: BaseChatModel, df: pd.DataFrame) -> AgentExecutor:
     try:
         # create_pandas_dataframe_agent automatically sets up tools for DataFrame interaction
         # Added allow_dangerous_code=True to enable code execution
+        # Added handle_parsing_errors=True to allow the agent to recover from LLM output errors
         agent_executor = create_pandas_dataframe_agent(
             llm,
             df,
             verbose=True, # Set to True to see the agent's thought process
-            allow_dangerous_code=True # Explicitly allow code execution for data analysis
+            allow_dangerous_code=True, # Explicitly allow code execution for data analysis
+            handle_parsing_errors=True # Allow the agent to handle and attempt to fix parsing errors
             # include_df_in_prompt=True # Consider if you want the full df in the prompt (can be large)
         )
         return agent_executor

@@ -70,10 +70,18 @@ def display_chat_messages():
                     if os.path.exists(plot_path):
                         try:
                             st.image(plot_path, caption="Generated Plot")
+                            # Add download button for the plot
+                            with open(plot_path, "rb") as file:
+                                st.download_button(
+                                    label="Download Plot",
+                                    data=file,
+                                    file_name=os.path.basename(plot_path),
+                                    mime="image/png" # Assuming plots are PNGs
+                                )
                             # Optionally remove the file after displaying
                             # os.remove(plot_path) # Decide if you want to keep or remove the file
                         except Exception as e:
-                            st.warning(f"Could not display plot from {plot_path}: {e}")
+                            st.warning(f"Could not display or offer download for plot from {plot_path}: {e}")
                     # else: # Removed this else block to avoid showing the raw path if file is missing
                     #      st.warning(f"Plot file not found at {plot_path}")
                 else:
@@ -294,14 +302,22 @@ def handle_user_input(agent_executor, llm: BaseChatModel):
                         if os.path.exists(PLOT_SAVE_PATH):
                             try:
                                 st.image(PLOT_SAVE_PATH, caption="Generated Plot")
+                                # Add download button for the plot
+                                with open(PLOT_SAVE_PATH, "rb") as file:
+                                    st.download_button(
+                                        label="Download Plot",
+                                        data=file,
+                                        file_name=os.path.basename(PLOT_SAVE_PATH),
+                                        mime="image/png" # Assuming plots are PNGs
+                                    )
                                 # Add a placeholder message to history indicating a plot was shown
                                 # This helps the chat history display the plot on rerun
                                 st.session_state.messages.append(AIMessage(content=f"PLOT_PATH:{PLOT_SAVE_PATH}"))
                                 # Optionally remove the file after displaying
                                 # os.remove(PLOT_SAVE_PATH) # Decide if you want to keep or remove the file
                             except Exception as e:
-                                st.warning(f"Could not display plot: {e}")
-                                st.session_state.messages.append(AIMessage(content=f"Could not display plot: {e}"))
+                                st.warning(f"Could not display or offer download for plot: {e}")
+                                st.session_state.messages.append(AIMessage(content=f"Could not display or offer download for plot: {e}"))
                         # --- End plot check ---
 
                         prompt_processed_this_run = True # Mark that an interaction happened

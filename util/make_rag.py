@@ -223,7 +223,6 @@ if __name__ == "__main__":
                 "text": doc.page_content,
                 # Add metadata fields. Assuming 'source' is the only one based on current code.
                 # If there could be other metadata keys, iterate through doc.metadata
-                # We will handle schema matching below when adding to an existing table
                 **doc.metadata # Unpack metadata dictionary
             }
             data_to_add.append(doc_dict)
@@ -274,11 +273,15 @@ if __name__ == "__main__":
                 pa.field("source", pa.string()) # Explicitly include the 'source' field
             ])
 
-            # Create the table using the lancedb client and the prepared data
-            # The data_to_add already includes 'vector', 'text', and 'source'
-            table = db.create_table(COLLECTION_NAME, data_to_add, schema=schema)
+            # Create the table using the lancedb client with the explicit schema
+            table = db.create_table(COLLECTION_NAME, schema=schema)
+            logging.info(f"Successfully created empty table '{COLLECTION_NAME}' with explicit schema.")
 
-            logging.info(f"Successfully created table '{COLLECTION_NAME}' with explicit schema and added initial documents.")
+            # Now add the prepared data to the newly created table
+            logging.info(f"Adding {len(data_to_add)} initial documents to LanceDB table '{COLLECTION_NAME}'...")
+            # Use the original data_to_add which includes 'source'
+            table.add(data_to_add)
+            logging.info("Successfully added initial documents to LanceDB.")
 
 
         # Update the PDF ingestion log file with newly processed files

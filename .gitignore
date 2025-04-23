@@ -2,4 +2,4 @@
 .env
 uv.lock
 exports
-
+*.log

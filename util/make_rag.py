@@ -212,6 +212,15 @@ if __name__ == "__main__":
             logging.info(f"Table '{COLLECTION_NAME}' already exists. Appending documents.")
             table = db.open_table(COLLECTION_NAME)
 
+            # Get the existing schema to ensure data conforms
+            existing_schema = table.schema
+            # Identify field names in the existing schema (excluding 'text' and 'vector' which are standard)
+            # This assumes 'text' and 'vector' are the only standard fields added by LanceDB.from_documents
+            schema_field_names = {field.name for field in existing_schema}
+            # We only care about metadata fields that are actually columns in the table
+            metadata_fields_in_schema = schema_field_names - {'text', 'vector'}
+
+
             # Prepare documents for LanceDB add method (list of dictionaries)
             # Need to generate embeddings for the documents before adding
             logging.info(f"Generating embeddings for {len(all_documents_to_ingest)} documents...")
@@ -220,16 +229,20 @@ if __name__ == "__main__":
             embeddings = embedding_function.embed_documents(texts_to_embed)
             logging.info("Embeddings generated.")
 
-            # Create the list of dictionaries for LanceDB
             data_to_add = []
             for i, doc in enumerate(all_documents_to_ingest):
                 doc_dict = {
                     "vector": embeddings[i],
                     "text": doc.page_content,
-                    # Add metadata fields. Assuming 'source' is the only one based on current code.
-                    # If there could be other metadata keys, iterate through doc.metadata
-                    **doc.metadata # Unpack metadata dictionary
                 }
+                # Add only metadata fields that exist in the table's schema
+                for key, value in doc.metadata.items():
+                    if key in metadata_fields_in_schema:
+                        doc_dict[key] = value
+                    else:
+                        # Log a warning if metadata is being dropped
+                        logging.warning(f"Metadata field '{key}' from document is not in the existing table schema ('{COLLECTION_NAME}') and will be dropped.")
+
                 data_to_add.append(doc_dict)
 
             # Add the prepared data to the table
@@ -241,6 +254,7 @@ if __name__ == "__main__":
             # If table does not exist, create it from documents using LangChain's LanceDB class
             logging.info(f"Table '{COLLECTION_NAME}' not found. Creating table from documents.")
             # LanceDB.from_documents handles embedding internally and creates the table
+            # This should infer the schema including 'source' if present in initial docs
             vector_store = LanceDB.from_documents(
                 all_documents_to_ingest,
                 embedding_function,

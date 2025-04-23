@@ -1,1 +1,11 @@
-pip install -r requirements.txt
+streamlit
+python-dotenv
+langchain-google-genai
+langchain-community
+langchain
+tavily-python
+crawl4ai
+unstructured[pdf]
+pdfminer.six
+lancedb
+pyarrow

@@ -205,32 +205,52 @@ if __name__ == "__main__":
         db = lancedb.connect(LANCEDB_DB_PATH)
         logging.info("Connected to LanceDB.")
 
-        # Use from_documents to create the table if it doesn't exist and add documents,
-        # or append to the existing table.
-        logging.info(f"Adding {len(all_documents_to_ingest)} documents to LanceDB table '{COLLECTION_NAME}'...")
-
         # Check if the table exists
         table_names = db.table_names()
         if COLLECTION_NAME in table_names:
             # If table exists, open it and add documents
             logging.info(f"Table '{COLLECTION_NAME}' already exists. Appending documents.")
             table = db.open_table(COLLECTION_NAME)
-            # Corrected method name from add_documents to add
-            table.add(all_documents_to_ingest)
+
+            # Prepare documents for LanceDB add method (list of dictionaries)
+            # Need to generate embeddings for the documents before adding
+            logging.info(f"Generating embeddings for {len(all_documents_to_ingest)} documents...")
+            # Embed all documents in a batch for efficiency
+            texts_to_embed = [doc.page_content for doc in all_documents_to_ingest]
+            embeddings = embedding_function.embed_documents(texts_to_embed)
+            logging.info("Embeddings generated.")
+
+            # Create the list of dictionaries for LanceDB
+            data_to_add = []
+            for i, doc in enumerate(all_documents_to_ingest):
+                doc_dict = {
+                    "vector": embeddings[i],
+                    "text": doc.page_content,
+                    # Add metadata fields. Assuming 'source' is the only one based on current code.
+                    # If there could be other metadata keys, iterate through doc.metadata
+                    **doc.metadata # Unpack metadata dictionary
+                }
+                data_to_add.append(doc_dict)
+
+            # Add the prepared data to the table
+            logging.info(f"Adding {len(data_to_add)} documents to LanceDB table '{COLLECTION_NAME}'...")
+            table.add(data_to_add)
+            logging.info("Successfully added documents to LanceDB.")
+
         else:
-            # If table does not exist, create it from documents
+            # If table does not exist, create it from documents using LangChain's LanceDB class
             logging.info(f"Table '{COLLECTION_NAME}' not found. Creating table from documents.")
-            table = LanceDB.from_documents(
+            # LanceDB.from_documents handles embedding internally and creates the table
+            vector_store = LanceDB.from_documents(
                 all_documents_to_ingest,
                 embedding_function,
                 connection=db, # Pass the lancedb connection
                 table_name=COLLECTION_NAME,
             )
-            # Note: LanceDB.from_documents returns a LanceDB vector store instance,
-            # but we only need the table object for subsequent additions if any.
-            # The table object is implicitly created/updated by the call.
+            # The table is created by the above call. We don't need the vector_store object
+            # for subsequent additions in this script, but the table exists now.
+            logging.info(f"Successfully created table '{COLLECTION_NAME}' from documents.")
 
-        logging.info("Successfully added documents to LanceDB.")
 
         # Update the PDF ingestion log file with newly processed files
         if successfully_processed_pdf_filenames:

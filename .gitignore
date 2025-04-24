@@ -1,3 +1,12 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:4eca34ad7759276167125c7c73ffa44a9dfc5288c860cf5de0341e4fe342ea08
-size 85
+.aider*
+.env
+uv.lock
+*.log
+util/
+exports/
+data/
+ragdb/
+articles/
+util/
+web_markdown/
+

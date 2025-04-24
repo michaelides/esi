@@ -1,16 +1,3 @@
-[project]
-name = "util"
-version = "0.1.0"
-description = "Add your description here"
-readme = "README.md"
-requires-python = ">=3.13"
-dependencies = [
-    "crawl4ai>=0.6.0",
-    "lancedb>=0.21.2",
-    "langchain>=0.3.23",
-    "langchain-community>=0.3.21",
-    "langchain-google-genai>=2.1.3",
-    "pandas>=2.2.3",
-    "pypdf>=5.4.0",
-    "python-dotenv>=1.1.0",
-]
+version https://git-lfs.github.com/spec/v1
+oid sha256:375fcabc4c3488ed61e4e37a4c06b9437055b068e48eb4566a8d993587fa0ba1
+size 363

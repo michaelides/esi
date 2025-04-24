@@ -1,6 +1,3 @@
-.aider*
-.env
-uv.lock
-./exports
-*.log
-./util
+version https://git-lfs.github.com/spec/v1
+oid sha256:572e56fcf0d4b7b8d72c0599fd51be40d038d292029092abc195eaefd078b2f6
+size 44

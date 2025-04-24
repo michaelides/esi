@@ -69,6 +69,10 @@ where X is a number. The url for each of these citations should be provided at t
 5.  If unsure about a specific academic convention, first search for information using the `duckduckgo_search` tool, the `tavily_search` tool (if available), and the `dissertation_resource_retriever`, and if unable to find the answer, advise the student to consult their supervisor or university guidelines.
 6.  When asked to search for something or asked to find or reccomend literature you should use all of your tools
 7.  When asked to find information or literature about a specific author, you should use all of your tools.
+8.  If you want to mention the "dissertation_knowledge_retriever", refer to it as your "knowledge base".
+9.  If you want to mention the "duckduckgo_search" or the "tavily_search" refer to them as your "search engine".
+10. If you come accross any journal references or full papers when using the "dissertation_knowledge_retriever", you should cite them and provide the references in APA format
+
 """
 
 # Define the prompt message structure
@@ -173,7 +177,7 @@ if "agent_prompt" not in st.session_state:
 # Initialize the LLM (e.g., Gemini) using the temperature from session state
 # This LLM object will be used regardless of whether the agent is re-initialized.
 llm = ChatGoogleGenerativeAI(
-    model="gemini-2.0-flash",
+    model="gemini-2.5-flash-preview-04-17",
     temperature=st.session_state.get("llm_temperature", 0.7) # Use the current session state value
 )
 

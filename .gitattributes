@@ -1,21 +1,3 @@
 *.pdf filter=lfs diff=lfs merge=lfs -text
 *.sqlite3 filter=lfs diff=lfs merge=lfs -text
 *.bin filter=lfs diff=lfs merge=lfs -text
-*.py filter=lfs diff=lfs merge=lfs -text
-*.txt filter=lfs diff=lfs merge=lfs -text
-*.gitignore filter=lfs diff=lfs merge=lfs -text
-*.python-version filter=lfs diff=lfs merge=lfs -text
-*.toml filter=lfs diff=lfs merge=lfs -text
-*.md filter=lfs diff=lfs merge=lfs -text
-*.pyc filter=lfs diff=lfs merge=lfs -text
-*.db filter=lfs diff=lfs merge=lfs -text
-*.log filter=lfs diff=lfs merge=lfs -text
-*.pickle filter=lfs diff=lfs merge=lfs -text
-*.png filter=lfs diff=lfs merge=lfs -text
-*.lock filter=lfs diff=lfs merge=lfs -text
-*.py` file, you have two imports related to LanceDB filter=lfs diff=lfs merge=lfs -text
-*.txn filter=lfs diff=lfs merge=lfs -text
-*.manifest filter=lfs diff=lfs merge=lfs -text
-*.lance filter=lfs diff=lfs merge=lfs -text
-/The[[:space:]]error[[:space:]]message[[:space:]]you're[[:space:]]seeing filter=lfs diff=lfs merge=lfs -text
-*.bak filter=lfs diff=lfs merge=lfs -text

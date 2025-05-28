@@ -67,36 +67,53 @@ def setup_agent():
         st.error(f"Failed to initialize the AI agent. Please check configurations. Error: {e}")
         st.stop()
 
-# --- User ID and Memory Management Functions ---
-def get_or_create_user_id():
-    """Retrieves user ID from cookies or creates a new one."""
+# --- Cached User ID Retrieval ---
+@st.cache_resource
+def get_cached_user_id():
+    """Retrieves user ID from cookies or creates a new one, cached to run once per session."""
     user_id = cookies.get(cookie="user_id")
     if not user_id:
         user_id = str(uuid.uuid4())
         cookies.set(cookie="user_id", val=user_id)
-        # print(f"New user ID created and set: {user_id}") # Removed print
-    # else:
-        # print(f"Existing user ID retrieved: {user_id}") # Removed print
+        # cookies.set() triggers a rerun. The cached function will re-execute,
+        # but on the next run, cookies.get() should return the newly set user_id.
+        # The final return value will be cached.
+        print(f"New user ID created and set (cached): {user_id}")
+    else:
+        print(f"Existing user ID retrieved (cached): {user_id}")
     return user_id
 
+# --- Cached Chat History Loading ---
+@st.cache_resource
+def get_cached_chat_history(user_id: str) -> List[Dict[str, Any]]:
+    """Loads chat history for a given user ID from a JSON file, cached to run once per session."""
+    history = load_chat_history_from_file(user_id) # Call the non-cached helper
+    if not history:
+        # If history is empty, add initial greeting and save it
+        history = [{"role": "assistant", "content": generate_llm_greeting()}]
+        save_chat_history(user_id, history)
+        print(f"New chat history initialized and saved for user {user_id} (cached).")
+    else:
+        print(f"Chat history loaded for user {user_id} (cached).")
+    return history
+
+# --- User ID and Memory Management Functions (non-cached helpers) ---
 def get_user_memory_path(user_id: str) -> str:
     """Returns the file path for a user's chat history."""
     os.makedirs(MEMORY_DIR, exist_ok=True)
     return os.path.join(MEMORY_DIR, f"{user_id}.json")
 
-def load_chat_history(user_id: str) -> List[Dict[str, Any]]:
-    """Loads chat history for a given user ID from a JSON file."""
+def load_chat_history_from_file(user_id: str) -> List[Dict[str, Any]]:
+    """Loads chat history for a given user ID from a JSON file (non-cached helper)."""
     memory_file = get_user_memory_path(user_id)
     if os.path.exists(memory_file):
         try:
             with open(memory_file, "r", encoding="utf-8") as f:
                 history = json.load(f)
-                # print(f"Loaded chat history for user {user_id} from {memory_file}") # Removed print
                 return history
         except json.JSONDecodeError as e:
             print(f"Error decoding chat history for user {user_id}: {e}. Starting fresh.")
             return []
-    # print(f"No existing chat history found for user {user_id}. Starting fresh.") # Removed print
     return []
 
 def save_chat_history(user_id: str, messages: List[Dict[str, Any]]):
@@ -229,13 +246,13 @@ def main():
 
     # Get or create user ID and store in session state (only once per session)
     if "user_id" not in st.session_state:
-        st.session_state.user_id = get_or_create_user_id()
-        print(f"User ID for this session: {st.session_state.user_id}") # Added print
+        st.session_state.user_id = get_cached_user_id() # Use the cached function
+        print(f"User ID for this session: {st.session_state.user_id}")
     
     # Initialize agent (cached and stored in session state)
     if AGENT_SESSION_KEY not in st.session_state:
         st.session_state[AGENT_SESSION_KEY] = setup_agent()
-        print("Agent for this session is ready.") # Added print
+        print("Agent for this session is ready.")
 
     # Handle regeneration request if flag is set
     # This needs to be called before stui.create_interface() so that
@@ -245,11 +262,9 @@ def main():
 
     # Initialize chat history and suggested prompts from memory or fresh
     if "messages" not in st.session_state:
-        st.session_state.messages = load_chat_history(st.session_state.user_id)
-        if not st.session_state.messages: # If loaded history is empty, add initial greeting
-            st.session_state.messages = [{"role": "assistant", "content": generate_llm_greeting()}]
-            save_chat_history(st.session_state.user_id, st.session_state.messages) # Save initial greeting
-        print(f"Chat history for user {st.session_state.user_id} loaded/initialized.") # Added print
+        # Use the cached function for chat history
+        st.session_state.messages = get_cached_chat_history(st.session_state.user_id)
+        # The print statement is now inside get_cached_chat_history, so no need for one here.
 
     if "suggested_prompts" not in st.session_state:
         st.session_state.suggested_prompts = DEFAULT_PROMPTS

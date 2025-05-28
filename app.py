@@ -105,6 +105,9 @@ def get_cached_user_data(user_id: str) -> Dict[str, Any]:
     print(f"Loaded {len(all_chat_messages)} chat histories for user {user_id} (cached).")
     return {"metadata": all_chat_metadata, "messages": all_chat_messages}
 
+# Store a reference to the cached function for clearing its cache
+_get_cached_user_data = get_cached_user_data
+
 def save_chat_history(user_id: str, chat_id: str, messages: List[Dict[str, Any]]):
     """Saves a specific chat history for a given user ID to a JSON file."""
     user_dir = os.path.join(MEMORY_DIR, user_id)
@@ -126,6 +129,9 @@ def save_chat_metadata(user_id: str, chat_metadata: Dict[str, str]):
         with open(metadata_file, "w", encoding="utf-8") as f:
             json.dump(chat_metadata, f, indent=2)
         print(f"Saved chat metadata for user {user_id} to {metadata_file}")
+        # Clear the cache of get_cached_user_data so it reloads fresh data on next run
+        _get_cached_user_data.clear()
+        print("Cleared get_cached_user_data cache.")
     except Exception as e:
         print(f"Error saving chat metadata for user {user_id}): {e}")
 
@@ -154,7 +160,7 @@ def get_agent_response(query: str, chat_history: List[ChatMessage]) -> str:
             print(f"Warning: Could not access LLM object within the agent to set temperature. Agent or LLM structure might have changed (agent.llm or agent.llm.temperature not found).")
 
         with st.spinner("ESI is thinking..."):
-            response = agent.chat(query, chat_history=chat_history)
+            response = agent.chat(query, chat_history=formatted_history)
 
         response_text = response.response if hasattr(response, 'response') else str(response)
 

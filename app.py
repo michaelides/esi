@@ -127,7 +127,7 @@ def save_chat_metadata(user_id: str, chat_metadata: Dict[str, str]):
             json.dump(chat_metadata, f, indent=2)
         print(f"Saved chat metadata for user {user_id} to {metadata_file}")
     except Exception as e:
-        print(f"Error saving chat metadata for user {user_id}: {e}")
+        print(f"Error saving chat metadata for user {user_id}): {e}")
 
 def format_chat_history(streamlit_messages: List[Dict[str, Any]]) -> List[ChatMessage]:
     """Converts Streamlit message history to LlamaIndex ChatMessage list."""
@@ -209,22 +209,44 @@ def switch_chat(chat_id: str):
 
 def delete_chat_session(chat_id: str):
     """Deletes a chat history and its metadata."""
-    if chat_id == st.session_state.current_chat_id:
-        st.warning("Cannot delete the currently active chat. Please switch to another chat first.")
-        return
+    # Check if the chat to be deleted is the currently active one
+    is_current_chat = (chat_id == st.session_state.current_chat_id)
 
     if chat_id in st.session_state.all_chat_messages:
+        # Delete from in-memory session state
         del st.session_state.all_chat_messages[chat_id]
         del st.session_state.chat_metadata[chat_id]
         
-        chat_file = os.path.join(MEMORY_DIR, st.session_state.user_id, f"{chat_id}.json")
+        # Delete the physical file
+        user_dir = os.path.join(MEMORY_DIR, st.session_state.user_id)
+        chat_file = os.path.join(user_dir, f"{chat_id}.json")
         if os.path.exists(chat_file):
             os.remove(chat_file)
             print(f"Deleted chat file: {chat_file}")
         
+        # Save updated metadata to disk
         save_chat_metadata(st.session_state.user_id, st.session_state.chat_metadata)
         print(f"Deleted chat: ID={chat_id}")
-        st.rerun()
+
+        # If the deleted chat was the current one, switch to another or create a new one
+        if is_current_chat:
+            if st.session_state.chat_metadata:
+                # Switch to the first available chat
+                first_available_chat_id = next(iter(st.session_state.chat_metadata))
+                print(f"Deleted current chat. Switching to: {first_available_chat_id}")
+                # Call switch_chat to handle updating session state and rerunning
+                switch_chat(first_available_chat_id)
+            else:
+                # No other chats left, create a brand new one
+                print("Deleted last chat. Creating a new chat session.")
+                create_new_chat_session_in_memory()
+                st.rerun() # Rerun to display the new chat
+        else:
+            # If a non-current chat was deleted, just rerun to update the sidebar
+            st.rerun()
+    else:
+        print(f"Attempted to delete non-existent chat ID: {chat_id}")
+        # No rerun needed if chat_id wasn't found, as nothing changed.
 
 def rename_chat(chat_id: str, new_name: str): # Modified to accept chat_id
     """Renames the specified chat."""

@@ -226,13 +226,12 @@ def delete_chat_session(chat_id: str):
         print(f"Deleted chat: ID={chat_id}")
         st.rerun()
 
-def rename_current_chat(new_name: str):
-    """Renames the current chat."""
-    current_chat_id = st.session_state.current_chat_id
-    if current_chat_id and new_name and new_name != st.session_state.chat_metadata.get(current_chat_id):
-        st.session_state.chat_metadata[current_chat_id] = new_name
+def rename_chat(chat_id: str, new_name: str): # Modified to accept chat_id
+    """Renames the specified chat."""
+    if chat_id and new_name and new_name != st.session_state.chat_metadata.get(chat_id):
+        st.session_state.chat_metadata[chat_id] = new_name
         save_chat_metadata(st.session_state.user_id, st.session_state.chat_metadata)
-        print(f"Renamed chat {current_chat_id} to '{new_name}'")
+        print(f"Renamed chat {chat_id} to '{new_name}'")
         st.rerun()
 
 def get_discussion_markdown(chat_id: str) -> str:
@@ -354,6 +353,12 @@ def main():
     if "suggested_prompts" not in st.session_state:
         st.session_state.suggested_prompts = DEFAULT_PROMPTS
 
+    # Initialize renaming state variables
+    if 'renaming_chat_id' not in st.session_state:
+        st.session_state.renaming_chat_id = None
+    if 'renaming_chat_name_input' not in st.session_state:
+        st.session_state.renaming_chat_name_input = ""
+
     if st.session_state.get("do_regenerate", False):
         handle_regeneration_request()
 
@@ -361,11 +366,11 @@ def main():
         reset_callback=reset_chat_callback,
         new_chat_callback=lambda: create_new_chat_session_in_memory() and st.rerun(),
         delete_chat_callback=delete_chat_session,
-        rename_chat_callback=rename_current_chat,
+        rename_chat_callback=rename_chat, # Pass the modified rename_chat function
         chat_metadata=st.session_state.chat_metadata,
         current_chat_id=st.session_state.current_chat_id,
         switch_chat_callback=switch_chat,
-        get_discussion_markdown_callback=get_discussion_markdown # Pass the new callback
+        get_discussion_markdown_callback=get_discussion_markdown
     )
 
     if st.session_state.suggested_prompts:

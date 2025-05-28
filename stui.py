@@ -178,7 +178,7 @@ def create_interface(
     chat_metadata: Dict[str, str],
     current_chat_id: str,
     switch_chat_callback: Callable,
-    get_discussion_markdown_callback: Callable # New parameter
+    get_discussion_markdown_callback: Callable
 ):
     """Create the Streamlit UI for the chat interface."""
     st.title("🎓 ESI: ESI Scholarly Instructor")
@@ -204,32 +204,50 @@ def create_interface(
                         if chat_id != current_chat_id:
                             switch_chat_callback(chat_id)
                 with col2:
-                    with st.popover("⋮", use_container_width=True):
-                        st.write(f"Options for: **{chat_name}**") # Use chat_name here
+                    with st.popover("⋮", use_container_width=True, key=f"popover_{chat_id}"):
+                        st.write(f"Options for: **{chat_name}**")
                         
                         # Option to download
                         st.download_button(
                             label="⬇️ Download (.md)",
-                            data=get_discussion_markdown_callback(chat_id), # Use callback
+                            data=get_discussion_markdown_callback(chat_id),
                             file_name=f"{chat_name.replace(' ', '_')}.md",
                             mime="text/markdown",
                             key=f"download_listed_{chat_id}",
                             use_container_width=True
                         )
                         
+                        # Option to rename
+                        if st.button("✏️ Rename", key=f"rename_btn_{chat_id}", use_container_width=True):
+                            st.session_state.renaming_chat_id = chat_id
+                            st.session_state.renaming_chat_name_input = chat_name # Pre-fill input
+                            st.rerun() # Rerun to show the input field
+
+                        # Display rename input if this chat is selected for renaming
+                        if st.session_state.get('renaming_chat_id') == chat_id:
+                            new_name = st.text_input(
+                                "New name:",
+                                value=st.session_state.renaming_chat_name_input,
+                                key=f"rename_input_popover_{chat_id}"
+                            )
+                            col_apply, col_cancel = st.columns(2)
+                            with col_apply:
+                                if st.button("Apply", key=f"apply_rename_{chat_id}", use_container_width=True):
+                                    if new_name and new_name != chat_name:
+                                        rename_chat_callback(chat_id, new_name) # Pass chat_id to callback
+                                    st.session_state.renaming_chat_id = None # Clear renaming state
+                                    st.session_state.renaming_chat_name_input = ""
+                                    st.rerun()
+                            with col_cancel:
+                                if st.button("Cancel", key=f"cancel_rename_{chat_id}", use_container_width=True):
+                                    st.session_state.renaming_chat_id = None
+                                    st.session_state.renaming_chat_name_input = ""
+                                    st.rerun()
+
                         # Option to delete
                         if st.button("♻ Delete", key=f"delete_from_popover_{chat_id}", use_container_width=True):
-                            delete_chat_callback(chat_id) # This callback already handles the "cannot delete current chat" logic
+                            delete_chat_callback(chat_id)
 
-            st.divider()
-
-            # Rename current chat (applies to the active chat)
-            if current_chat_id:
-                current_chat_name = chat_metadata.get(current_chat_id, "Unnamed Chat")
-                new_name_input = st.text_input("Rename current chat:", value=current_chat_name, key=f"rename_input_{current_chat_id}")
-                if new_name_input and new_name_input != current_chat_name:
-                    rename_chat_callback(new_name_input)
-        
         with st.expander("**LLM Settings**", expanded=False, icon = ":material/tune:"):
             st.slider(
                 "Creativity (Temperature)",
@@ -246,10 +264,9 @@ def create_interface(
             st.warning("⚠️  Remember: Always consult your dissertation supervisor for final guidance and decisions.")
             st.info("Made for NBS7091A and NBS7095x")
 
-        # # Reset chat button (global action, outside expanders)
-        # st.divider()
-        # if st.button("🔄 Reset Current Chat", key="reset_chat_button", help="Clears the current conversation and starts a new one."):
-        #     reset_callback()
+        st.divider()
+        if st.button("🔄 Reset Current Chat", key="reset_chat_button", help="Clears the current conversation and starts a new one."):
+            reset_callback()
 
     # Apply CSS globally
     CSS = """

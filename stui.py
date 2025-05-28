@@ -184,11 +184,17 @@ def create_interface(
     st.title("🎓 ESI: ESI Scholarly Instructor")
     st.caption("Your AI partner for brainstorming and structuring your dissertation research")
 
+    # Initialize editing state if not present
+    if 'editing_chat_id' not in st.session_state:
+        st.session_state.editing_chat_id = None
+
     with st.sidebar:
         with st.expander("**Chat History**", expanded=True, icon = ":material/forum:"):
             st.info("Conversations are automatically saved and linked to your browser via cookies. Clearing browser data will remove your saved discussions.")
             
             if st.button("➕ New Chat", key="new_chat_button", use_container_width=True):
+                # Clear any active editing state when creating a new chat
+                st.session_state.editing_chat_id = None
                 new_chat_callback()
 
             st.markdown("---") # Separator for new chat button and list
@@ -199,12 +205,28 @@ def create_interface(
             for chat_id, chat_name in sorted_chat_items:
                 col1, col2 = st.columns([0.8, 0.2])
                 with col1:
-                    if st.button(chat_name, key=f"chat_select_{chat_id}", use_container_width=True,
-                                type="primary" if chat_id == current_chat_id else "secondary"):
-                        if chat_id != current_chat_id:
-                            switch_chat_callback(chat_id)
+                    if st.session_state.editing_chat_id == chat_id:
+                        # Display text input for renaming
+                        new_name = st.text_input(
+                            "New name:",
+                            value=chat_name,
+                            key=f"rename_input_{chat_id}",
+                            label_visibility="collapsed",
+                            on_change=lambda c=chat_id, n=st.session_state[f"rename_input_{c}"]: (
+                                rename_chat_callback(c, n) if n and n != chat_metadata.get(c) else None,
+                                setattr(st.session_state, 'editing_chat_id', None) # Clear editing state
+                            )
+                        )
+                    else:
+                        # Display button for switching chat
+                        if st.button(chat_name, key=f"chat_select_{chat_id}", use_container_width=True,
+                                    type="primary" if chat_id == current_chat_id else "secondary"):
+                            if chat_id != current_chat_id:
+                                # Clear any active editing state when switching chats
+                                st.session_state.editing_chat_id = None
+                                switch_chat_callback(chat_id)
                 with col2:
-                    with st.popover("⋮", use_container_width=True): # Removed 'key' argument
+                    with st.popover("⋮", use_container_width=True):
                         st.write(f"Options for: **{chat_name}**")
                         
                         # Option to download
@@ -217,33 +239,16 @@ def create_interface(
                             use_container_width=True
                         )
                         
-                        # Option to rename
+                        # Option to rename (sets editing_chat_id and reruns)
                         if st.button("✏️ Rename", key=f"rename_btn_{chat_id}", use_container_width=True):
-                            st.session_state.renaming_chat_id = chat_id
-                            st.session_state.renaming_chat_name_input = chat_name # Pre-fill input
+                            st.session_state.editing_chat_id = chat_id
                             st.rerun() # Rerun to show the input field
-
-                        # Display rename input if this chat is selected for renaming
-                        if st.session_state.get('renaming_chat_id') == chat_id:
-                            new_name = st.text_input(
-                                "New name:",
-                                value=st.session_state.renaming_chat_name_input,
-                                key=f"rename_input_popover_{chat_id}"
-                            )
-                            # Removed st.columns(2) here
-                            if st.button("Apply", key=f"apply_rename_{chat_id}", use_container_width=True):
-                                if new_name and new_name != chat_name:
-                                    rename_chat_callback(chat_id, new_name) # Pass chat_id to callback
-                                st.session_state.renaming_chat_id = None # Clear renaming state
-                                st.session_state.renaming_chat_name_input = ""
-                                st.rerun()
-                            if st.button("Cancel", key=f"cancel_rename_{chat_id}", use_container_width=True):
-                                st.session_state.renaming_chat_id = None
-                                st.session_state.renaming_chat_name_input = ""
-                                st.rerun()
 
                         # Option to delete
                         if st.button("♻ Delete", key=f"delete_from_popover_{chat_id}", use_container_width=True):
+                            # Clear any active editing state if the chat being edited is deleted
+                            if st.session_state.editing_chat_id == chat_id:
+                                st.session_state.editing_chat_id = None
                             delete_chat_callback(chat_id)
 
         with st.expander("**LLM Settings**", expanded=False, icon = ":material/tune:"):

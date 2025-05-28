@@ -156,15 +156,13 @@ def get_agent_response(query: str, chat_history: List[ChatMessage]) -> str:
         # --- Update LLM Temperature from Slider ---
         current_temperature = st.session_state.get("llm_temperature", 0.7)
 
-        if hasattr(agent, '_agent_worker') and hasattr(agent._agent_worker, '_llm'):
-            actual_llm_instance = agent._agent_worker._llm
-            if hasattr(actual_llm_instance, 'temperature'):
-                actual_llm_instance.temperature = current_temperature
-                # print(f"Set LLM temperature to: {current_temperature}") # Removed to reduce log spam
-            else:
-                print(f"Warning: LLM object of type {type(actual_llm_instance)} does not have a 'temperature' attribute.")
+        # Access the LLM instance directly from the agent and update its temperature
+        if hasattr(agent, 'llm') and hasattr(agent.llm, 'temperature'):
+            actual_llm_instance = agent.llm
+            actual_llm_instance.temperature = current_temperature
+            # print(f"Set LLM temperature to: {current_temperature}") # Removed to reduce log spam
         else:
-            print("Warning: Could not access LLM object within the agent to set temperature. Agent or worker structure might have changed (_agent_worker or _agent_worker._llm not found).")
+            print(f"Warning: Could not access LLM object within the agent to set temperature. Agent or LLM structure might have changed (agent.llm or agent.llm.temperature not found).")
         # --- End Temperature Update ---
 
         with st.spinner("ESI is thinking..."):

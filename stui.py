@@ -5,14 +5,9 @@ import re # Import regex module
 import json # Added for parsing RAG source JSON
 from typing import List, Dict, Any, Optional, Callable # Import Callable
 
-# Removed: from agent import generate_llm_greeting, DEFAULT_PROMPTS (no longer needed here)
-
 # Determine project root based on the script's location
 PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 
-
-# Removed: get_greeting_message() - now handled by app.py
-# Removed: init_session_state() - now handled by app.py
 
 def display_chat():
     """Display the chat messages from the session state, handling file downloads and image display."""
@@ -34,51 +29,28 @@ def display_chat():
             code_is_image = False
 
             if message["role"] == "assistant":
-                # --- 1. Extract RAG sources ---
-                current_pos = 0
-                temp_text_for_rag_extraction = text_to_display
-                processed_text_after_rag = ""
+                # --- 1. Extract RAG sources using regex ---
+                # Regex to find RAG_SOURCE_MARKER followed by a JSON object
+                # The JSON object is captured in group 1
+                rag_source_pattern = re.compile(rf"{re.escape(RAG_SOURCE_MARKER)}({{\"type\":.*?}})", re.DOTALL)
                 
-                while True:
-                    marker_pos = temp_text_for_rag_extraction.find(RAG_SOURCE_MARKER, current_pos)
-                    if marker_pos == -1:
-                        processed_text_after_rag += temp_text_for_rag_extraction[current_pos:]
-                        break 
-                        
-                    processed_text_after_rag += temp_text_for_rag_extraction[current_pos:marker_pos]
-                    
-                    json_start_pos = marker_pos + len(RAG_SOURCE_MARKER)
-                    json_end_pos = temp_text_for_rag_extraction.find("\n", json_start_pos)
-                    if json_end_pos == -1:
-                        json_end_pos = len(temp_text_for_rag_extraction)
-                    
-                    json_str = temp_text_for_rag_extraction[json_start_pos:json_end_pos].strip()
-                    consumed_upto = json_end_pos
-
-                    if not json_str.startswith("{"):
-                        json_start_pos_next_line = json_end_pos + 1
-                        if json_start_pos_next_line < len(temp_text_for_rag_extraction):
-                            json_end_pos_next_line = temp_text_for_rag_extraction.find("\n", json_start_pos_next_line)
-                            if json_end_pos_next_line == -1:
-                                json_end_pos_next_line = len(temp_text_for_rag_extraction)
-                            
-                            potential_json_str_next_line = temp_text_for_rag_extraction[json_start_pos_next_line:json_end_pos_next_line].strip()
-                            if potential_json_str_next_line.startswith("{"):
-                                json_str = potential_json_str_next_line
-                                consumed_upto = json_end_pos_next_line
-                    
+                # Find all matches
+                all_rag_matches = list(rag_source_pattern.finditer(text_to_display))
+                
+                # Extract JSON data and remove markers from text_to_display
+                processed_text_after_rag = text_to_display
+                for match in reversed(all_rag_matches): # Process in reverse to avoid index issues
+                    json_str = match.group(1)
                     try:
-                        if not json_str:
-                            raise json.JSONDecodeError("Extracted JSON string is empty after attempts", json_str, 0)
-                        
                         rag_data = json.loads(json_str)
                         rag_sources_data.append(rag_data)
                         print(f"Extracted RAG source: {rag_data.get('name') or rag_data.get('title')}")
                     except json.JSONDecodeError as e:
                         print(f"Warning: Could not decode RAG source JSON: '{json_str}'. Error: {e}")
-
-                    current_pos = consumed_upto
-
+                    
+                    # Remove the entire matched marker and JSON from the text
+                    processed_text_after_rag = processed_text_after_rag[:match.start()] + processed_text_after_rag[match.end():]
+                
                 text_to_display = processed_text_after_rag.strip()
 
                 # --- 2. Extract Code Interpreter download marker ---
@@ -109,6 +81,9 @@ def display_chat():
 
             # --- 4. Display RAG sources (PDFs and Web Links) - Deduplicated ---
             displayed_rag_identifiers = set()
+            # Sort rag_sources_data to ensure consistent display order if multiple sources
+            rag_sources_data.sort(key=lambda x: x.get('citation_number', float('inf')) if x.get('type') == 'pdf' else x.get('url', x.get('title', '')))
+
             for rag_idx, rag_data in enumerate(rag_sources_data):
                 source_type = rag_data.get("type")
                 identifier = None
@@ -204,8 +179,6 @@ def create_interface(reset_callback: Callable): # Accept the callback function
     st.title("🎓 ESI: ESI Scholarly Instructor")
     st.caption("Your AI partner for brainstorming and structuring your dissertation research")
 
-    # Removed: init_session_state() - now handled by app.py
-
     with st.sidebar:
         st.header("About ESI")
         st.info("ESI uses AI to help you navigate the dissertation process. It has access to some of the literature in your reading lists and also uses search tools for web lookups.")
@@ -232,8 +205,3 @@ def create_interface(reset_callback: Callable): # Accept the callback function
             reset_callback() # Call the passed callback
 
     display_chat()
-
-
-
-
-# Removed: reset_chat_callback() - moved to app.py

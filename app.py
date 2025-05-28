@@ -191,9 +191,8 @@ def create_new_chat_session(is_initial_load=False):
     st.session_state.messages = st.session_state.all_chat_messages[new_chat_id] # Point to current chat's messages
     st.session_state.chat_modified = False # New chats are initially unsaved
     
-    # Save metadata immediately so the new chat appears in the sidebar
-    save_chat_metadata(st.session_state.user_id, st.session_state.chat_metadata)
-    print(f"Created new chat: ID={new_chat_id}, Name='{new_chat_name}'")
+    # Removed: save_chat_metadata(st.session_state.user_id, st.session_state.chat_metadata)
+    print(f"Created new chat: ID={new_chat_id}, Name='{new_chat_name}' (not yet saved to disk)")
     
     if not is_initial_load: # Only rerun if triggered by user action
         st.rerun()
@@ -207,7 +206,7 @@ def switch_chat(chat_id: str):
     st.session_state.current_chat_id = chat_id
     st.session_state.messages = st.session_state.all_chat_messages[chat_id]
     st.session_state.suggested_prompts = generate_suggested_prompts(st.session_state.messages)
-    st.session_state.chat_modified = True # Assume existing chat is modified if switched to
+    st.session_state.chat_modified = True # Assume existing chat is modified if switched to (will be saved on next AI response)
     print(f"Switched to chat: ID={chat_id}, Name='{st.session_state.chat_metadata.get(chat_id, 'Unknown')}'")
     st.rerun()
 
@@ -255,8 +254,11 @@ def handle_user_input(chat_input_value: str | None):
 
     if prompt_to_process:
         # If this is the first user message in a new, unsaved chat, mark it as modified
+        # and save its metadata for the first time.
         if not st.session_state.chat_modified and len(st.session_state.messages) == 1 and st.session_state.messages[0]["role"] == "assistant":
             st.session_state.chat_modified = True 
+            save_chat_metadata(st.session_state.user_id, st.session_state.chat_metadata) # Save metadata now that chat is active
+            print(f"Chat '{st.session_state.chat_metadata.get(st.session_state.current_chat_id)}' activated and metadata saved.")
 
         st.session_state.messages.append({"role": "user", "content": prompt_to_process})
 
@@ -337,7 +339,7 @@ def main():
     if "current_chat_id" not in st.session_state or st.session_state.current_chat_id not in st.session_state.all_chat_messages:
         # If no current chat or current chat ID is invalid/missing, create a new one
         create_new_chat_session(is_initial_load=True)
-        print("Starting a new, unsaved chat session.")
+        # The print statement is now inside create_new_chat_session
     else:
         # Point st.session_state.messages to the current chat's messages
         st.session_state.messages = st.session_state.all_chat_messages[st.session_state.current_chat_id]

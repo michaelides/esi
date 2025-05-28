@@ -230,19 +230,17 @@ def create_interface(
                                 value=st.session_state.renaming_chat_name_input,
                                 key=f"rename_input_popover_{chat_id}"
                             )
-                            col_apply, col_cancel = st.columns(2)
-                            with col_apply:
-                                if st.button("Apply", key=f"apply_rename_{chat_id}", use_container_width=True):
-                                    if new_name and new_name != chat_name:
-                                        rename_chat_callback(chat_id, new_name) # Pass chat_id to callback
-                                    st.session_state.renaming_chat_id = None # Clear renaming state
-                                    st.session_state.renaming_chat_name_input = ""
-                                    st.rerun()
-                            with col_cancel:
-                                if st.button("Cancel", key=f"cancel_rename_{chat_id}", use_container_width=True):
-                                    st.session_state.renaming_chat_id = None
-                                    st.session_state.renaming_chat_name_input = ""
-                                    st.rerun()
+                            # Removed st.columns(2) here
+                            if st.button("Apply", key=f"apply_rename_{chat_id}", use_container_width=True):
+                                if new_name and new_name != chat_name:
+                                    rename_chat_callback(chat_id, new_name) # Pass chat_id to callback
+                                st.session_state.renaming_chat_id = None # Clear renaming state
+                                st.session_state.renaming_chat_name_input = ""
+                                st.rerun()
+                            if st.button("Cancel", key=f"cancel_rename_{chat_id}", use_container_width=True):
+                                st.session_state.renaming_chat_id = None
+                                st.session_state.renaming_chat_name_input = ""
+                                st.rerun()
 
                         # Option to delete
                         if st.button("♻ Delete", key=f"delete_from_popover_{chat_id}", use_container_width=True):

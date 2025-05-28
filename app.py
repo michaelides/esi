@@ -247,12 +247,12 @@ def main():
     # Get or create user ID and store in session state (only once per session)
     if "user_id" not in st.session_state:
         st.session_state.user_id = get_cached_user_id() # Use the cached function
-        print(f"User ID for this session: {st.session_state.user_id}")
+        # The print statement is now inside get_cached_user_id, so no need for one here.
     
     # Initialize agent (cached and stored in session state)
     if AGENT_SESSION_KEY not in st.session_state:
         st.session_state[AGENT_SESSION_KEY] = setup_agent()
-        print("Agent for this session is ready.")
+        # The print statement is now inside setup_agent, so no need for one here.
 
     # Handle regeneration request if flag is set
     # This needs to be called before stui.create_interface() so that

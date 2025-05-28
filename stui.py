@@ -3,25 +3,16 @@ import datetime
 import os
 import re # Import regex module
 import json # Added for parsing RAG source JSON
-from typing import List, Dict, Any, Optional
-from agent import generate_llm_greeting, DEFAULT_PROMPTS
+from typing import List, Dict, Any, Optional, Callable # Import Callable
+
+# Removed: from agent import generate_llm_greeting, DEFAULT_PROMPTS (no longer needed here)
 
 # Determine project root based on the script's location
 PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 
 
-def get_greeting_message() -> str:
-    """Generate a greeting message, trying the LLM first and falling back to static."""
-    return generate_llm_greeting()
-
-def init_session_state():
-    """Initialize session state variables for a new chat."""
-    if "messages" not in st.session_state:
-        print("Initializing new chat session with greeting.")
-        st.session_state.messages = [{"role": "assistant", "content": get_greeting_message()}]
-
-    if "suggested_prompts" not in st.session_state:
-        st.session_state.suggested_prompts = DEFAULT_PROMPTS
+# Removed: get_greeting_message() - now handled by app.py
+# Removed: init_session_state() - now handled by app.py
 
 def display_chat():
     """Display the chat messages from the session state, handling file downloads and image display."""
@@ -208,12 +199,12 @@ def display_chat():
                         st.rerun()
 
 
-def create_interface():
+def create_interface(reset_callback: Callable): # Accept the callback function
     """Create the Streamlit UI for the chat interface."""
     st.title("🎓 ESI: ESI Scholarly Instructor")
     st.caption("Your AI partner for brainstorming and structuring your dissertation research")
 
-    init_session_state()
+    # Removed: init_session_state() - now handled by app.py
 
     with st.sidebar:
         st.header("About ESI")
@@ -238,19 +229,8 @@ def create_interface():
         
         st.divider()
         if st.button("🔄 Reset Chat", key="reset_chat_button", help="Clears the current conversation and starts a new one."):
-            reset_chat_callback()
+            reset_callback() # Call the passed callback
 
     display_chat()
 
-def reset_chat_callback():
-    """Resets the chat history and suggested prompts to their initial state."""
-    print("Resetting chat...")
-    st.session_state.messages = [{"role": "assistant", "content": get_greeting_message()}]
-    st.session_state.suggested_prompts = DEFAULT_PROMPTS
-    
-    if 'prompt_to_use' in st.session_state:
-        st.session_state.prompt_to_use = None
-    if 'selected_prompt_dropdown' in st.session_state:
-        st.session_state.selected_prompt_dropdown = ""
-
-    st.rerun()
+# Removed: reset_chat_callback() - moved to app.py

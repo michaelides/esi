@@ -3,6 +3,8 @@ import os
 import time
 import json
 import re # Import regex module for parsing code blocks and markers
+import uuid # New import for generating user IDs
+import streamlit_cookies_manager as stc # New import for cookie management
 from typing import List, Dict, Any
 from llama_index.core.llms import ChatMessage, MessageRole # Import necessary types
 import stui
@@ -11,7 +13,6 @@ from agent import create_orchestrator_agent, generate_suggested_prompts, SUGGEST
 from dotenv import load_dotenv
 
 # Determine project root based on the script's location
-# For app.py directly in the 'esi' project root, PROJECT_ROOT is the directory of app.py
 PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 
 # Load environment variables
@@ -25,6 +26,8 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# Initialize cookie manager
+cookies = stc.CookieManager()
 
 # --- Constants and Configuration ---
 # Update DB_PATH default to the new simple vector store persistence directory
@@ -35,14 +38,57 @@ AGENT_SESSION_KEY = "esi_orchestrator_agent" # Key for storing orchestrator agen
 DOWNLOAD_MARKER = "---DOWNLOAD_FILE---" # Used by stui.py for display
 RAG_SOURCE_MARKER_PREFIX = "---RAG_SOURCE---" # Used by stui.py for display
 
+# New: Directory for user chat memories
+MEMORY_DIR = os.path.join(PROJECT_ROOT, "user_memories")
+
+# --- User ID and Memory Management Functions ---
+def get_or_create_user_id():
+    """Retrieves user ID from cookies or creates a new one."""
+    user_id = cookies.get("user_id")
+    if not user_id:
+        user_id = str(uuid.uuid4())
+        cookies.set("user_id", user_id)
+        print(f"New user ID created and set: {user_id}")
+    else:
+        print(f"Existing user ID retrieved: {user_id}")
+    return user_id
+
+def get_user_memory_path(user_id: str) -> str:
+    """Returns the file path for a user's chat history."""
+    os.makedirs(MEMORY_DIR, exist_ok=True)
+    return os.path.join(MEMORY_DIR, f"{user_id}.json")
+
+def load_chat_history(user_id: str) -> List[Dict[str, Any]]:
+    """Loads chat history for a given user ID from a JSON file."""
+    memory_file = get_user_memory_path(user_id)
+    if os.path.exists(memory_file):
+        try:
+            with open(memory_file, "r", encoding="utf-8") as f:
+                history = json.load(f)
+                print(f"Loaded chat history for user {user_id} from {memory_file}")
+                return history
+        except json.JSONDecodeError as e:
+            print(f"Error decoding chat history for user {user_id}: {e}. Starting fresh.")
+            return []
+    print(f"No existing chat history found for user {user_id}. Starting fresh.")
+    return []
+
+def save_chat_history(user_id: str, messages: List[Dict[str, Any]]):
+    """Saves chat history for a given user ID to a JSON file."""
+    memory_file = get_user_memory_path(user_id)
+    try:
+        with open(memory_file, "w", encoding="utf-8") as f:
+            json.dump(messages, f, indent=2)
+        print(f"Saved chat history for user {user_id} to {memory_file}")
+    except Exception as e:
+        print(f"Error saving chat history for user {user_id}: {e}")
+
 # --- Agent Initialization ---
 def initialize_agent():
     """Initializes the orchestrator agent and stores it in session state."""
     if AGENT_SESSION_KEY not in st.session_state:
         print("Initializing orchestrator agent for new session (LLM settings should already be done)...")
         try:
-            # create_orchestrator_agent uses the globally initialized Settings.llm
-            # and now loads RAG data from Hugging Face Hub, so db_path is not needed.
             st.session_state[AGENT_SESSION_KEY] = create_orchestrator_agent()
             print("Orchestrator agent object initialized successfully.")
         except Exception as e:
@@ -54,8 +100,6 @@ def initialize_agent():
 def format_chat_history(streamlit_messages: List[Dict[str, Any]]) -> List[ChatMessage]:
     """Converts Streamlit message history to LlamaIndex ChatMessage list."""
     history = []
-    # Pass the full history including the last user message,
-    # as this is a common pattern for chat interfaces.
     for msg in streamlit_messages:
         role = MessageRole.USER if msg["role"] == "user" else MessageRole.ASSISTANT
         history.append(ChatMessage(role=role, content=msg["content"]))
@@ -82,12 +126,8 @@ def get_agent_response(query: str, chat_history: List[ChatMessage]) -> str:
 
     try:
         # --- Update LLM Temperature from Slider ---
-        # Retrieve the temperature value from session state (set by the slider in stui.py)
-        # Default to 0.7 if not found, though it should be set by the slider's default
         current_temperature = st.session_state.get("llm_temperature", 0.7)
 
-        # Access the LLM instance within the agent runner's worker and update its temperature
-        # AgentRunner stores its worker in `_agent_worker`, and FunctionCallingAgentWorker stores llm in `_llm`
         if hasattr(agent, '_agent_worker') and hasattr(agent._agent_worker, '_llm'):
             actual_llm_instance = agent._agent_worker._llm
             if hasattr(actual_llm_instance, 'temperature'):
@@ -99,22 +139,15 @@ def get_agent_response(query: str, chat_history: List[ChatMessage]) -> str:
             print("Warning: Could not access LLM object within the agent to set temperature. Agent or worker structure might have changed (_agent_worker or _agent_worker._llm not found).")
         # --- End Temperature Update ---
 
-        # Use agent.chat(), passing the explicit history
         with st.spinner("ESI is thinking..."):
-            # Pass the formatted history to the agent's chat method
-            # The LLM temperature has now been updated for this call
             response = agent.chat(query, chat_history=chat_history)
 
-        # Access the actual response string via the .response attribute
-        # The orchestrator agent's response should contain all necessary information,
-        # including RAG source markers and code download markers, as per its system prompt.
         response_text = response.response if hasattr(response, 'response') else str(response)
 
         print(f"Orchestrator final response text for UI: \n{response_text[:500]}...") # Log snippet
         return response_text
 
     except Exception as e:
-        # Log the error and return a friendly message
         print(f"Error getting orchestrator agent response: {e}")
         print(f"Error getting agent response: {e}")
         return f"I apologize, but I encountered an error while processing your request. Please try again or rephrase your question. Technical details: {str(e)}"
@@ -130,40 +163,46 @@ def handle_user_input(chat_input_value: str | None):
     if hasattr(st.session_state, 'prompt_to_use') and st.session_state.prompt_to_use:
         prompt_to_process = st.session_state.prompt_to_use
         st.session_state.prompt_to_use = None  # Clear it after using
-    # Otherwise, use the value from the chat input box if it's not None
     elif chat_input_value:
         prompt_to_process = chat_input_value
 
     if prompt_to_process:
-        # Add user message to chat history *before* calling the agent
         st.session_state.messages.append({"role": "user", "content": prompt_to_process})
 
-        # Display user message immediately
         with st.chat_message("user"):
             st.markdown(prompt_to_process)
 
-        # Format the *entire* current history (including the new user message)
-        # to pass to the agent.chat method.
         formatted_history = format_chat_history(st.session_state.messages)
 
-        # Get AI response using the session agent, passing the history
         response_text = get_agent_response(prompt_to_process, chat_history=formatted_history)
 
-        # Add assistant response (potentially including plot marker from manual execution) to chat history
-        # stui.display_chat will handle rendering the text and the plot/download button
         st.session_state.messages.append({"role": "assistant", "content": response_text})
 
-        # Update suggested prompts based on new chat history (using original full history)
+        # Save chat history after each turn
+        save_chat_history(st.session_state.user_id, st.session_state.messages)
+
         st.session_state.suggested_prompts = generate_suggested_prompts(st.session_state.messages)
 
-        # Force Streamlit to rerun the script immediately to display the new messages
         st.rerun()
 
+# --- UI Callbacks ---
+def reset_chat_callback():
+    """Resets the chat history and suggested prompts to their initial state, and saves."""
+    print("Resetting chat...")
+    st.session_state.messages = [{"role": "assistant", "content": generate_llm_greeting()}]
+    st.session_state.suggested_prompts = DEFAULT_PROMPTS
+    
+    if 'prompt_to_use' in st.session_state:
+        st.session_state.prompt_to_use = None
+    
+    # Save the reset history
+    save_chat_history(st.session_state.user_id, st.session_state.messages)
+
+    st.rerun()
 
 def main():
     """Main function to run the Streamlit app."""
     # --- Initialize LLM Settings FIRST ---
-    # This ensures Settings.llm is available for the greeting generation
     try:
         print("Initializing LLM settings...")
         initialize_agent_settings()
@@ -173,29 +212,35 @@ def main():
         st.stop()
     # --- End LLM Settings Initialization ---
 
+    # Get or create user ID and store in session state
+    user_id = get_or_create_user_id()
+    st.session_state.user_id = user_id
 
     # Initialize agent (stores it in session state)
-    initialize_agent() # This function now assumes settings are already initialized
+    initialize_agent()
 
     # Handle regeneration request if flag is set
-    # This needs to be called before stui.create_interface() so that
-    # the messages are updated before being displayed.
     if st.session_state.get("do_regenerate", False):
-        handle_regeneration_request() # This function will set do_regenerate to False and rerun
+        handle_regeneration_request()
 
-    # Initialize chat history and suggested prompts if they don't exist
-    # This is now handled by stui.init_session_state() called within stui.create_interface()
+    # Initialize chat history and suggested prompts from memory or fresh
+    if "messages" not in st.session_state:
+        st.session_state.messages = load_chat_history(user_id)
+        if not st.session_state.messages: # If loaded history is empty, add initial greeting
+            st.session_state.messages = [{"role": "assistant", "content": generate_llm_greeting()}]
+            save_chat_history(user_id, st.session_state.messages) # Save initial greeting
+
+    if "suggested_prompts" not in st.session_state:
+        st.session_state.suggested_prompts = DEFAULT_PROMPTS
 
     # Create the rest of the interface using stui (displays chat history, sidebar, etc.)
-    # stui.create_interface() will call stui.init_session_state() which handles
-    # loading persistent chat history or initializing a new one.
-    stui.create_interface() # This displays history and sidebar info
+    # Pass the reset_chat_callback to stui.create_interface
+    stui.create_interface(reset_callback=reset_chat_callback)
 
     # Display suggested prompts as buttons below the chat history
     if st.session_state.suggested_prompts:
         st.markdown("---") # Add a separator for visual clarity
         st.subheader("Suggested Prompts:")
-        # Create columns for buttons, up to the number of suggested prompts
         cols = st.columns(len(st.session_state.suggested_prompts)) 
         for i, prompt in enumerate(st.session_state.suggested_prompts):
             with cols[i]:
@@ -207,7 +252,6 @@ def main():
     chat_input_value = st.chat_input("Ask me about dissertations, research methods, academic writing, etc.")
 
     # Handle user input (either from chat box or a clicked suggested prompt button)
-    # If a button was clicked, prompt_to_use is set, otherwise use chat_input_value
     handle_user_input(chat_input_value)
 
 
@@ -227,9 +271,9 @@ def handle_regeneration_request():
     # Case 1: Regenerating the initial greeting
     if len(st.session_state.messages) == 1:
         print("Regenerating initial greeting...")
-        # generate_llm_greeting is already imported from agent module
         new_greeting = generate_llm_greeting()
         st.session_state.messages[0]['content'] = new_greeting
+        save_chat_history(st.session_state.user_id, st.session_state.messages) # Save regenerated greeting
         st.rerun()
         return
 
@@ -238,17 +282,16 @@ def handle_regeneration_request():
 
     if not st.session_state.messages or st.session_state.messages[-1]['role'] != 'user':
         print("Warning: Cannot regenerate, no preceding user query found after popping assistant message.")
-        # Potentially restore the popped message or handle error state more gracefully
         st.rerun()
         return
 
     print("Regenerating last assistant response to user query...")
     prompt_to_regenerate = st.session_state.messages[-1]['content']
-    # The history should include the user message we are responding to
     formatted_history_for_regen = format_chat_history(st.session_state.messages)
 
     response_text = get_agent_response(prompt_to_regenerate, chat_history=formatted_history_for_regen)
     st.session_state.messages.append({"role": "assistant", "content": response_text})
+    save_chat_history(st.session_state.user_id, st.session_state.messages) # Save regenerated response
     st.session_state.suggested_prompts = generate_suggested_prompts(st.session_state.messages)
     st.rerun()
 

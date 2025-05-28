@@ -104,6 +104,33 @@ def _load_user_data_from_disk(user_id: str) -> Dict[str, Any]:
     print(f"Loaded {len(all_chat_messages)} chat histories for user {user_id} from disk.")
     return {"metadata": all_chat_metadata, "messages": all_chat_messages}
 
+@st.cache_resource
+def initialize_user_session_data(user_id: str) -> None:
+    """
+    Initializes user-specific chat data in st.session_state once per session.
+    This function is cached to prevent repeated disk reads and state re-initialization.
+    """
+    print(f"Initializing user session data for {user_id} (cached)...")
+    user_data = _load_user_data_from_disk(user_id)
+    st.session_state.chat_metadata = user_data["metadata"]
+    st.session_state.all_chat_messages = user_data["messages"]
+    print(f"User session data initialized for {user_id}: {len(st.session_state.chat_metadata)} chats.")
+
+    # Set up initial current chat state
+    if not st.session_state.chat_metadata:
+        # No chats exist, present a blank slate with initial greeting
+        print("No existing chats found. Presenting initial greeting.")
+        st.session_state.current_chat_id = None # Indicate no active chat ID
+        st.session_state.messages = [{"role": "assistant", "content": generate_llm_greeting()}]
+        st.session_state.chat_modified = False # This state is not yet saved to disk
+    else:
+        # If there are existing chats, switch to the first one
+        first_available_chat_id = next(iter(st.session_state.chat_metadata))
+        st.session_state.current_chat_id = first_available_chat_id
+        st.session_state.messages = st.session_state.all_chat_messages[first_available_chat_id]
+        st.session_state.chat_modified = True # Existing chats are considered modified for saving
+        print(f"Switched to first available chat: '{st.session_state.chat_metadata.get(first_available_chat_id, first_available_chat_id)}'")
+
 
 def save_chat_history(user_id: str, chat_id: str, messages: List[Dict[str, Any]]):
     """Saves a specific chat history for a given user ID to a JSON file."""
@@ -374,37 +401,9 @@ def main():
     if AGENT_SESSION_KEY not in st.session_state:
         st.session_state[AGENT_SESSION_KEY] = setup_agent()
 
-    # Load all user's chat data (metadata and messages) only once per session
-    if "chat_metadata" not in st.session_state or "all_chat_messages" not in st.session_state:
-        user_data = _load_user_data_from_disk(st.session_state.user_id)
-        st.session_state.chat_metadata = user_data["metadata"]
-        st.session_state.all_chat_messages = user_data["messages"]
-        print(f"Initial load of user data for {st.session_state.user_id}: {len(st.session_state.chat_metadata)} chats.")
-    else:
-        print(f"User data already in session state. Current chats: {len(st.session_state.chat_metadata)}.")
-
-
-    # Initialize or restore current chat session
-    # This logic ensures a valid current chat is always selected or a new blank state is presented.
-    if "current_chat_id" not in st.session_state or st.session_state.current_chat_id not in st.session_state.all_chat_messages:
-        if st.session_state.chat_metadata:
-            # If there are existing chats, switch to the first one
-            first_available_chat_id = next(iter(st.session_state.chat_metadata))
-            st.session_state.current_chat_id = first_available_chat_id
-            st.session_state.messages = st.session_state.all_chat_messages[first_available_chat_id]
-            st.session_state.chat_modified = True # Existing chats are considered modified for saving
-            print(f"No valid current chat found. Switched to first available chat: '{st.session_state.chat_metadata.get(first_available_chat_id, first_available_chat_id)}'")
-        else:
-            # No chats exist, present a blank slate with initial greeting
-            print("No valid current chat found and no existing chats. Presenting initial greeting.")
-            st.session_state.current_chat_id = None # Indicate no active chat ID
-            st.session_state.messages = [{"role": "assistant", "content": generate_llm_greeting()}]
-            st.session_state.chat_modified = False # This state is not yet saved to disk
-    else:
-        # Ensure st.session_state.messages points to the correct chat's messages
-        st.session_state.messages = st.session_state.all_chat_messages[st.session_state.current_chat_id]
-        st.session_state.chat_modified = True # Existing chats are considered modified for saving
-        print(f"Continuing with chat: '{st.session_state.chat_metadata.get(st.session_state.current_chat_id, st.session_state.current_chat_id)}'")
+    # Initialize user-specific session data (chat metadata, messages, current chat)
+    # This cached function ensures this complex initialization runs only once per session.
+    initialize_user_session_data(st.session_state.user_id)
 
     if "suggested_prompts" not in st.session_state:
         st.session_state.suggested_prompts = DEFAULT_PROMPTS

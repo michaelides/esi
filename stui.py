@@ -1,13 +1,11 @@
 import streamlit as st
 import datetime
 import os
-import re # Import regex module
-import json # Added for parsing RAG source JSON
-from typing import List, Dict, Any, Optional, Callable # Import Callable
+import re
+import json
+from typing import List, Dict, Any, Optional, Callable
 
-# Determine project root based on the script's location
 PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
-
 
 def display_chat():
     """Display the chat messages from the session state, handling file downloads and image display."""
@@ -143,8 +141,7 @@ def display_chat():
                     print(f"Successfully displayed image from code interpreter: {code_download_filename}")
                 except Exception as e:
                     st.error(f"Error displaying image {code_download_filename}: {e}")
-                    # If image display fails, fall through to show download button
-                    code_is_image = False # Treat as non-image for download button logic
+                    code_is_image = False
             
             if code_download_absolute_filepath and os.path.exists(code_download_absolute_filepath) and not code_is_image:
                 try:
@@ -160,7 +157,6 @@ def display_chat():
                 except Exception as e:
                     st.error(f"Error creating download button for {code_download_filename}: {e}")
 
-            # Add regenerate button for the last assistant message
             if message["role"] == "assistant" and msg_idx == len(st.session_state.messages) - 1:
                 can_regenerate = False
                 if len(st.session_state.messages) == 1:
@@ -174,18 +170,52 @@ def display_chat():
                         st.rerun()
 
 
-def create_interface(reset_callback: Callable): # Accept the callback function
+def create_interface(
+    reset_callback: Callable,
+    new_chat_callback: Callable,
+    delete_chat_callback: Callable,
+    rename_chat_callback: Callable,
+    chat_metadata: Dict[str, str],
+    current_chat_id: str,
+    switch_chat_callback: Callable
+):
     """Create the Streamlit UI for the chat interface."""
     st.title("🎓 ESI: ESI Scholarly Instructor")
     st.caption("Your AI partner for brainstorming and structuring your dissertation research")
 
     with st.sidebar:
-        st.header("About ESI")
-        st.info("ESI uses AI to help you navigate the dissertation process. It has access to some of the literature in your reading lists and also uses search tools for web lookups.")
-        st.warning("⚠️  Remember: Always consult your dissertation supervisor for final guidance and decisions.")
+        st.header("Chat History")
+        if st.button("➕ New Chat", key="new_chat_button", use_container_width=True):
+            new_chat_callback()
+
+        # Display existing chats
+        # Sort by name for consistent display
+        sorted_chat_items = sorted(chat_metadata.items(), key=lambda item: item[1].lower())
+        
+        for chat_id, chat_name in sorted_chat_items:
+            col1, col2 = st.columns([0.8, 0.2])
+            with col1:
+                if st.button(chat_name, key=f"chat_select_{chat_id}", use_container_width=True,
+                             type="primary" if chat_id == current_chat_id else "secondary"):
+                    if chat_id != current_chat_id:
+                        switch_chat_callback(chat_id)
+            with col2:
+                if chat_id != current_chat_id: # Don't allow deleting the current chat
+                    if st.button("🗑️", key=f"chat_delete_{chat_id}", help=f"Delete '{chat_name}'"):
+                        delete_chat_callback(chat_id)
+                else:
+                    st.markdown(" ") # Placeholder for alignment
 
         st.divider()
 
+        # Rename current chat
+        if current_chat_id:
+            current_chat_name = chat_metadata.get(current_chat_id, "Unnamed Chat")
+            new_name = st.text_input("Rename current chat:", value=current_chat_name, key=f"rename_input_{current_chat_id}")
+            if new_name and new_name != current_chat_name:
+                rename_chat_callback(new_name)
+        
+        st.divider()
         st.header("LLM Settings")
         st.slider(
             "Creativity (Temperature)",
@@ -201,7 +231,7 @@ def create_interface(reset_callback: Callable): # Accept the callback function
         st.info("Made for NBS7091A and NBS7095x")
         
         st.divider()
-        if st.button("🔄 Reset Chat", key="reset_chat_button", help="Clears the current conversation and starts a new one."):
-            reset_callback() # Call the passed callback
+        if st.button("🔄 Reset Current Chat", key="reset_chat_button", help="Clears the current conversation and starts a new one."):
+            reset_callback()
 
     display_chat()

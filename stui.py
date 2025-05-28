@@ -233,4 +233,7 @@ def create_interface(reset_callback: Callable): # Accept the callback function
 
     display_chat()
 
+
+
+
 # Removed: reset_chat_callback() - moved to app.py

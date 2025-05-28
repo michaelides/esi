@@ -86,12 +86,10 @@ def get_cached_user_data(user_id: str) -> Dict[str, Any]:
             print(f"Loaded chat metadata for user {user_id} (cached).")
         except json.JSONDecodeError as e:
             print(f"Error decoding chat metadata for user {user_id}: {e}. Starting fresh metadata.")
-            # If metadata is corrupt, treat it as empty
             all_chat_metadata = {}
     
     all_chat_messages = {}
-    # Load messages for each chat ID found in metadata
-    for chat_id, chat_name in list(all_chat_metadata.items()): # Use list() to allow modification during iteration
+    for chat_id, chat_name in list(all_chat_metadata.items()):
         chat_file = os.path.join(user_dir, f"{chat_id}.json")
         if os.path.exists(chat_file):
             try:
@@ -99,10 +97,10 @@ def get_cached_user_data(user_id: str) -> Dict[str, Any]:
                     all_chat_messages[chat_id] = json.load(f)
             except json.JSONDecodeError as e:
                 print(f"Error decoding chat history for chat {chat_id} (file: {chat_file}): {e}. Removing from metadata.")
-                del all_chat_metadata[chat_id] # Remove corrupt chat from metadata
+                del all_chat_metadata[chat_id]
         else:
             print(f"Chat file {chat_file} not found for chat ID {chat_id}. Removing from metadata.")
-            del all_chat_metadata[chat_id] # Remove missing chat from metadata
+            del all_chat_metadata[chat_id]
     
     print(f"Loaded {len(all_chat_messages)} chat histories for user {user_id} (cached).")
     return {"metadata": all_chat_metadata, "messages": all_chat_messages}
@@ -168,11 +166,13 @@ def get_agent_response(query: str, chat_history: List[ChatMessage]) -> str:
         print(f"Error getting agent response: {e}")
         return f"I apologize, but I encountered an error while processing your request. Please try again or rephrase your question. Technical details: {str(e)}"
 
-def create_new_chat_session(is_initial_load=False):
-    """Creates a new chat session (ID, name, empty messages) and sets it as current."""
+def create_new_chat_session_in_memory():
+    """
+    Creates a new chat session (ID, name, empty messages) in memory (st.session_state)
+    and sets it as the current chat. Does NOT save to disk immediately.
+    """
     new_chat_id = str(uuid.uuid4())
     
-    # Determine the next "Idea X" number
     existing_idea_nums = []
     for name in st.session_state.chat_metadata.values():
         match = re.match(r"Idea (\d+)", name)
@@ -188,20 +188,17 @@ def create_new_chat_session(is_initial_load=False):
     st.session_state.chat_metadata[new_chat_id] = new_chat_name
     st.session_state.all_chat_messages[new_chat_id] = [{"role": "assistant", "content": generate_llm_greeting()}]
     st.session_state.current_chat_id = new_chat_id
-    st.session_state.messages = st.session_state.all_chat_messages[new_chat_id] # Point to current chat's messages
+    st.session_state.messages = st.session_state.all_chat_messages[new_chat_id]
     st.session_state.chat_modified = False # New chats are initially unsaved
     
-    # Removed: save_chat_metadata(st.session_state.user_id, st.session_state.chat_metadata)
-    print(f"Created new chat: ID={new_chat_id}, Name='{new_chat_name}' (not yet saved to disk)")
-    
-    if not is_initial_load: # Only rerun if triggered by user action
-        st.rerun()
+    print(f"Created new chat in memory: ID={new_chat_id}, Name='{new_chat_name}' (not yet saved to disk)")
+    return new_chat_id # Return the new chat ID
 
 def switch_chat(chat_id: str):
     """Switches to an existing chat."""
     if chat_id not in st.session_state.all_chat_messages:
         print(f"Attempted to switch to non-existent chat ID: {chat_id}")
-        return # Or handle error
+        return
 
     st.session_state.current_chat_id = chat_id
     st.session_state.messages = st.session_state.all_chat_messages[chat_id]
@@ -220,7 +217,6 @@ def delete_chat_session(chat_id: str):
         del st.session_state.all_chat_messages[chat_id]
         del st.session_state.chat_metadata[chat_id]
         
-        # Delete the physical file
         chat_file = os.path.join(MEMORY_DIR, st.session_state.user_id, f"{chat_id}.json")
         if os.path.exists(chat_file):
             os.remove(chat_file)
@@ -279,7 +275,8 @@ def handle_user_input(chat_input_value: str | None):
 def reset_chat_callback():
     """Resets the chat by creating a new, unsaved chat session."""
     print("Resetting chat by creating a new session...")
-    create_new_chat_session() # This will handle setting messages, current_chat_id, and rerunning
+    create_new_chat_session_in_memory() # Create new chat in memory
+    st.rerun() # Rerun to display the new chat
 
 def handle_regeneration_request():
     """Handles the request to regenerate the last assistant response."""
@@ -335,11 +332,12 @@ def main():
         st.session_state.all_chat_messages = user_data["messages"]
         print(f"Loaded user data for {st.session_state.user_id}: {len(st.session_state.chat_metadata)} chats.")
 
-    # Determine current chat and initialize if needed
+    # Initialize or restore current chat session
+    # This block runs on every rerun, but the logic inside ensures state is set only once per session
     if "current_chat_id" not in st.session_state or st.session_state.current_chat_id not in st.session_state.all_chat_messages:
-        # If no current chat or current chat ID is invalid/missing, create a new one
-        create_new_chat_session(is_initial_load=True)
-        # The print statement is now inside create_new_chat_session
+        # If no current chat or current chat ID is invalid/missing, create a new one in memory
+        print("No valid current chat found in session state. Initializing a new chat.")
+        create_new_chat_session_in_memory()
     else:
         # Point st.session_state.messages to the current chat's messages
         st.session_state.messages = st.session_state.all_chat_messages[st.session_state.current_chat_id]
@@ -355,7 +353,7 @@ def main():
 
     stui.create_interface(
         reset_callback=reset_chat_callback,
-        new_chat_callback=create_new_chat_session,
+        new_chat_callback=lambda: create_new_chat_session_in_memory() and st.rerun(), # Trigger new chat and rerun
         delete_chat_callback=delete_chat_session,
         rename_chat_callback=rename_current_chat,
         chat_metadata=st.session_state.chat_metadata,

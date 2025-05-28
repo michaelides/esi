@@ -212,8 +212,8 @@ def create_interface(
                             value=chat_name,
                             key=f"rename_input_{chat_id}",
                             label_visibility="collapsed",
-                            on_change=lambda c=chat_id, n=st.session_state[f"rename_input_{c}"]: (
-                                rename_chat_callback(c, n) if n and n != chat_metadata.get(c) else None,
+                            on_change=lambda current_chat_id_in_loop=chat_id: (
+                                rename_chat_callback(current_chat_id_in_loop, st.session_state[f"rename_input_{current_chat_id_in_loop}"]) if st.session_state[f"rename_input_{current_chat_id_in_loop}"] and st.session_state[f"rename_input_{current_chat_id_in_loop}"] != chat_metadata.get(current_chat_id_in_loop) else None,
                                 setattr(st.session_state, 'editing_chat_id', None) # Clear editing state
                             )
                         )

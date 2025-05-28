@@ -4,7 +4,7 @@ import time
 import json
 import re # Import regex module for parsing code blocks and markers
 import uuid # New import for generating user IDs
-import streamlit_cookies_manager as stc # New import for cookie management
+import extra_streamlit_components as esc # Changed import for cookie management
 from typing import List, Dict, Any
 from llama_index.core.llms import ChatMessage, MessageRole # Import necessary types
 import stui
@@ -26,8 +26,12 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Initialize cookie manager
-cookies = stc.CookieManager()
+# Initialize cookie manager using extra_streamlit_components
+@st.cache_resource(experimental_allow_widgets=True)
+def get_cookie_manager():
+    return esc.CookieManager(key="esi_cookie_manager")
+
+cookies = get_cookie_manager()
 
 # --- Constants and Configuration ---
 # Update DB_PATH default to the new simple vector store persistence directory
@@ -44,10 +48,12 @@ MEMORY_DIR = os.path.join(PROJECT_ROOT, "user_memories")
 # --- User ID and Memory Management Functions ---
 def get_or_create_user_id():
     """Retrieves user ID from cookies or creates a new one."""
-    user_id = cookies.get("user_id")
+    # extra_streamlit_components.CookieManager.get() takes 'cookie' as argument
+    user_id = cookies.get(cookie="user_id")
     if not user_id:
         user_id = str(uuid.uuid4())
-        cookies.set("user_id", user_id)
+        # extra_streamlit_components.CookieManager.set() takes 'cookie' and 'val'
+        cookies.set(cookie="user_id", val=user_id)
         print(f"New user ID created and set: {user_id}")
     else:
         print(f"Existing user ID retrieved: {user_id}")

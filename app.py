@@ -169,7 +169,7 @@ def get_agent_response(query: str, chat_history: List[ChatMessage]) -> str:
 def create_new_chat_session_in_memory():
     """
     Creates a new chat session (ID, name, empty messages) in memory (st.session_state)
-    and sets it as the current chat. Does NOT save to disk immediately.
+    and sets it as the current chat. Saves metadata to disk immediately.
     """
     new_chat_id = str(uuid.uuid4())
     
@@ -191,7 +191,10 @@ def create_new_chat_session_in_memory():
     st.session_state.messages = st.session_state.all_chat_messages[new_chat_id]
     st.session_state.chat_modified = False # New chats are initially unsaved
     
-    print(f"Created new chat in memory: ID={new_chat_id}, Name='{new_chat_name}' (not yet saved to disk)")
+    # Immediately save the updated chat metadata to disk
+    save_chat_metadata(st.session_state.user_id, st.session_state.chat_metadata)
+    
+    print(f"Created new chat in memory and saved metadata: ID={new_chat_id}, Name='{new_chat_name}'")
     return new_chat_id # Return the new chat ID
 
 def switch_chat(chat_id: str):
@@ -284,8 +287,9 @@ def handle_user_input(chat_input_value: str | None):
         # and save its metadata for the first time.
         if not st.session_state.chat_modified and len(st.session_state.messages) == 1 and st.session_state.messages[0]["role"] == "assistant":
             st.session_state.chat_modified = True 
-            save_chat_metadata(st.session_state.user_id, st.session_state.chat_metadata) # Save metadata now that chat is active
-            print(f"Chat '{st.session_state.chat_metadata.get(st.session_state.current_chat_id)}' activated and metadata saved.")
+            # The metadata is already saved when the chat is created, so no need to save again here.
+            # save_chat_metadata(st.session_state.user_id, st.session_state.chat_metadata) # Removed
+            print(f"Chat '{st.session_state.chat_metadata.get(st.session_state.current_chat_id)}' activated.")
 
         st.session_state.messages.append({"role": "user", "content": prompt_to_process})
 
@@ -357,17 +361,23 @@ def main():
         st.session_state[AGENT_SESSION_KEY] = setup_agent()
 
     # Load all user's chat data (metadata and messages)
-    if "all_chat_messages" not in st.session_state:
+    # This block ensures that st.session_state.chat_metadata and st.session_state.all_chat_messages
+    # are initialized once per session from the cached data.
+    if "chat_metadata" not in st.session_state or "all_chat_messages" not in st.session_state:
         user_data = get_cached_user_data(st.session_state.user_id)
         st.session_state.chat_metadata = user_data["metadata"]
         st.session_state.all_chat_messages = user_data["messages"]
-        print(f"Loaded user data for {st.session_state.user_id}: {len(st.session_state.chat_metadata)} chats.")
+        print(f"Initial load of user data for {st.session_state.user_id}: {len(st.session_state.chat_metadata)} chats.")
+    else:
+        print(f"User data already in session state. Current chats: {len(st.session_state.chat_metadata)}.")
+
 
     # Initialize or restore current chat session
     if "current_chat_id" not in st.session_state or st.session_state.current_chat_id not in st.session_state.all_chat_messages:
         print("No valid current chat found in session state. Initializing a new chat.")
         create_new_chat_session_in_memory()
     else:
+        # Ensure st.session_state.messages points to the correct chat's messages
         st.session_state.messages = st.session_state.all_chat_messages[st.session_state.current_chat_id]
         st.session_state.chat_modified = True 
         print(f"Continuing with chat: '{st.session_state.chat_metadata.get(st.session_state.current_chat_id, st.session_state.current_chat_id)}'")
@@ -378,8 +388,8 @@ def main():
     # Initialize renaming state variables
     if 'renaming_chat_id' not in st.session_state:
         st.session_state.renaming_chat_id = None
-    if 'renaming_chat_name_input' not in st.session_state:
-        st.session_state.renaming_chat_name_input = ""
+    # The 'renaming_chat_name_input' is tied to the text_input key, so it's managed by Streamlit.
+    # No explicit initialization needed here.
 
     if st.session_state.get("do_regenerate", False):
         handle_regeneration_request()

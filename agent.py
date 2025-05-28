@@ -55,10 +55,7 @@ def generate_llm_greeting() -> str:
              return static_fallback
 
         # Use a simple prompt for a greeting
-        prompt = """Generate a single, short, friendly, and welcoming greeting message (1-2 sentences) 
-        for a user interacting with an AI assistant named ESI designed to help with university dissertations. 
-        Mention ESI by name. Provide only the greeting itself, and offer help to the user.
-        """
+        prompt = """Generate a short, friendly greeting (1-2 sentences) for ESI, an AI dissertation assistant. Mention ESI by name and offer help. Provide only the greeting."""
         response = llm.complete(prompt)
         greeting = response.text.strip()
 
@@ -179,22 +176,15 @@ def generate_suggested_prompts(chat_history: List[Dict[str, Any]]) -> List[str]:
         context_str = "\n".join([f"{m['role'].capitalize()}: {m['content']}" for m in context_messages])
 
         # Construct the prompt for the LLM
-        prompt = f"""Given the following recent conversation context between a User and an AI Assistant (ESI) helping with university dissertations:
+        prompt = f"""Based on the recent conversation context below, suggest exactly {SUGGESTED_PROMPT_COUNT} concise follow-up prompts (under 15 words each) for a user working on a dissertation.
 --- CONTEXT START ---
 {context_str}
 --- CONTEXT END ---
-
-Generate exactly {SUGGESTED_PROMPT_COUNT} concise and relevant follow-up responses or prompts (each under 15 words) that the User might respond with next. 
-The prompts should be directly related to the conversation topics or typical dissertation support tasks. 
-
-Output ONLY the prompts, each on a new line, without any numbering, bullet points, or introductory text.
+Output ONLY the prompts, each on a new line, without numbering or introductory text.
 Example:
-I am interested in topic K.
-I like theory L.
 Find papers on topic X.
 Explain concept Y.
 How do I structure section Z?
-Summarize the key points about W.
 """
 
         print("Generating suggested prompts using LLM...")

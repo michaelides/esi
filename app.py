@@ -45,8 +45,8 @@ MEMORY_DIR = os.path.join(PROJECT_ROOT, "user_memories")
 @st.cache_resource
 def setup_global_llm_settings():
     """Initializes global LLM settings using st.cache_resource to run only once."""
+    print("Initializing LLM settings (cached)...")
     try:
-        print("Initializing LLM settings (cached)...")
         initialize_agent_settings()
         print("LLM settings initialized (cached).")
     except Exception as e:
@@ -74,9 +74,9 @@ def get_or_create_user_id():
     if not user_id:
         user_id = str(uuid.uuid4())
         cookies.set(cookie="user_id", val=user_id)
-        print(f"New user ID created and set: {user_id}")
-    else:
-        print(f"Existing user ID retrieved: {user_id}")
+        # print(f"New user ID created and set: {user_id}") # Removed print
+    # else:
+        # print(f"Existing user ID retrieved: {user_id}") # Removed print
     return user_id
 
 def get_user_memory_path(user_id: str) -> str:
@@ -91,12 +91,12 @@ def load_chat_history(user_id: str) -> List[Dict[str, Any]]:
         try:
             with open(memory_file, "r", encoding="utf-8") as f:
                 history = json.load(f)
-                print(f"Loaded chat history for user {user_id} from {memory_file}")
+                # print(f"Loaded chat history for user {user_id} from {memory_file}") # Removed print
                 return history
         except json.JSONDecodeError as e:
             print(f"Error decoding chat history for user {user_id}: {e}. Starting fresh.")
             return []
-    print(f"No existing chat history found for user {user_id}. Starting fresh.")
+    # print(f"No existing chat history found for user {user_id}. Starting fresh.") # Removed print
     return []
 
 def save_chat_history(user_id: str, messages: List[Dict[str, Any]]):
@@ -230,12 +230,12 @@ def main():
     # Get or create user ID and store in session state (only once per session)
     if "user_id" not in st.session_state:
         st.session_state.user_id = get_or_create_user_id()
-    # No 'else' needed here, as get_or_create_user_id already prints if existing.
-
+        print(f"User ID for this session: {st.session_state.user_id}") # Added print
+    
     # Initialize agent (cached and stored in session state)
     if AGENT_SESSION_KEY not in st.session_state:
         st.session_state[AGENT_SESSION_KEY] = setup_agent()
-    # No 'else' needed here, as setup_agent already prints if existing.
+        print("Agent for this session is ready.") # Added print
 
     # Handle regeneration request if flag is set
     # This needs to be called before stui.create_interface() so that
@@ -249,6 +249,7 @@ def main():
         if not st.session_state.messages: # If loaded history is empty, add initial greeting
             st.session_state.messages = [{"role": "assistant", "content": generate_llm_greeting()}]
             save_chat_history(st.session_state.user_id, st.session_state.messages) # Save initial greeting
+        print(f"Chat history for user {st.session_state.user_id} loaded/initialized.") # Added print
 
     if "suggested_prompts" not in st.session_state:
         st.session_state.suggested_prompts = DEFAULT_PROMPTS

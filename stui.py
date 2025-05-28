@@ -204,7 +204,7 @@ def create_interface(
                         if chat_id != current_chat_id:
                             switch_chat_callback(chat_id)
                 with col2:
-                    with st.popover("⋮", use_container_width=True, key=f"popover_{chat_id}"):
+                    with st.popover("⋮", use_container_width=True): # Removed 'key' argument
                         st.write(f"Options for: **{chat_name}**")
                         
                         # Option to download

@@ -184,54 +184,78 @@ def create_interface(
     st.caption("Your AI partner for brainstorming and structuring your dissertation research")
 
     with st.sidebar:
-        st.header("Chat History")
-        if st.button("➕ New Chat", key="new_chat_button", use_container_width=True):
-            new_chat_callback()
-
-        # Display existing chats
-        # Sort by name for consistent display
-        sorted_chat_items = sorted(chat_metadata.items(), key=lambda item: item[1].lower())
+#        st.header("Chat History")
+        with st.expander("**Chat History**", expanded=False, icon = ":material/forum:"): 
+            st.info("Conversations are automarically saved and linked to your browser via cookies. Clearing browser data will remove your saved discussions.")
+            if st.button("➕ New Chat", key="new_chat_button", use_container_width=True):
+                new_chat_callback()
+            sorted_chat_items = sorted(chat_metadata.items(), key=lambda item: item[1].lower())
+     
+            for chat_id, chat_name in sorted_chat_items:
+                col1, col2 = st.columns([0.8, 0.2])
+                with col1:
+                    if st.button(chat_name, key=f"chat_select_{chat_id}", use_container_width=True,
+                                type="primary" if chat_id == current_chat_id else "secondary"):
+                        if chat_id != current_chat_id:
+                            switch_chat_callback(chat_id)
+            #     with col2:
+            #         if chat_id != current_chat_id: # Don't allow deleting the current chat
+            #             if st.button("🗑️", key=f"chat_delete_{chat_id}", help=f"Delete '{chat_name}'"):
+            #                 delete_chat_callback(chat_id)
+            #         else:
+            #             st.markdown(" ") # Placeholder for alignment
+            #  # Rename current chat
+            # if current_chat_id:
+            #     current_chat_name = chat_metadata.get(current_chat_id, "Unnamed Chat")
+            #     new_name = st.text_input("Rename current chat:", value=current_chat_name, key=f"rename_input_{current_chat_id}")
+            #     if new_name and new_name != current_chat_name:
+            #         rename_chat_callback(new_name)
+                
+                with col2:
+                    with st.popover("⋮", use_container_width=True):
+                            st.write(f"Options for: **{chat_id['title']}**")
+                            
+                            # Option to edit title
+                            if st.button("✏️ Edit Title", key=f"edit_from_popover_{chat_id['id']}", use_container_width=True):
+                                st.session_state.editing_list_discussion_id = chat_id['id']
+                                # Removed st.rerun() here. Rely on natural rerun after button click.
+                            
+                            # Option to download
+                            st.download_button(
+                                label="⬇️ Download (.md)",
+                                data=st.session_state._get_discussion_markdown(chat_id['id']), # New function call
+                                file_name=f"{chat_id['title'].replace(' ', '_')}.md",
+                                mime="text/markdown",
+                                key=f"download_listed_{chat_id['id']}",
+                                use_container_width=True
+                            )
+                            
+                            # Option to delete
+                            if st.button("♻ Delete", key=f"delete_from_popover_{chat_id['id']}", use_container_width=True):
+                                st.session_state._delete_current_discussion(chat_id['id'])
+                                # Removed st.rerun() here. Rely on natural rerun after button click.    
         
-        for chat_id, chat_name in sorted_chat_items:
-            col1, col2 = st.columns([0.8, 0.2])
-            with col1:
-                if st.button(chat_name, key=f"chat_select_{chat_id}", use_container_width=True,
-                             type="primary" if chat_id == current_chat_id else "secondary"):
-                    if chat_id != current_chat_id:
-                        switch_chat_callback(chat_id)
-            with col2:
-                if chat_id != current_chat_id: # Don't allow deleting the current chat
-                    if st.button("🗑️", key=f"chat_delete_{chat_id}", help=f"Delete '{chat_name}'"):
-                        delete_chat_callback(chat_id)
-                else:
-                    st.markdown(" ") # Placeholder for alignment
+        with st.expander("**LLM Settings**", expanded=False, icon = ":material/tune:"):
+            st.slider(
+                "Creativity (Temperature)",
+                min_value=0.0,
+                max_value=2.0,
+                value=st.session_state.get("llm_temperature", 0.7),
+                step=0.1,
+                key="llm_temperature",
+                help="Controls the randomness of the AI's responses. Lower values are more focused, higher values are more creative."
+            )
 
-        st.divider()
+        with st.expander("**About ESI**", expanded=False, icon = ":material/info:"):
+            st.info("ESI uses AI to help you navigate the dissertation process. It has access to some of the literature in your reading lists and also uses search tools for web lookups.")
+            st.warning("⚠️  Remember: Always consult your dissertation supervisor for final guidance and decisions.")
+            st.info("Made for NBS7091A and NBS7095x")
 
-        # Rename current chat
-        if current_chat_id:
-            current_chat_name = chat_metadata.get(current_chat_id, "Unnamed Chat")
-            new_name = st.text_input("Rename current chat:", value=current_chat_name, key=f"rename_input_{current_chat_id}")
-            if new_name and new_name != current_chat_name:
-                rename_chat_callback(new_name)
-        
-        st.divider()
-        st.header("LLM Settings")
-        st.slider(
-            "Creativity (Temperature)",
-            min_value=0.0,
-            max_value=2.0,
-            value=st.session_state.get("llm_temperature", 0.7),
-            step=0.1,
-            key="llm_temperature",
-            help="Controls the randomness of the AI's responses. Lower values are more focused, higher values are more creative."
-        )
-
-        st.divider()
-        st.info("Made for NBS7091A and NBS7095x")
-        
-        st.divider()
-        if st.button("🔄 Reset Current Chat", key="reset_chat_button", help="Clears the current conversation and starts a new one."):
-            reset_callback()
+        CSS = """
+        .stExpander > details {
+            border: none;
+        }
+        """
+        st.html(f"<style>{CSS}</style>")
 
     display_chat()

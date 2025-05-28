@@ -246,10 +246,10 @@ def create_interface(
             st.warning("⚠️  Remember: Always consult your dissertation supervisor for final guidance and decisions.")
             st.info("Made for NBS7091A and NBS7095x")
 
-        # Reset chat button (global action, outside expanders)
-        st.divider()
-        if st.button("🔄 Reset Current Chat", key="reset_chat_button", help="Clears the current conversation and starts a new one."):
-            reset_callback()
+        # # Reset chat button (global action, outside expanders)
+        # st.divider()
+        # if st.button("🔄 Reset Current Chat", key="reset_chat_button", help="Clears the current conversation and starts a new one."):
+        #     reset_callback()
 
     # Apply CSS globally
     CSS = """

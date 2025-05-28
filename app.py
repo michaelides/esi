@@ -68,11 +68,10 @@ def get_cached_user_id():
         print(f"Existing user ID retrieved (cached): {user_id}")
     return user_id
 
-@st.cache_resource
-def get_cached_user_data(user_id: str) -> Dict[str, Any]:
+def _load_user_data_from_disk(user_id: str) -> Dict[str, Any]:
     """
-    Loads all chat metadata and histories for a user, cached to run once per session.
-    Returns a dictionary with 'metadata' and 'messages' keys.
+    Loads all chat metadata and histories for a user directly from disk.
+    This function is NOT cached by Streamlit.
     """
     user_dir = os.path.join(MEMORY_DIR, user_id)
     os.makedirs(user_dir, exist_ok=True)
@@ -83,7 +82,7 @@ def get_cached_user_data(user_id: str) -> Dict[str, Any]:
         try:
             with open(chat_metadata_path, "r", encoding="utf-8") as f:
                 all_chat_metadata = json.load(f)
-            print(f"Loaded chat metadata for user {user_id} (cached).")
+            print(f"Loaded chat metadata for user {user_id} from disk.")
         except json.JSONDecodeError as e:
             print(f"Error decoding chat metadata for user {user_id}: {e}. Starting fresh metadata.")
             all_chat_metadata = {}
@@ -102,11 +101,9 @@ def get_cached_user_data(user_id: str) -> Dict[str, Any]:
             print(f"Chat file {chat_file} not found for chat ID {chat_id}. Removing from metadata.")
             del all_chat_metadata[chat_id]
     
-    print(f"Loaded {len(all_chat_messages)} chat histories for user {user_id} (cached).")
+    print(f"Loaded {len(all_chat_messages)} chat histories for user {user_id} from disk.")
     return {"metadata": all_chat_metadata, "messages": all_chat_messages}
 
-# Store a reference to the cached function for clearing its cache
-_get_cached_user_data = get_cached_user_data
 
 def save_chat_history(user_id: str, chat_id: str, messages: List[Dict[str, Any]]):
     """Saves a specific chat history for a given user ID to a JSON file."""
@@ -129,9 +126,6 @@ def save_chat_metadata(user_id: str, chat_metadata: Dict[str, str]):
         with open(metadata_file, "w", encoding="utf-8") as f:
             json.dump(chat_metadata, f, indent=2)
         print(f"Saved chat metadata for user {user_id} to {metadata_file}")
-        # Clear the cache of get_cached_user_data so it reloads fresh data on next run
-        _get_cached_user_data.clear()
-        print("Cleared get_cached_user_data cache.")
     except Exception as e:
         print(f"Error saving chat metadata for user {user_id}): {e}")
 
@@ -160,7 +154,7 @@ def get_agent_response(query: str, chat_history: List[ChatMessage]) -> str:
             print(f"Warning: Could not access LLM object within the agent to set temperature. Agent or LLM structure might have changed (agent.llm or agent.llm.temperature not found).")
 
         with st.spinner("ESI is thinking..."):
-            response = agent.chat(query, chat_history=chat_history) # Changed formatted_history to chat_history
+            response = agent.chat(query, chat_history=chat_history)
 
         response_text = response.response if hasattr(response, 'response') else str(response)
 
@@ -294,7 +288,6 @@ def handle_user_input(chat_input_value: str | None):
         if not st.session_state.chat_modified and len(st.session_state.messages) == 1 and st.session_state.messages[0]["role"] == "assistant":
             st.session_state.chat_modified = True 
             # The metadata is already saved when the chat is created, so no need to save again here.
-            # save_chat_metadata(st.session_state.user_id, st.session_state.chat_metadata) # Removed
             print(f"Chat '{st.session_state.chat_metadata.get(st.session_state.current_chat_id)}' activated.")
 
         st.session_state.messages.append({"role": "user", "content": prompt_to_process})
@@ -366,11 +359,9 @@ def main():
     if AGENT_SESSION_KEY not in st.session_state:
         st.session_state[AGENT_SESSION_KEY] = setup_agent()
 
-    # Load all user's chat data (metadata and messages)
-    # This block ensures that st.session_state.chat_metadata and st.session_state.all_chat_messages
-    # are initialized once per session from the cached data.
+    # Load all user's chat data (metadata and messages) only once per session
     if "chat_metadata" not in st.session_state or "all_chat_messages" not in st.session_state:
-        user_data = get_cached_user_data(st.session_state.user_id)
+        user_data = _load_user_data_from_disk(st.session_state.user_id)
         st.session_state.chat_metadata = user_data["metadata"]
         st.session_state.all_chat_messages = user_data["messages"]
         print(f"Initial load of user data for {st.session_state.user_id}: {len(st.session_state.chat_metadata)} chats.")
@@ -379,9 +370,19 @@ def main():
 
 
     # Initialize or restore current chat session
+    # This logic ensures a valid current chat is always selected or created.
     if "current_chat_id" not in st.session_state or st.session_state.current_chat_id not in st.session_state.all_chat_messages:
-        print("No valid current chat found in session state. Initializing a new chat.")
-        create_new_chat_session_in_memory()
+        if st.session_state.chat_metadata:
+            # If there are existing chats, switch to the first one
+            first_available_chat_id = next(iter(st.session_state.chat_metadata))
+            st.session_state.current_chat_id = first_available_chat_id
+            st.session_state.messages = st.session_state.all_chat_messages[first_available_chat_id]
+            st.session_state.chat_modified = True
+            print(f"No valid current chat found. Switched to first available chat: '{st.session_state.chat_metadata.get(first_available_chat_id, first_available_chat_id)}'")
+        else:
+            # No chats exist, create a brand new one
+            print("No valid current chat found and no existing chats. Initializing a new chat.")
+            create_new_chat_session_in_memory()
     else:
         # Ensure st.session_state.messages points to the correct chat's messages
         st.session_state.messages = st.session_state.all_chat_messages[st.session_state.current_chat_id]

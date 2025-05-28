@@ -4,7 +4,7 @@ import time
 import json
 import re # Import regex module for parsing code blocks and markers
 import uuid # New import for generating user IDs
-import extra_streamlit_components as esc # Changed import for cookie management
+import extra_streamlit_components as esc
 from typing import List, Dict, Any
 from llama_index.core.llms import ChatMessage, MessageRole # Import necessary types
 import stui
@@ -26,12 +26,8 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Initialize cookie manager using extra_streamlit_components
-@st.cache_resource(experimental_allow_widgets=True)
-def get_cookie_manager():
-    return esc.CookieManager(key="esi_cookie_manager")
-
-cookies = get_cookie_manager()
+# Initialize cookie manager directly (not cached)
+cookies = esc.CookieManager(key="esi_cookie_manager")
 
 # --- Constants and Configuration ---
 # Update DB_PATH default to the new simple vector store persistence directory

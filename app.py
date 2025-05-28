@@ -159,15 +159,6 @@ def handle_user_input(chat_input_value: str | None):
         # Force Streamlit to rerun the script immediately to display the new messages
         st.rerun()
 
-# --- UI Callbacks ---
-def set_selected_prompt_from_dropdown():
-    """Callback function to set the selected prompt from the dropdown."""
-    prompt = st.session_state.get("selected_prompt_dropdown", "")
-    if prompt:
-        st.session_state.prompt_to_use = prompt
-        # Optionally clear the dropdown selection after use, though selectbox usually resets visually
-        # st.session_state.selected_prompt_dropdown = "" # Might cause issues if not handled carefully
-
 
 def main():
     """Main function to run the Streamlit app."""
@@ -200,16 +191,17 @@ def main():
     # loading persistent chat history or initializing a new one.
     stui.create_interface() # This displays history and sidebar info
 
-    # Display suggested prompts as a dropdown below the chat history
-    # Ensure suggested_prompts is available in session_state (initialized by stui.init_session_state)
-    st.selectbox(
-        "Select a suggested prompt:",
-        # Add a blank option at the beginning
-        options=[""] + st.session_state.suggested_prompts,
-        key="selected_prompt_dropdown", # Unique key for the selectbox state
-        placeholder="Select a suggested prompt...",
-        on_change=set_selected_prompt_from_dropdown # Set the callback function
-    )
+    # Display suggested prompts as buttons below the chat history
+    if st.session_state.suggested_prompts:
+        st.markdown("---") # Add a separator for visual clarity
+        st.subheader("Suggested Prompts:")
+        # Create columns for buttons, up to the number of suggested prompts
+        cols = st.columns(len(st.session_state.suggested_prompts)) 
+        for i, prompt in enumerate(st.session_state.suggested_prompts):
+            with cols[i]:
+                if st.button(prompt, key=f"suggested_prompt_btn_{i}"):
+                    st.session_state.prompt_to_use = prompt
+                    st.rerun() # Rerun to process the prompt
 
     # Render the chat input box at the bottom, capture its value
     chat_input_value = st.chat_input("Ask me about dissertations, research methods, academic writing, etc.")

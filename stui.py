@@ -177,20 +177,25 @@ def create_interface(
     rename_chat_callback: Callable,
     chat_metadata: Dict[str, str],
     current_chat_id: str,
-    switch_chat_callback: Callable
+    switch_chat_callback: Callable,
+    get_discussion_markdown_callback: Callable # New parameter
 ):
     """Create the Streamlit UI for the chat interface."""
     st.title("🎓 ESI: ESI Scholarly Instructor")
     st.caption("Your AI partner for brainstorming and structuring your dissertation research")
 
     with st.sidebar:
-#        st.header("Chat History")
-        with st.expander("**Chat History**", expanded=False, icon = ":material/forum:"): 
-            st.info("Conversations are automarically saved and linked to your browser via cookies. Clearing browser data will remove your saved discussions.")
+        with st.expander("**Chat History**", expanded=True, icon = ":material/forum:"):
+            st.info("Conversations are automatically saved and linked to your browser via cookies. Clearing browser data will remove your saved discussions.")
+            
             if st.button("➕ New Chat", key="new_chat_button", use_container_width=True):
                 new_chat_callback()
+
+            st.markdown("---") # Separator for new chat button and list
+
+            # Display existing chats
             sorted_chat_items = sorted(chat_metadata.items(), key=lambda item: item[1].lower())
-     
+            
             for chat_id, chat_name in sorted_chat_items:
                 col1, col2 = st.columns([0.8, 0.2])
                 with col1:
@@ -198,42 +203,32 @@ def create_interface(
                                 type="primary" if chat_id == current_chat_id else "secondary"):
                         if chat_id != current_chat_id:
                             switch_chat_callback(chat_id)
-            #     with col2:
-            #         if chat_id != current_chat_id: # Don't allow deleting the current chat
-            #             if st.button("🗑️", key=f"chat_delete_{chat_id}", help=f"Delete '{chat_name}'"):
-            #                 delete_chat_callback(chat_id)
-            #         else:
-            #             st.markdown(" ") # Placeholder for alignment
-            #  # Rename current chat
-            # if current_chat_id:
-            #     current_chat_name = chat_metadata.get(current_chat_id, "Unnamed Chat")
-            #     new_name = st.text_input("Rename current chat:", value=current_chat_name, key=f"rename_input_{current_chat_id}")
-            #     if new_name and new_name != current_chat_name:
-            #         rename_chat_callback(new_name)
-                
                 with col2:
                     with st.popover("⋮", use_container_width=True):
-                            st.write(f"Options for: **{chat_id['title']}**")
-                            
-                            # Option to edit title
-                            if st.button("✏️ Edit Title", key=f"edit_from_popover_{chat_id['id']}", use_container_width=True):
-                                st.session_state.editing_list_discussion_id = chat_id['id']
-                                # Removed st.rerun() here. Rely on natural rerun after button click.
-                            
-                            # Option to download
-                            st.download_button(
-                                label="⬇️ Download (.md)",
-                                data=st.session_state._get_discussion_markdown(chat_id['id']), # New function call
-                                file_name=f"{chat_id['title'].replace(' ', '_')}.md",
-                                mime="text/markdown",
-                                key=f"download_listed_{chat_id['id']}",
-                                use_container_width=True
-                            )
-                            
-                            # Option to delete
-                            if st.button("♻ Delete", key=f"delete_from_popover_{chat_id['id']}", use_container_width=True):
-                                st.session_state._delete_current_discussion(chat_id['id'])
-                                # Removed st.rerun() here. Rely on natural rerun after button click.    
+                        st.write(f"Options for: **{chat_name}**") # Use chat_name here
+                        
+                        # Option to download
+                        st.download_button(
+                            label="⬇️ Download (.md)",
+                            data=get_discussion_markdown_callback(chat_id), # Use callback
+                            file_name=f"{chat_name.replace(' ', '_')}.md",
+                            mime="text/markdown",
+                            key=f"download_listed_{chat_id}",
+                            use_container_width=True
+                        )
+                        
+                        # Option to delete
+                        if st.button("♻ Delete", key=f"delete_from_popover_{chat_id}", use_container_width=True):
+                            delete_chat_callback(chat_id) # This callback already handles the "cannot delete current chat" logic
+
+            st.divider()
+
+            # Rename current chat (applies to the active chat)
+            if current_chat_id:
+                current_chat_name = chat_metadata.get(current_chat_id, "Unnamed Chat")
+                new_name_input = st.text_input("Rename current chat:", value=current_chat_name, key=f"rename_input_{current_chat_id}")
+                if new_name_input and new_name_input != current_chat_name:
+                    rename_chat_callback(new_name_input)
         
         with st.expander("**LLM Settings**", expanded=False, icon = ":material/tune:"):
             st.slider(
@@ -251,11 +246,17 @@ def create_interface(
             st.warning("⚠️  Remember: Always consult your dissertation supervisor for final guidance and decisions.")
             st.info("Made for NBS7091A and NBS7095x")
 
-        CSS = """
-        .stExpander > details {
-            border: none;
-        }
-        """
-        st.html(f"<style>{CSS}</style>")
+        # Reset chat button (global action, outside expanders)
+        st.divider()
+        if st.button("🔄 Reset Current Chat", key="reset_chat_button", help="Clears the current conversation and starts a new one."):
+            reset_callback()
+
+    # Apply CSS globally
+    CSS = """
+    .stExpander > details {
+        border: none;
+    }
+    """
+    st.html(f"<style>{CSS}</style>")
 
     display_chat()

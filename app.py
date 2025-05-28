@@ -198,7 +198,7 @@ def switch_chat(chat_id: str):
     """Switches to an existing chat."""
     if chat_id not in st.session_state.all_chat_messages:
         print(f"Attempted to switch to non-existent chat ID: {chat_id}")
-        return
+        return # Or handle error
 
     st.session_state.current_chat_id = chat_id
     st.session_state.messages = st.session_state.all_chat_messages[chat_id]
@@ -234,6 +234,16 @@ def rename_current_chat(new_name: str):
         save_chat_metadata(st.session_state.user_id, st.session_state.chat_metadata)
         print(f"Renamed chat {current_chat_id} to '{new_name}'")
         st.rerun()
+
+def get_discussion_markdown(chat_id: str) -> str:
+    """Retrieves messages for a given chat_id and formats them into a Markdown string."""
+    messages = st.session_state.all_chat_messages.get(chat_id, [])
+    markdown_content = []
+    for msg in messages:
+        role = msg["role"].capitalize()
+        content = msg["content"]
+        markdown_content.append(f"**{role}:**\n{content}\n\n---")
+    return "\n".join(markdown_content)
 
 def handle_user_input(chat_input_value: str | None):
     """
@@ -333,15 +343,11 @@ def main():
         print(f"Loaded user data for {st.session_state.user_id}: {len(st.session_state.chat_metadata)} chats.")
 
     # Initialize or restore current chat session
-    # This block runs on every rerun, but the logic inside ensures state is set only once per session
     if "current_chat_id" not in st.session_state or st.session_state.current_chat_id not in st.session_state.all_chat_messages:
-        # If no current chat or current chat ID is invalid/missing, create a new one in memory
         print("No valid current chat found in session state. Initializing a new chat.")
         create_new_chat_session_in_memory()
     else:
-        # Point st.session_state.messages to the current chat's messages
         st.session_state.messages = st.session_state.all_chat_messages[st.session_state.current_chat_id]
-        # Mark existing chats as modified by default, so they get saved on interaction
         st.session_state.chat_modified = True 
         print(f"Continuing with chat: '{st.session_state.chat_metadata.get(st.session_state.current_chat_id, st.session_state.current_chat_id)}'")
 
@@ -353,12 +359,13 @@ def main():
 
     stui.create_interface(
         reset_callback=reset_chat_callback,
-        new_chat_callback=lambda: create_new_chat_session_in_memory() and st.rerun(), # Trigger new chat and rerun
+        new_chat_callback=lambda: create_new_chat_session_in_memory() and st.rerun(),
         delete_chat_callback=delete_chat_session,
         rename_chat_callback=rename_current_chat,
         chat_metadata=st.session_state.chat_metadata,
         current_chat_id=st.session_state.current_chat_id,
-        switch_chat_callback=switch_chat
+        switch_chat_callback=switch_chat,
+        get_discussion_markdown_callback=get_discussion_markdown # Pass the new callback
     )
 
     if st.session_state.suggested_prompts:

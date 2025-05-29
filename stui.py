@@ -197,8 +197,6 @@ def create_interface(
                 st.session_state.editing_chat_id = None
                 new_chat_callback()
 
-            st.markdown("---") # Separator for new chat button and list
-
             # Display existing chats
             sorted_chat_items = sorted(chat_metadata.items(), key=lambda item: item[1].lower())
             

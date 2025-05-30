@@ -40,8 +40,16 @@ def setup_global_llm_settings():
         initialize_agent_settings()
         logger.info("LLM settings initialized (cached).")
     except Exception as e:
-        logger.error(f"Fatal Error: Could not initialize LLM settings. {e}")
-        st.error(f"Fatal Error: Could not initialize LLM settings. {e}")
+        error_message = (
+            "Fatal Error: Could not initialize the AI's language model (Gemini).\n\n"
+            "This is often due to an issue with the GOOGLE_API_KEY setup:\n"
+            "1. Ensure the GOOGLE_API_KEY environment variable is set.\n"
+            "2. Verify the API key is correct and active in your Google AI Studio or Google Cloud console.\n"
+            "3. Check if the API key has permissions for the model being used (e.g., 'gemini-2.5-flash-preview-05-20').\n\n"
+            f"Original error details: {e}"
+        )
+        logger.error(error_message) # Log the more detailed message too
+        st.error(error_message)
         st.stop()
 
 @st.cache_resource

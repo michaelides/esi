@@ -4,14 +4,14 @@ import uuid
 import json
 import time
 from typing import List, Dict, Any, Callable
-from datetime import datetime, timedelta # Added timedelta for cookie expiration
+from datetime import datetime, timedelta
 
 from llama_index.core.llms import ChatMessage
 from llama_index.core.agent import AgentRunner
 from llama_index.core.memory import ChatMemoryBuffer
 
 from agent import create_orchestrator_agent, generate_llm_greeting, generate_suggested_prompts
-from st_pages import add_page_title, hide_pages
+# from st_pages import add_page_title, hide_pages # Removed as not needed for single-page app
 import extra_streamlit_components as esc
 
 PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
@@ -260,8 +260,9 @@ def handle_regeneration_request():
 
 
 def main():
-    add_page_title()
-    hide_pages(["Thank you"])
+    # add_page_title() # Removed
+    st.set_page_config(page_title="ESI Chatbot", layout="wide") # Added for basic page config
+    # hide_pages(["Thank you"]) # Removed
 
     # Initialize session state variables if they don't exist
     if "user_id" not in st.session_state:

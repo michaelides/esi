@@ -9,7 +9,7 @@ import pytz
 from llama_index.core.llms import ChatMessage, MessageRole
 from llama_index.core.agent import AgentRunner
 
-from agent import create_orchestrator_agent, generate_llm_greeting, generate_suggested_prompts
+from agent import create_orchestrator_agent, generate_llm_greeting, generate_suggested_prompts, initialize_settings # Import initialize_settings
 from stui import display_chat # Updated import: only display_chat is needed
 from tools import UI_ACCESSIBLE_WORKSPACE_RELATIVE, UI_ACCESSIBLE_WORKSPACE
 
@@ -233,6 +233,9 @@ def handle_regeneration_request():
 
 def main():
     """Main function to run the Streamlit application."""
+    # Initialize LlamaIndex global settings (LLM, Embedding model)
+    initialize_settings() # Ensure Gemini is set up first
+
     # Initialize session state variables if they don't exist (moved from setup_global_llm_settings)
     if "chat_sessions" not in st.session_state:
         st.session_state.chat_sessions = {} # Stores metadata for all chats

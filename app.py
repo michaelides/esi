@@ -35,27 +35,7 @@ RAG_SOURCE_MARKER_PREFIX = "---RAG_SOURCE---"
 MEMORY_DIR = os.path.join(PROJECT_ROOT, "user_memories")
 os.makedirs(MEMORY_DIR, exist_ok=True)
 
-@st.cache_resource
-def setup_global_llm_settings():
-    """
-    Sets up global LLM settings, including initial session state for chat.
-    This runs only once per app deployment.
-    """
-    # Initialize session state variables if they don't exist
-    if "chat_sessions" not in st.session_state:
-        st.session_state.chat_sessions = {} # Stores metadata for all chats
-    if "current_chat_id" not in st.session_state:
-        st.session_state.current_chat_id = None
-    if "messages" not in st.session_state:
-        st.session_state.messages = [] # Current chat messages
-    if "llm_greeting" not in st.session_state:
-        st.session_state.llm_greeting = generate_llm_greeting()
-    if "suggested_prompts" not in st.session_state:
-        st.session_state.suggested_prompts = []
-    if "last_chat_history_save" not in st.session_state:
-        st.session_state.last_chat_history_save = None
-    if "verbosity_level" not in st.session_state: # Initialize verbosity_level
-        st.session_state.verbosity_level = 5 # Default value
+# Removed setup_global_llm_settings as its contents are moved to main()
 
 @st.cache_resource
 def setup_agent(verbosity_level: int) -> AgentRunner:
@@ -253,7 +233,22 @@ def handle_regeneration_request():
 
 def main():
     """Main function to run the Streamlit application."""
-    setup_global_llm_settings()
+    # Initialize session state variables if they don't exist (moved from setup_global_llm_settings)
+    if "chat_sessions" not in st.session_state:
+        st.session_state.chat_sessions = {} # Stores metadata for all chats
+    if "current_chat_id" not in st.session_state:
+        st.session_state.current_chat_id = None
+    if "messages" not in st.session_state:
+        st.session_state.messages = [] # Current chat messages
+    if "llm_greeting" not in st.session_state:
+        st.session_state.llm_greeting = generate_llm_greeting()
+    if "suggested_prompts" not in st.session_state:
+        st.session_state.suggested_prompts = []
+    if "last_chat_history_save" not in st.session_state:
+        st.session_state.last_chat_history_save = None
+    if "verbosity_level" not in st.session_state: # Initialize verbosity_level
+        st.session_state.verbosity_level = 5 # Default value
+
     user_id = get_cached_user_id()
 
     # Load user's chat sessions from disk if not already loaded
@@ -362,7 +357,7 @@ def main():
     if st.session_state.suggested_prompts:
         st.markdown("---")
         st.subheader("Suggested Prompts:")
-        cols = st.columns(len(st.session_state.suggested_prompts)) 
+        cols = st.columns(len(st.session_state.suggested_prompts))
         for i, prompt in enumerate(st.session_state.suggested_prompts):
             with cols[i]:
                 if st.button(prompt, key=f"suggested_prompt_btn_{i}"):

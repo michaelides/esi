@@ -10,10 +10,12 @@ from llama_index.core.llms import ChatMessage, MessageRole
 import stui
 from agent import create_orchestrator_agent, generate_suggested_prompts, SUGGESTED_PROMPT_COUNT, DEFAULT_PROMPTS, initialize_settings as initialize_agent_settings, generate_llm_greeting
 from dotenv import load_dotenv
+from config import get_logger
 
 load_dotenv()
+logger = get_logger(__name__)
 
-PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
+from config import PROJECT_ROOT, DOWNLOAD_MARKER, RAG_SOURCE_MARKER_PREFIX, MEMORY_DIR_NAME
 
 st.set_page_config(
     page_title="ESI - ESI Scholarly Instructor",
@@ -27,32 +29,31 @@ cookies = esc.CookieManager(key="esi_cookie_manager")
 SIMPLE_STORE_PATH_RELATIVE = os.getenv("SIMPLE_STORE_PATH", "ragdb/simple_vector_store")
 DB_PATH = os.path.join(PROJECT_ROOT, SIMPLE_STORE_PATH_RELATIVE)
 AGENT_SESSION_KEY = "esi_orchestrator_agent"
-DOWNLOAD_MARKER = "---DOWNLOAD_FILE---"
-RAG_SOURCE_MARKER_PREFIX = "---RAG_SOURCE---"
 
-MEMORY_DIR = os.path.join(PROJECT_ROOT, "user_memories")
+MEMORY_DIR = os.path.join(PROJECT_ROOT, MEMORY_DIR_NAME)
 
 @st.cache_resource
 def setup_global_llm_settings():
     """Initializes global LLM settings using st.cache_resource to run only once."""
-    print("Initializing LLM settings (cached)...")
+    logger.info("Initializing LLM settings (cached)...")
     try:
         initialize_agent_settings()
-        print("LLM settings initialized (cached).")
+        logger.info("LLM settings initialized (cached).")
     except Exception as e:
+        logger.error(f"Fatal Error: Could not initialize LLM settings. {e}")
         st.error(f"Fatal Error: Could not initialize LLM settings. {e}")
         st.stop()
 
 @st.cache_resource
 def setup_agent():
     """Initializes the orchestrator agent using st.cache_resource to run only once."""
-    print("Initializing orchestrator agent (cached)...")
+    logger.info("Initializing orchestrator agent (cached)...")
     try:
         agent_instance = create_orchestrator_agent()
-        print("Orchestrator agent object initialized (cached) successfully.")
+        logger.info("Orchestrator agent object initialized (cached) successfully.")
         return agent_instance
     except Exception as e:
-        print(f"Error initializing orchestrator agent (cached): {e}")
+        logger.error(f"Error initializing orchestrator agent (cached): {e}")
         st.error(f"Failed to initialize the AI agent. Please check configurations. Error: {e}")
         st.stop()
 
@@ -63,9 +64,9 @@ def get_cached_user_id():
     if not user_id:
         user_id = str(uuid.uuid4())
         cookies.set(cookie="user_id", val=user_id)
-        print(f"New user ID created and set (cached): {user_id}")
+        logger.info(f"New user ID created and set (cached): {user_id}")
     else:
-        print(f"Existing user ID retrieved (cached): {user_id}")
+        logger.info(f"Existing user ID retrieved (cached): {user_id}")
     return user_id
 
 def _load_user_data_from_disk(user_id: str) -> Dict[str, Any]:
@@ -82,9 +83,9 @@ def _load_user_data_from_disk(user_id: str) -> Dict[str, Any]:
         try:
             with open(chat_metadata_path, "r", encoding="utf-8") as f:
                 all_chat_metadata = json.load(f)
-            print(f"Loaded chat metadata for user {user_id} from disk.")
+            logger.info(f"Loaded chat metadata for user {user_id} from disk.")
         except json.JSONDecodeError as e:
-            print(f"Error decoding chat metadata for user {user_id}: {e}. Starting fresh metadata.")
+            logger.error(f"Error decoding chat metadata for user {user_id}: {e}. Starting fresh metadata.")
             all_chat_metadata = {}
     
     all_chat_messages = {}
@@ -95,13 +96,13 @@ def _load_user_data_from_disk(user_id: str) -> Dict[str, Any]:
                 with open(chat_file, "r", encoding="utf-8") as f:
                     all_chat_messages[chat_id] = json.load(f)
             except json.JSONDecodeError as e:
-                print(f"Error decoding chat history for chat {chat_id} (file: {chat_file}): {e}. Removing from metadata.")
+                logger.error(f"Error decoding chat history for chat {chat_id} (file: {chat_file}): {e}. Removing from metadata.")
                 del all_chat_metadata[chat_id]
         else:
-            print(f"Chat file {chat_file} not found for chat ID {chat_id}. Removing from metadata.")
+            logger.warning(f"Chat file {chat_file} not found for chat ID {chat_id}. Removing from metadata.")
             del all_chat_metadata[chat_id]
     
-    print(f"Loaded {len(all_chat_messages)} chat histories for user {user_id} from disk.")
+    logger.info(f"Loaded {len(all_chat_messages)} chat histories for user {user_id} from disk.")
     return {"metadata": all_chat_metadata, "messages": all_chat_messages}
 
 # Removed initialize_user_session_data function as its logic is now inlined in main().
@@ -114,9 +115,9 @@ def save_chat_history(user_id: str, chat_id: str, messages: List[Dict[str, Any]]
     try:
         with open(memory_file, "w", encoding="utf-8") as f:
             json.dump(messages, f, indent=2)
-        print(f"Saved chat history for chat {chat_id} (user {user_id}) to {memory_file}")
+        logger.info(f"Saved chat history for chat {chat_id} (user {user_id}) to {memory_file}")
     except Exception as e:
-        print(f"Error saving chat history for chat {chat_id} (user {user_id}): {e}")
+        logger.error(f"Error saving chat history for chat {chat_id} (user {user_id}): {e}")
 
 def save_chat_metadata(user_id: str, chat_metadata: Dict[str, str]):
     """Saves the chat metadata (ID to name mapping) for a user."""
@@ -126,9 +127,9 @@ def save_chat_metadata(user_id: str, chat_metadata: Dict[str, str]):
     try:
         with open(metadata_file, "w", encoding="utf-8") as f:
             json.dump(chat_metadata, f, indent=2)
-        print(f"Saved chat metadata for user {user_id} to {metadata_file}")
+        logger.info(f"Saved chat metadata for user {user_id} to {metadata_file}")
     except Exception as e:
-        print(f"Error saving chat metadata for user {user_id}): {e}")
+        logger.error(f"Error saving chat metadata for user {user_id}): {e}")
 
 def format_chat_history(streamlit_messages: List[Dict[str, Any]]) -> List[ChatMessage]:
     """Converts Streamlit message history to LlamaIndex ChatMessage list."""
@@ -153,23 +154,22 @@ def get_agent_response(query: str, chat_history: List[ChatMessage]) -> str:
             actual_llm_instance = agent.llm
             actual_llm_instance.temperature = current_temperature
         else:
-            print(f"Warning: Could not access LLM object within the agent to set temperature. Agent or LLM structure might have changed (agent.llm or agent.llm.temperature not found).")
+            logger.warning(f"Could not access LLM object within the agent to set temperature. Agent or LLM structure might have changed (agent.llm or agent.llm.temperature not found).")
 
         # Prepend verbosity level to the query
         modified_query = f"Verbosity Level: {current_verbosity}. {query}"
-        print(f"Modified query with verbosity: {modified_query}")
+        logger.info(f"Modified query with verbosity: {modified_query}")
 
         with st.spinner("ESI is thinking..."):
             response = agent.chat(modified_query, chat_history=chat_history)
 
         response_text = response.response if hasattr(response, 'response') else str(response)
 
-        print(f"Orchestrator final response text for UI: \n{response_text[:500]}...")
+        logger.info(f"Orchestrator final response text for UI: \n{response_text[:500]}...")
         return response_text
 
     except Exception as e:
-        print(f"Error getting orchestrator agent response: {e}")
-        print(f"Error getting agent response: {e}")
+        logger.error(f"Error getting orchestrator agent response: {e}")
         return f"I apologize, but I encountered an error while processing your request. Please try again or rephrase your question. Technical details: {str(e)}"
 
 def create_new_chat_session_in_memory():
@@ -180,10 +180,11 @@ def create_new_chat_session_in_memory():
     new_chat_id = str(uuid.uuid4())
     
     existing_idea_nums = []
-    for name in st.session_state.chat_metadata.values():
-        match = re.match(r"Idea (\d+)", name)
-        if match:
-            existing_idea_nums.append(int(match.group(1)))
+    if st.session_state.chat_metadata: # Check if chat_metadata is not empty
+        for name in st.session_state.chat_metadata.values():
+            match = re.match(r"Idea (\d+)", name)
+            if match:
+                existing_idea_nums.append(int(match.group(1)))
     
     next_idea_num = 1
     if existing_idea_nums:
@@ -191,29 +192,32 @@ def create_new_chat_session_in_memory():
 
     new_chat_name = f"Idea {next_idea_num}"
 
+    # Update session state
     st.session_state.chat_metadata[new_chat_id] = new_chat_name
     st.session_state.all_chat_messages[new_chat_id] = [{"role": "assistant", "content": generate_llm_greeting()}]
+
+    # Save metadata to disk immediately
+    save_chat_metadata(st.session_state.user_id, st.session_state.chat_metadata)
+    logger.info(f"Created new chat and saved metadata: ID={new_chat_id}, Name='{new_chat_name}'")
+
+    # Set as current chat
     st.session_state.current_chat_id = new_chat_id
     st.session_state.messages = st.session_state.all_chat_messages[new_chat_id]
-    st.session_state.chat_modified = False # New chats are initially unsaved
+    st.session_state.chat_modified = False # History is not modified yet
     
-    # Removed immediate save_chat_metadata call here.
-    # Metadata will be saved when the first user message is sent in handle_user_input.
-    
-    print(f"Created new chat in memory: ID={new_chat_id}, Name='{new_chat_name}' (not yet saved to disk)")
-    return new_chat_id # Return the new chat ID
+    return new_chat_id
 
 def switch_chat(chat_id: str):
     """Switches to an existing chat."""
     if chat_id not in st.session_state.all_chat_messages:
-        print(f"Attempted to switch to non-existent chat ID: {chat_id}")
+        logger.warning(f"Attempted to switch to non-existent chat ID: {chat_id}")
         return # Or handle error
 
     st.session_state.current_chat_id = chat_id
     st.session_state.messages = st.session_state.all_chat_messages[chat_id]
     st.session_state.suggested_prompts = generate_suggested_prompts(st.session_state.messages)
     st.session_state.chat_modified = True # Assume existing chat is modified if switched to (will be saved on next AI response)
-    print(f"Switched to chat: ID={chat_id}, Name='{st.session_state.chat_metadata.get(chat_id, 'Unknown')}'")
+    logger.info(f"Switched to chat: ID={chat_id}, Name='{st.session_state.chat_metadata.get(chat_id, 'Unknown')}'")
     st.rerun()
 
 def delete_chat_session(chat_id: str):
@@ -231,23 +235,23 @@ def delete_chat_session(chat_id: str):
         chat_file = os.path.join(user_dir, f"{chat_id}.json")
         if os.path.exists(chat_file):
             os.remove(chat_file)
-            print(f"Deleted chat file: {chat_file}")
+            logger.info(f"Deleted chat file: {chat_file}")
         
         # Save updated metadata to disk
         save_chat_metadata(st.session_state.user_id, st.session_state.chat_metadata)
-        print(f"Deleted chat: ID={chat_id}")
+        logger.info(f"Deleted chat: ID={chat_id}")
 
         # If the deleted chat was the current one, switch to another or create a new one
         if is_current_chat:
             if st.session_state.chat_metadata:
                 # Switch to the first available chat
                 first_available_chat_id = next(iter(st.session_state.chat_metadata))
-                print(f"Deleted current chat. Switching to: {first_available_chat_id}")
+                logger.info(f"Deleted current chat. Switching to: {first_available_chat_id}")
                 # Call switch_chat to handle updating session state and rerunning
                 switch_chat(first_available_chat_id)
             else:
                 # No other chats left, set to a "no chat" state
-                print("Deleted last chat. Setting to no active chat state.")
+                logger.info("Deleted last chat. Setting to no active chat state.")
                 st.session_state.current_chat_id = None
                 st.session_state.messages = [{"role": "assistant", "content": generate_llm_greeting()}]
                 st.session_state.chat_modified = False
@@ -256,7 +260,7 @@ def delete_chat_session(chat_id: str):
             # If a non-current chat was deleted, just rerun to update the sidebar
             st.rerun()
     else:
-        print(f"Attempted to delete non-existent chat ID: {chat_id}")
+        logger.warning(f"Attempted to delete non-existent chat ID: {chat_id}")
         # No rerun needed if chat_id wasn't found, as nothing changed.
 
 def rename_chat(chat_id: str, new_name: str): # Modified to accept chat_id
@@ -264,7 +268,7 @@ def rename_chat(chat_id: str, new_name: str): # Modified to accept chat_id
     if chat_id and new_name and new_name != st.session_state.chat_metadata.get(chat_id):
         st.session_state.chat_metadata[chat_id] = new_name
         save_chat_metadata(st.session_state.user_id, st.session_state.chat_metadata)
-        print(f"Renamed chat {chat_id} to '{new_name}'")
+        logger.info(f"Renamed chat {chat_id} to '{new_name}'")
         st.rerun()
 
 def get_discussion_markdown(chat_id: str) -> str:
@@ -291,27 +295,16 @@ def handle_user_input(chat_input_value: str | None):
         prompt_to_process = chat_input_value
 
     if prompt_to_process:
-        # If this is the first user message in a new, unsaved chat, mark it as modified
-        # and save its metadata for the first time.
-        if not st.session_state.chat_modified and st.session_state.current_chat_id is None:
-            # This means it's the very first message in a fresh session, or after all chats were deleted.
-            # Create a new chat session in memory and set it as current.
-            # This will also update st.session_state.chat_metadata and st.session_state.all_chat_messages
-            # with the new chat's entry.
-            new_chat_id = create_new_chat_session_in_memory()
-            # Now that the chat is created and current_chat_id is set, save its metadata to disk.
-            save_chat_metadata(st.session_state.user_id, st.session_state.chat_metadata)
-            st.session_state.chat_modified = True # Mark as modified for history saving
-            print(f"Activated new chat '{st.session_state.chat_metadata.get(st.session_state.current_chat_id)}' with first user input.")
-        elif not st.session_state.chat_modified and len(st.session_state.messages) == 1 and st.session_state.messages[0]["role"] == "assistant":
-            # This handles the case where a new chat was created via the "New Chat" button
-            # and this is the first user message in it.
-            st.session_state.chat_modified = True 
-            save_chat_metadata(st.session_state.user_id, st.session_state.chat_metadata) # Save metadata now that chat is active
-            print(f"Chat '{st.session_state.chat_metadata.get(st.session_state.current_chat_id)}' activated and metadata saved.")
+        # If no chat is currently active (e.g., first run or after all chats deleted),
+        # create a new one.
+        if st.session_state.current_chat_id is None:
+            logger.info("No current chat ID. Creating a new chat session for the first input.")
+            create_new_chat_session_in_memory()
+            # create_new_chat_session_in_memory now sets current_chat_id and saves metadata.
 
-
+        # Append user message and mark chat history as modified
         st.session_state.messages.append({"role": "user", "content": prompt_to_process})
+        st.session_state.chat_modified = True # History is now modified
 
         with st.chat_message("user"):
             st.markdown(prompt_to_process)
@@ -320,16 +313,19 @@ def handle_user_input(chat_input_value: str | None):
         response_text = get_agent_response(prompt_to_process, chat_history=formatted_history)
         st.session_state.messages.append({"role": "assistant", "content": response_text})
 
-        # Autosave the current chat history after AI response if it's been modified
-        if st.session_state.chat_modified:
+        # Autosave the current chat history after AI response if it's_been modified
+        # This `chat_modified` flag is now primarily for history saving.
+        if st.session_state.chat_modified: # This will be true here
             save_chat_history(st.session_state.user_id, st.session_state.current_chat_id, st.session_state.messages)
+            # Optionally, could reset chat_modified to False here if saving happens only once per modification,
+            # but current logic of saving if True is fine.
 
         st.session_state.suggested_prompts = generate_suggested_prompts(st.session_state.messages)
         st.rerun()
 
 def reset_chat_callback():
     """Resets the chat by creating a new, unsaved chat session."""
-    print("Resetting chat by creating a new session...")
+    logger.info("Resetting chat by creating a new session...")
     create_new_chat_session_in_memory() # Create new chat in memory
     st.rerun() # Rerun to display the new chat
 
@@ -341,23 +337,23 @@ def handle_regeneration_request():
     st.session_state.do_regenerate = False
 
     if not st.session_state.messages or st.session_state.messages[-1]['role'] != 'assistant':
-        print("Warning: Regeneration called but last message is not from assistant or no messages exist.")
+        logger.warning("Regeneration called but last message is not from assistant or no messages exist.")
         st.rerun()
         return
 
     if len(st.session_state.messages) == 1:
-        print("Regenerating initial greeting...")
+        logger.info("Regenerating initial greeting...")
         new_greeting = generate_llm_greeting()
         st.session_state.messages[0]['content'] = new_greeting
         save_chat_history(st.session_state.user_id, st.session_state.current_chat_id, st.session_state.messages)
         st.rerun()
         return
 
-    print("Regenerating last assistant response to user query...")
+    logger.info("Regenerating last assistant response to user query...")
     st.session_state.messages.pop() # Remove last assistant message
 
     if not st.session_state.messages or st.session_state.messages[-1]['role'] != 'user':
-        print("Warning: Cannot regenerate, no preceding user query found after popping assistant message.")
+        logger.warning("Cannot regenerate, no preceding user query found after popping assistant message.")
         st.rerun()
         return
 
@@ -403,9 +399,9 @@ def main():
         user_data = _load_user_data_from_disk(st.session_state.user_id)
         st.session_state.chat_metadata = user_data["metadata"]
         st.session_state.all_chat_messages = user_data["messages"]
-        print(f"Initial load of user data for {st.session_state.user_id}: {len(st.session_state.chat_metadata)} chats.")
+        logger.info(f"Initial load of user data for {st.session_state.user_id}: {len(st.session_state.chat_metadata)} chats.")
     else:
-        print(f"User data already in session state. Current chats: {len(st.session_state.chat_metadata)}.")
+        logger.info(f"User data already in session state. Current chats: {len(st.session_state.chat_metadata)}.")
 
     # Determine the active chat or present initial greeting
     # This logic ensures a valid current chat is always selected or a new blank state is presented.
@@ -416,10 +412,10 @@ def main():
             st.session_state.current_chat_id = first_available_chat_id
             st.session_state.messages = st.session_state.all_chat_messages[first_available_chat_id]
             st.session_state.chat_modified = True # Existing chats are considered modified for saving
-            print(f"No valid current chat found. Switched to first available chat: '{st.session_state.chat_metadata.get(first_available_chat_id, first_available_chat_id)}'")
+            logger.info(f"No valid current chat found. Switched to first available chat: '{st.session_state.chat_metadata.get(first_available_chat_id, first_available_chat_id)}'")
         else:
             # No chats exist, present a blank slate with initial greeting
-            print("No valid current chat found and no existing chats. Presenting initial greeting.")
+            logger.info("No valid current chat found and no existing chats. Presenting initial greeting.")
             st.session_state.current_chat_id = None # Indicate no active chat ID
             st.session_state.messages = [{"role": "assistant", "content": generate_llm_greeting()}]
             st.session_state.chat_modified = False # This state is not yet saved to disk
@@ -427,7 +423,7 @@ def main():
         # Ensure st.session_state.messages points to the correct chat's messages
         st.session_state.messages = st.session_state.all_chat_messages[st.session_state.current_chat_id]
         st.session_state.chat_modified = True # Existing chats are considered modified for saving
-        print(f"Continuing with chat: '{st.session_state.chat_metadata.get(st.session_state.current_chat_id, st.session_state.current_chat_id)}'")
+        logger.info(f"Continuing with chat: '{st.session_state.chat_metadata.get(st.session_state.current_chat_id, st.session_state.current_chat_id)}'")
 
     if st.session_state.get("do_regenerate", False):
         handle_regeneration_request()

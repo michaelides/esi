@@ -147,6 +147,7 @@ def get_agent_response(query: str, chat_history: List[ChatMessage]) -> str:
 
     try:
         current_temperature = st.session_state.get("llm_temperature", 0.7)
+        current_verbosity = st.session_state.get("llm_verbosity", 3) # Default to 3 if not found
 
         if hasattr(agent, 'llm') and hasattr(agent.llm, 'temperature'):
             actual_llm_instance = agent.llm
@@ -154,8 +155,12 @@ def get_agent_response(query: str, chat_history: List[ChatMessage]) -> str:
         else:
             print(f"Warning: Could not access LLM object within the agent to set temperature. Agent or LLM structure might have changed (agent.llm or agent.llm.temperature not found).")
 
+        # Prepend verbosity level to the query
+        modified_query = f"Verbosity Level: {current_verbosity}. {query}"
+        print(f"Modified query with verbosity: {modified_query}")
+
         with st.spinner("ESI is thinking..."):
-            response = agent.chat(query, chat_history=chat_history)
+            response = agent.chat(modified_query, chat_history=chat_history)
 
         response_text = response.response if hasattr(response, 'response') else str(response)
 

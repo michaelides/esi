@@ -7,16 +7,12 @@ from typing import List, Dict, Any, Optional, Callable
 
 PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 
-def display_chat(
-    download_marker: str,
-    rag_source_marker_prefix: str,
-    ui_accessible_workspace_relative: str
-):
+def display_chat():
     """Display the chat messages from the session state, handling file downloads and image display."""
-    CODE_DOWNLOAD_MARKER = download_marker
-    RAG_SOURCE_MARKER = rag_source_marker_prefix
-    CODE_WORKSPACE_RELATIVE = ui_accessible_workspace_relative
+    CODE_DOWNLOAD_MARKER = "---DOWNLOAD_FILE---"
+    RAG_SOURCE_MARKER = "---RAG_SOURCE---"
     
+    CODE_WORKSPACE_RELATIVE = "./code_interpreter_ws"
     code_workspace_absolute = os.path.join(PROJECT_ROOT, CODE_WORKSPACE_RELATIVE)
     os.makedirs(code_workspace_absolute, exist_ok=True)
 
@@ -171,4 +167,110 @@ def display_chat(
                 if can_regenerate:
                     if st.button("🔄", key=f"regenerate_{msg_idx}", help="Regenerate Response"):
                         st.session_state.do_regenerate = True
-                        st.rerun() # Rerun to trigger handle_regeneration_request in app.py
+                        st.rerun()
+
+
+def create_interface(
+    reset_callback: Callable,
+    new_chat_callback: Callable,
+    delete_chat_callback: Callable,
+    rename_chat_callback: Callable,
+    chat_metadata: Dict[str, str],
+    current_chat_id: str,
+    switch_chat_callback: Callable,
+    get_discussion_markdown_callback: Callable
+):
+    """Create the Streamlit UI for the chat interface."""
+    st.title("🎓 ESI: ESI Scholarly Instructor")
+    st.caption("Your AI partner for brainstorming and structuring your dissertation research")
+
+    # Initialize editing state if not present
+    if 'editing_chat_id' not in st.session_state:
+        st.session_state.editing_chat_id = None
+
+    with st.sidebar:
+        with st.expander("**Chat History**", expanded=True, icon = ":material/forum:"):
+            st.info("Conversations are automatically saved and linked to your browser via cookies. Clearing browser data will remove your saved discussions.")
+            
+            if st.button("➕ New Chat", key="new_chat_button", use_container_width=True):
+                # Clear any active editing state when creating a new chat
+                st.session_state.editing_chat_id = None
+                new_chat_callback()
+
+            # Display existing chats
+            sorted_chat_items = sorted(chat_metadata.items(), key=lambda item: item[1].lower())
+            
+            for chat_id, chat_name in sorted_chat_items:
+                col1, col2 = st.columns([0.8, 0.2])
+                with col1:
+                    if st.session_state.editing_chat_id == chat_id:
+                        # Display text input for renaming
+                        new_name = st.text_input(
+                            "New name:",
+                            value=chat_name,
+                            key=f"rename_input_{chat_id}",
+                            label_visibility="collapsed",
+                            on_change=lambda current_chat_id_in_loop=chat_id: (
+                                rename_chat_callback(current_chat_id_in_loop, st.session_state[f"rename_input_{current_chat_id_in_loop}"]) if st.session_state[f"rename_input_{current_chat_id_in_loop}"] and st.session_state[f"rename_input_{current_chat_id_in_loop}"] != chat_metadata.get(current_chat_id_in_loop) else None,
+                                setattr(st.session_state, 'editing_chat_id', None) # Clear editing state
+                            )
+                        )
+                    else:
+                        # Display button for switching chat
+                        if st.button(chat_name, key=f"chat_select_{chat_id}", use_container_width=True,
+                                    type="primary" if chat_id == current_chat_id else "secondary"):
+                            if chat_id != current_chat_id:
+                                # Clear any active editing state when switching chats
+                                st.session_state.editing_chat_id = None
+                                switch_chat_callback(chat_id)
+                with col2:
+                    with st.popover("⋮", use_container_width=True):
+                        st.write(f"Options for: **{chat_name}**")
+                        
+                        # Option to download
+                        st.download_button(
+                            label="⬇️ Download (.md)",
+                            data=get_discussion_markdown_callback(chat_id),
+                            file_name=f"{chat_name.replace(' ', '_')}.md",
+                            mime="text/markdown",
+                            key=f"download_listed_{chat_id}",
+                            use_container_width=True
+                        )
+                        
+                        # Option to rename (sets editing_chat_id and reruns)
+                        if st.button("✏️ Rename", key=f"rename_btn_{chat_id}", use_container_width=True):
+                            st.session_state.editing_chat_id = chat_id
+                            st.rerun() # Rerun to show the input field
+
+                        # Option to delete
+                        if st.button("♻ Delete", key=f"delete_from_popover_{chat_id}", use_container_width=True):
+                            # Clear any active editing state if the chat being edited is deleted
+                            if st.session_state.editing_chat_id == chat_id:
+                                st.session_state.editing_chat_id = None
+                            delete_chat_callback(chat_id)
+
+        with st.expander("**LLM Settings**", expanded=False, icon = ":material/tune:"):
+            st.slider(
+                "Creativity (Temperature)",
+                min_value=0.0,
+                max_value=2.0,
+                value=st.session_state.get("llm_temperature", 0.7),
+                step=0.1,
+                key="llm_temperature",
+                help="Controls the randomness of the AI's responses. Lower values are more focused, higher values are more creative."
+            )
+
+        with st.expander("**About ESI**", expanded=False, icon = ":material/info:"):
+            st.info("ESI uses AI to help you navigate the dissertation process. It has access to some of the literature in your reading lists and also uses search tools for web lookups.")
+            st.warning("⚠️  Remember: Always consult your dissertation supervisor for final guidance and decisions.")
+            st.info("Made for NBS7091A and NBS7095x")
+
+    # Apply CSS globally
+    CSS = """
+    .stExpander > details {
+        border: none;
+    }
+    """
+    st.html(f"<style>{CSS}</style>")
+
+    display_chat()

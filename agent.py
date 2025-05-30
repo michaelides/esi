@@ -8,7 +8,7 @@ from llama_index.core.tools import FunctionTool
 from llama_index.core.llms import LLM # Import base LLM type for type hinting
 
 from tools import (
-    get_search_tools,
+    get_search_tools, 
     get_semantic_scholar_tool_for_agent,
     get_web_scraper_tool_for_agent,
     get_rag_tool_for_agent,
@@ -37,7 +37,7 @@ def initialize_settings():
     # Use a potentially more stable model name and set a default temperature
     Settings.llm = Gemini(model_name="models/gemini-2.5-flash-preview-04-17",
                           api_key=google_api_key,
-                          temperature=0.7)
+                          temperature=0.7) 
 
 
 # --- Greeting Generation ---
@@ -73,7 +73,7 @@ def generate_llm_greeting() -> str:
 
 
 # --- Comprehensive Agent Definition ---
-def create_orchestrator_agent(verbosity_level: int = 5) -> AgentRunner: # Added verbosity_level parameter
+def create_orchestrator_agent() -> AgentRunner:
     """
     Creates a single comprehensive agent that has access to all specialized tools.
     This agent will act as the primary interface, leveraging various tools as needed.
@@ -108,16 +108,13 @@ def create_orchestrator_agent(verbosity_level: int = 5) -> AgentRunner: # Added 
     print(f"Initialized {len(all_tools)} tools for the comprehensive agent.")
 
     try:
-        with open(os.path.join(PROJECT_ROOT, "esi_agent_instruction.md"), "r") as f:
-             # Format the system prompt with the verbosity level
-             system_prompt_base = f.read().strip().format(V=verbosity_level) # Formatted with V
+        with open("esi_agent_instruction.md", "r") as f:
+             system_prompt_base = f.read().strip()
     except FileNotFoundError:
         print("Warning: esi_agent_instruction.md not found. Using default base prompt for the comprehensive agent.")
         system_prompt_base = "You are ESI, an AI assistant for dissertation support."
 
-    # The comprehensive_system_prompt now just uses the formatted base prompt
     comprehensive_system_prompt = f"""{system_prompt_base}
-
 Your role is to understand the user's query and use the available tools to gather information, perform tasks, and synthesize a comprehensive final answer.
 You have access to the following tools:
 *   **Search Tools (DuckDuckGo, Tavily, Wikipedia)**: For general web searches, current events, or broad topics.

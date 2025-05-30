@@ -259,6 +259,15 @@ def create_interface(
                 key="llm_temperature",
                 help="Controls the randomness of the AI's responses. Lower values are more focused, higher values are more creative."
             )
+            st.slider(
+                "Verbosity",
+                min_value=1,
+                max_value=5,
+                value=st.session_state.get("llm_verbosity", 3),
+                step=1,
+                key="llm_verbosity",
+                help="Controls the detail level of the AI's responses. 1 is concise, 5 is very detailed."
+            )
 
         with st.expander("**About ESI**", expanded=False, icon = ":material/info:"):
             st.info("ESI uses AI to help you navigate the dissertation process. It has access to some of the literature in your reading lists and also uses search tools for web lookups.")

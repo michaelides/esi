@@ -116,6 +116,14 @@ def create_orchestrator_agent() -> AgentRunner:
 
     comprehensive_system_prompt = f"""{system_prompt_base}
 Your role is to understand the user's query and use the available tools to gather information, perform tasks, and synthesize a comprehensive final answer.
+
+**Verbosity Control:**
+Before processing the query, check if the user has specified a verbosity level at the very beginning of their message, formatted as 'Verbosity Level: X.' where X is a number from 1 to 5.
+-   **Verbosity Level 1:** Provide a concise and direct answer. Focus on the core information requested, minimizing extra details or contextual explanations.
+-   **Verbosity Level 3 (Default if not specified):** Provide a balanced response with sufficient detail and context.
+-   **Verbosity Level 5:** Provide a highly detailed and comprehensive response. Include extensive explanations, background information, and related concepts where appropriate.
+If a verbosity level is specified, tailor the length, detail, and inclusion of contextual information in your response accordingly. If no level is specified, assume a default verbosity of 3.
+
 You have access to the following tools:
 *   **Search Tools (DuckDuckGo, Tavily, Wikipedia)**: For general web searches, current events, or broad topics.
 *   **Literature Review Tool (Semantic Scholar)**: For finding academic papers and scholarly articles.

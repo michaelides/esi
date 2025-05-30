@@ -15,29 +15,38 @@ from tools import (
     get_coder_tools
 )
 from dotenv import load_dotenv
+from config import get_logger
 
 load_dotenv()
+logger = get_logger(__name__)
 
-# Determine project root based on the script's location
-PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
-
-
-# --- Constants ---
-SUGGESTED_PROMPT_COUNT = 4
+from config import PROJECT_ROOT, SUGGESTED_PROMPT_COUNT, DEFAULT_PROMPTS, ESI_AGENT_INSTRUCTION_FILE
 
 # --- Global Settings ---
 def initialize_settings():
     """Initializes LlamaIndex settings with Gemini LLM and Embedding model."""
+    # Check if specific attributes are already set, as Settings object itself might exist
+    if getattr(Settings, 'llm', None) and getattr(Settings, 'embed_model', None):
+        logger.info("Settings.llm and Settings.embed_model are already configured. Skipping re-initialization.")
+        return
+
+    logger.info("Configuring Settings.llm and Settings.embed_model...")
     google_api_key = os.getenv("GOOGLE_API_KEY")
     if not google_api_key:
+        logger.error("GOOGLE_API_KEY not found in environment variables.")
         raise ValueError("GOOGLE_API_KEY not found in environment variables.")
 
-    # Use Google Generative AI Embeddings
-    Settings.embed_model = GoogleGenAIEmbedding(model_name="models/text-embedding-004", api_key=google_api_key)
-    # Use a potentially more stable model name and set a default temperature
-    Settings.llm = Gemini(model_name="models/gemini-2.5-flash-preview-04-17",
-                          api_key=google_api_key,
-                          temperature=0.7) 
+    try:
+        # Use Google Generative AI Embeddings
+        Settings.embed_model = GoogleGenAIEmbedding(model_name="models/text-embedding-004", api_key=google_api_key)
+        # Use the original model name and temperature setting
+        Settings.llm = Gemini(model_name="models/gemini-2.5-flash-preview-04-17",
+                              api_key=google_api_key,
+                              temperature=0.7)
+        logger.info("Settings.llm and Settings.embed_model configured successfully.")
+    except Exception as e:
+        logger.error(f"Error during Settings.llm/Settings.embed_model configuration: {e}")
+        raise
 
 
 # --- Greeting Generation ---
@@ -51,7 +60,7 @@ def generate_llm_greeting() -> str:
 
         llm = Settings.llm
         if not isinstance(llm, LLM): # Basic check
-             print("Warning: LLM not configured correctly for greeting generation.")
+             logger.warning("LLM not configured correctly for greeting generation.")
              return static_fallback
 
         # Use a simple prompt for a greeting
@@ -61,14 +70,14 @@ def generate_llm_greeting() -> str:
 
         # Basic validation
         if not greeting or len(greeting) < 10:
-            print("Warning: LLM generated an empty or too short greeting. Falling back.")
+            logger.warning("LLM generated an empty or too short greeting. Falling back.")
             return static_fallback
 
-        print(f"Generated LLM Greeting: {greeting}")
+        logger.info(f"Generated LLM Greeting: {greeting}")
         return greeting
 
     except Exception as e:
-        print(f"Error generating LLM greeting: {e}. Falling back to static message.")
+        logger.error(f"Error generating LLM greeting: {e}. Falling back to static message.")
         return static_fallback
 
 
@@ -80,7 +89,7 @@ def create_orchestrator_agent() -> AgentRunner:
     """
     initialize_settings() # Ensure LLM settings are initialized
 
-    print("Initializing all tools for the comprehensive agent...")
+    logger.info("Initializing all tools for the comprehensive agent...")
 
     # Initialize all tools
     search_tools = get_search_tools()
@@ -105,13 +114,13 @@ def create_orchestrator_agent() -> AgentRunner:
     if not all_tools:
         raise RuntimeError("No tools could be initialized for the comprehensive agent. Agent cannot function.")
 
-    print(f"Initialized {len(all_tools)} tools for the comprehensive agent.")
+    logger.info(f"Initialized {len(all_tools)} tools for the comprehensive agent.")
 
     try:
-        with open("esi_agent_instruction.md", "r") as f:
+        with open(os.path.join(PROJECT_ROOT, ESI_AGENT_INSTRUCTION_FILE), "r") as f:
              system_prompt_base = f.read().strip()
     except FileNotFoundError:
-        print("Warning: esi_agent_instruction.md not found. Using default base prompt for the comprehensive agent.")
+        logger.warning(f"{ESI_AGENT_INSTRUCTION_FILE} not found. Using default base prompt for the comprehensive agent.")
         system_prompt_base = "You are ESI, an AI assistant for dissertation support."
 
     comprehensive_system_prompt = f"""{system_prompt_base}
@@ -155,17 +164,10 @@ Your final output to the user should be a single, complete response directly add
         verbose=True, # Set to False for production
     )
     comprehensive_agent_runner = AgentRunner(comprehensive_agent_worker)
-    print("Comprehensive agent created with all expert tools.")
+    logger.info("Comprehensive agent created with all expert tools.")
     return comprehensive_agent_runner
 
 # --- Suggested Prompts ---
-DEFAULT_PROMPTS = [
-    "Find recent papers on qualitative data analysis methods.",
-    "Explain the structure of a typical literature review.",
-    "What are common challenges students face in writing?",
-    "Search for university policies on dissertation submission deadlines (uses RAG).",
-]
-
 def generate_suggested_prompts(chat_history: List[Dict[str, Any]]) -> List[str]:
     """
     Generates concise suggested prompts.
@@ -174,7 +176,7 @@ def generate_suggested_prompts(chat_history: List[Dict[str, Any]]) -> List[str]:
     try:
         # Ensure LLM is initialized
         if not Settings.llm:
-            print("Warning: LLM not initialized for suggested prompts. Returning defaults.")
+            logger.warning("LLM not initialized for suggested prompts. Returning defaults.")
             return DEFAULT_PROMPTS
 
         llm = Settings.llm
@@ -195,7 +197,7 @@ Explain concept Y.
 How do I structure section Z?
 """
 
-        print("Generating suggested prompts using LLM...")
+        logger.info("Generating suggested prompts using LLM...")
         response = llm.complete(prompt)
         suggestions_text = response.text.strip()
 
@@ -204,12 +206,12 @@ How do I structure section Z?
 
         # Validate the output
         if len(suggested_prompts) == SUGGESTED_PROMPT_COUNT and all(suggested_prompts):
-            print(f"LLM generated prompts: {suggested_prompts}")
+            logger.info(f"LLM generated prompts: {suggested_prompts}")
             return suggested_prompts
         else:
-            print(f"Warning: LLM generated unexpected output for suggestions: '{suggestions_text}'. Falling back to defaults.")
+            logger.warning(f"LLM generated unexpected output for suggestions: '{suggestions_text}'. Falling back to defaults.")
             return DEFAULT_PROMPTS
 
     except Exception as e:
-        print(f"Error generating suggested prompts with LLM: {e}. Falling back to defaults.")
+        logger.error(f"Error generating suggested prompts with LLM: {e}. Falling back to defaults.")
         return DEFAULT_PROMPTS

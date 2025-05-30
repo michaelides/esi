@@ -37,6 +37,10 @@ def initialize_settings():
         raise ValueError("GOOGLE_API_KEY not found in environment variables. This is required for Gemini.")
 
     try:
+        # Explicitly set to None first to clear any potential implicit defaults
+        Settings.llm = None
+        Settings.embed_model = None
+
         Settings.embed_model = GoogleGenAIEmbedding(model_name="models/text-embedding-004", api_key=google_api_key)
         #                             Ensure this is the correct model name as per user feedback
         Settings.llm = Gemini(model_name="models/gemini-2.5-flash-preview-05-20", # USER SPECIFIED MODEL

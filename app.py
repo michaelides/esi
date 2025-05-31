@@ -7,6 +7,7 @@ import uuid
 import extra_streamlit_components as esc
 from typing import List, Dict, Any
 from llama_index.core.llms import ChatMessage, MessageRole
+from llama_index.core import Settings # Added import
 import stui
 from agent import create_orchestrator_agent, generate_suggested_prompts, SUGGESTED_PROMPT_COUNT, DEFAULT_PROMPTS, initialize_settings, generate_llm_greeting
 from dotenv import load_dotenv
@@ -158,18 +159,22 @@ def get_agent_response(query: str, chat_history: List[ChatMessage]) -> str:
         current_temperature = st.session_state.get("llm_temperature", 0.7)
         current_verbosity = st.session_state.get("llm_verbosity", 3) # Default to 3 if not found
 
-        if hasattr(agent, 'llm') and hasattr(agent.llm, 'temperature'):
-            actual_llm_instance = agent.llm
-            actual_llm_instance.temperature = current_temperature
+        # Set temperature on the global Settings.llm object
+        if Settings.llm: # Check if Settings.llm is initialized
+            try:
+                Settings.llm.temperature = current_temperature
+                logger.info(f"LLM temperature set to: {Settings.llm.temperature}")
+            except Exception as e:
+                logger.error(f"Failed to set LLM temperature on Settings.llm: {e}")
         else:
-            logger.warning(f"Could not access LLM object within the agent to set temperature. Agent or LLM structure might have changed (agent.llm or agent.llm.temperature not found).")
+            logger.warning("Settings.llm not available for setting temperature.")
 
         # Prepend verbosity level to the query
         modified_query = f"Verbosity Level: {current_verbosity}. {query}"
         logger.info(f"Modified query with verbosity: {modified_query}")
 
         with st.spinner("ESI is thinking..."):
-            response = agent.chat(modified_query, chat_history=formatted_history)
+            response = agent.chat(modified_query, chat_history=chat_history)
 
         response_text = response.response if hasattr(response, 'response') else str(response)
 
@@ -317,16 +322,19 @@ def handle_user_input(chat_input_value: str | None):
         with st.chat_message("user"):
             st.markdown(prompt_to_process)
 
+        # For standard chat, pass the full history including the latest user message
         formatted_history = format_chat_history(st.session_state.messages)
         response_text = get_agent_response(prompt_to_process, chat_history=formatted_history)
+
+        # Display assistant response
+        with st.chat_message("assistant"):
+            st.markdown(response_text)
+
         st.session_state.messages.append({"role": "assistant", "content": response_text})
 
-        # Autosave the current chat history after AI response if it's_been modified
-        # This `chat_modified` flag is now primarily for history saving.
-        if st.session_state.chat_modified: # This will be true here
+        # Autosave the current chat history after AI response
+        if st.session_state.chat_modified:
             save_chat_history(st.session_state.user_id, st.session_state.current_chat_id, st.session_state.messages)
-            # Optionally, could reset chat_modified to False here if saving happens only once per modification,
-            # but current logic of saving if True is fine.
 
         st.session_state.suggested_prompts = generate_suggested_prompts(st.session_state.messages)
         st.rerun()
@@ -366,10 +374,19 @@ def handle_regeneration_request():
         return
 
     prompt_to_regenerate = st.session_state.messages[-1]['content']
-    formatted_history_for_regen = format_chat_history(st.session_state.messages)
+    # formatted_history_for_regen should exclude the last assistant message AND the user message that prompted it,
+    # then the user message is passed as the query.
+    # However, the current get_agent_response expects the full history *including* the user query that needs a response.
+    # History for regeneration: messages up to the one before the assistant's last response.
+    # The last user message (prompt_to_regenerate) will be the new query.
+    history_for_regen = format_chat_history(st.session_state.messages[:-1]) # Excludes last assistant message
 
-    response_text = get_agent_response(prompt_to_regenerate, chat_history=formatted_history_for_regen)
+    response_text = get_agent_response(prompt_to_regenerate, chat_history=history_for_regen)
+
+    # The new response will be displayed on rerun by display_chat.
+    # No need to explicitly st.markdown() here as it would be before the old message is popped.
     st.session_state.messages.append({"role": "assistant", "content": response_text})
+
     save_chat_history(st.session_state.user_id, st.session_state.current_chat_id, st.session_state.messages)
     st.session_state.suggested_prompts = generate_suggested_prompts(st.session_state.messages)
     st.rerun()

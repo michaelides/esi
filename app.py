@@ -8,13 +8,13 @@ import extra_streamlit_components as esc
 from typing import List, Dict, Any
 from llama_index.core.llms import ChatMessage, MessageRole
 import stui
-from agent import create_orchestrator_agent, generate_suggested_prompts, SUGGESTED_PROMPT_COUNT, DEFAULT_PROMPTS, initialize_settings as initialize_agent_settings, generate_llm_greeting
+from agent import create_orchestrator_agent, generate_suggested_prompts, SUGGESTED_PROMPT_COUNT, DEFAULT_PROMPTS, initialize_settings, generate_llm_greeting
 from dotenv import load_dotenv
 from config import get_logger
 
 load_dotenv()
 logger = get_logger(__name__)
-
+google_api_key = os.getenv("GOOGLE_API_KEY")
 from config import PROJECT_ROOT, DOWNLOAD_MARKER, RAG_SOURCE_MARKER_PREFIX, MEMORY_DIR_NAME
 
 st.set_page_config(
@@ -37,7 +37,7 @@ def setup_global_llm_settings():
     """Initializes global LLM settings using st.cache_resource to run only once."""
     logger.info("Initializing LLM settings (cached)...")
     try:
-        initialize_agent_settings()
+        initialize_settings()
         logger.info("LLM settings initialized (cached).")
     except Exception as e:
         error_message = (

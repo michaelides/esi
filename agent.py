@@ -34,7 +34,8 @@ def initialize_settings():
     # Use a potentially more stable model name and set a default temperature
     Settings.llm = Gemini(model_name="models/gemini-2.5-flash-preview-04-17",
                           api_key=google_api_key,
-                          temperature=0.7) 
+                          temperature=0.7,
+                          streaming=True)
 
 
 # --- Greeting Generation ---

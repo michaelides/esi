@@ -147,9 +147,9 @@ def format_chat_history(streamlit_messages: List[Dict[str, Any]]) -> List[ChatMe
         history.append(ChatMessage(role=role, content=msg["content"]))
     return history
 
-def get_agent_response(query: str, chat_history: List[ChatMessage]) -> str:
+def get_agent_response(query: str, chat_history: List[ChatMessage]): # -> StreamingAgentChatResponse (or similar generator type)
     """
-    Get a response from the agent stored in the session state using the chat method,
+    Get a streaming response from the agent stored in the session state,
     explicitly passing the conversation history.
     """
     agent = st.session_state[AGENT_SESSION_KEY]
@@ -159,26 +159,24 @@ def get_agent_response(query: str, chat_history: List[ChatMessage]) -> str:
         current_verbosity = st.session_state.get("llm_verbosity", 3) # Default to 3 if not found
 
         if hasattr(agent, 'llm') and hasattr(agent.llm, 'temperature'):
-            actual_llm_instance = agent.llm
+            actual_llm_instance = agent.llm # type: ignore
             actual_llm_instance.temperature = current_temperature
         else:
             logger.warning(f"Could not access LLM object within the agent to set temperature. Agent or LLM structure might have changed (agent.llm or agent.llm.temperature not found).")
 
         # Prepend verbosity level to the query
         modified_query = f"Verbosity Level: {current_verbosity}. {query}"
-        logger.info(f"Modified query with verbosity: {modified_query}")
+        logger.info(f"Modified query with verbosity for streaming: {modified_query}")
 
-        with st.spinner("ESI is thinking..."):
-            response = agent.chat(modified_query, chat_history=formatted_history)
-
-        response_text = response.response if hasattr(response, 'response') else str(response)
-
-        logger.info(f"Orchestrator final response text for UI: \n{response_text[:500]}...")
-        return response_text
+        # Removed st.spinner from here; it will be handled by the caller.
+        streaming_response = agent.stream_chat(modified_query, chat_history=chat_history)
+        logger.info(f"Orchestrator is now streaming the response for query: {modified_query[:100]}...")
+        return streaming_response
 
     except Exception as e:
-        logger.error(f"Error getting orchestrator agent response: {e}")
-        return f"I apologize, but I encountered an error while processing your request. Please try again or rephrase your question. Technical details: {str(e)}"
+        logger.error(f"Error getting orchestrator agent streaming response: {e}")
+        # Re-raise the exception to be handled by the caller
+        raise
 
 def create_new_chat_session_in_memory():
     """
@@ -317,16 +315,29 @@ def handle_user_input(chat_input_value: str | None):
         with st.chat_message("user"):
             st.markdown(prompt_to_process)
 
-        formatted_history = format_chat_history(st.session_state.messages)
-        response_text = get_agent_response(prompt_to_process, chat_history=formatted_history)
-        st.session_state.messages.append({"role": "assistant", "content": response_text})
+        formatted_history = format_chat_history(st.session_state.messages[:-1]) # Pass history *before* user's latest message for agent
+
+        try:
+            with st.spinner("ESI is thinking..."): # Spinner before starting the stream
+                stream_generator = get_agent_response(prompt_to_process, chat_history=formatted_history)
+
+            with st.chat_message("assistant"):
+                # st.write_stream will render the content as it arrives and returns the full response once done.
+                full_response_text = st.write_stream(stream_generator)
+
+            st.session_state.messages.append({"role": "assistant", "content": full_response_text})
+            logger.info(f"Full streamed response received and added to history: {full_response_text[:200]}...")
+
+        except Exception as e:
+            logger.error(f"Error during response streaming or generation in handle_user_input: {e}")
+            error_message = f"I apologize, but I encountered an error while processing your request. Please try again or rephrase your question. Technical details: {str(e)}"
+            st.session_state.messages.append({"role": "assistant", "content": error_message})
+            with st.chat_message("assistant"):
+                st.error(error_message)
 
         # Autosave the current chat history after AI response if it's_been modified
-        # This `chat_modified` flag is now primarily for history saving.
         if st.session_state.chat_modified: # This will be true here
             save_chat_history(st.session_state.user_id, st.session_state.current_chat_id, st.session_state.messages)
-            # Optionally, could reset chat_modified to False here if saving happens only once per modification,
-            # but current logic of saving if True is fine.
 
         st.session_state.suggested_prompts = generate_suggested_prompts(st.session_state.messages)
         st.rerun()
@@ -366,10 +377,28 @@ def handle_regeneration_request():
         return
 
     prompt_to_regenerate = st.session_state.messages[-1]['content']
-    formatted_history_for_regen = format_chat_history(st.session_state.messages)
+    # formatted_history_for_regen should exclude the last assistant message AND the user message that prompted it,
+    # then the user message is passed as the query.
+    # However, the current get_agent_response expects the full history *including* the user query that needs a response.
+    # So, we pass messages up to and including the last user message.
+    history_for_regen = format_chat_history(st.session_state.messages[:-1]) # History before the assistant's message to be regenerated
 
-    response_text = get_agent_response(prompt_to_regenerate, chat_history=formatted_history_for_regen)
-    st.session_state.messages.append({"role": "assistant", "content": response_text})
+    try:
+        with st.spinner("ESI is rethinking..."):
+            stream_generator = get_agent_response(prompt_to_regenerate, chat_history=history_for_regen)
+
+        with st.chat_message("assistant"): # This will replace the previous one due to rerun
+            full_response_text = st.write_stream(stream_generator)
+
+        st.session_state.messages.append({"role": "assistant", "content": full_response_text})
+        logger.info(f"Full regenerated streamed response received: {full_response_text[:200]}...")
+
+    except Exception as e:
+        logger.error(f"Error during response regeneration streaming: {e}")
+        error_message = f"I apologize, but I encountered an error while regenerating the response. Please try again. Technical details: {str(e)}"
+        st.session_state.messages.append({"role": "assistant", "content": error_message})
+        # No need to display st.error here as st.rerun() will redraw chat from messages
+
     save_chat_history(st.session_state.user_id, st.session_state.current_chat_id, st.session_state.messages)
     st.session_state.suggested_prompts = generate_suggested_prompts(st.session_state.messages)
     st.rerun()

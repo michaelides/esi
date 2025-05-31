@@ -39,6 +39,7 @@ def setup_global_llm_settings():
     try:
         initialize_settings()
         logger.info("LLM settings initialized (cached).")
+        return True, None # Success, no error message
     except Exception as e:
         error_message = (
             "Fatal Error: Could not initialize the AI's language model (Gemini).\n\n"
@@ -48,9 +49,8 @@ def setup_global_llm_settings():
             "3. Check if the API key has permissions for the model being used (e.g., 'gemini-2.5-flash-preview-05-20').\n\n"
             f"Original error details: {e}"
         )
-        logger.error(error_message) # Log the more detailed message too
-        st.error(error_message)
-        st.stop()
+        logger.error(error_message)
+        return False, error_message # Failure, with error message
 
 @st.cache_resource
 def setup_agent():
@@ -59,11 +59,11 @@ def setup_agent():
     try:
         agent_instance = create_orchestrator_agent()
         logger.info("Orchestrator agent object initialized (cached) successfully.")
-        return agent_instance
+        return agent_instance, None # Success, no error message
     except Exception as e:
+        error_message = f"Failed to initialize the AI agent. Please check configurations. Error: {e}"
         logger.error(f"Error initializing orchestrator agent (cached): {e}")
-        st.error(f"Failed to initialize the AI agent. Please check configurations. Error: {e}")
-        st.stop()
+        return None, error_message # Failure, with error message
 
 @st.cache_resource
 def get_cached_user_id():
@@ -169,7 +169,7 @@ def get_agent_response(query: str, chat_history: List[ChatMessage]) -> str:
         logger.info(f"Modified query with verbosity: {modified_query}")
 
         with st.spinner("ESI is thinking..."):
-            response = agent.chat(modified_query, chat_history=chat_history)
+            response = agent.chat(modified_query, chat_history=formatted_history)
 
         response_text = response.response if hasattr(response, 'response') else str(response)
 
@@ -376,13 +376,22 @@ def handle_regeneration_request():
 
 def main():
     """Main function to run the Streamlit app."""
-    setup_global_llm_settings()
+    # Initialize LLM settings and handle potential errors outside cached function
+    llm_setup_success, llm_error_msg = setup_global_llm_settings()
+    if not llm_setup_success:
+        st.error(llm_error_msg)
+        st.stop()
 
     if "user_id" not in st.session_state:
         st.session_state.user_id = get_cached_user_id()
     
     if AGENT_SESSION_KEY not in st.session_state:
-        st.session_state[AGENT_SESSION_KEY] = setup_agent()
+        # Initialize orchestrator agent and handle potential errors outside cached function
+        agent_instance, agent_error_msg = setup_agent()
+        if agent_error_msg:
+            st.error(agent_error_msg)
+            st.stop()
+        st.session_state[AGENT_SESSION_KEY] = agent_instance
 
     # Initialize all necessary session state variables with default empty values
     # This ensures they always exist, preventing AttributeError.

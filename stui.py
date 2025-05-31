@@ -240,7 +240,8 @@ def create_interface(
                                 st.session_state.editing_chat_id = None
                                 switch_chat_callback(chat_id)
                 with col2:
-                    with st.popover("⋮", use_container_width=True):
+#                    with st.popover("⋮", use_container_width=True):
+                    with st.popover("", use_container_width=True):
                         st.write(f"Options for: **{chat_name}**")
                         
                         # Option to download

@@ -25,31 +25,16 @@ from config import PROJECT_ROOT, SUGGESTED_PROMPT_COUNT, DEFAULT_PROMPTS, ESI_AG
 # --- Global Settings ---
 def initialize_settings():
     """Initializes LlamaIndex settings with Gemini LLM and Embedding model."""
-    # Check if specific attributes are already set, as Settings object itself might exist
-    if getattr(Settings, 'llm', None) and getattr(Settings, 'embed_model', None):
-        logger.info("Settings.llm and Settings.embed_model are already configured. Skipping re-initialization.")
-        return
-
-    logger.info("Configuring Settings.llm and Settings.embed_model for Gemini...") # Added "for Gemini" for clarity
     google_api_key = os.getenv("GOOGLE_API_KEY")
     if not google_api_key:
-        logger.error("GOOGLE_API_KEY not found in environment variables. This is required for Gemini.") # Added specificity
-        raise ValueError("GOOGLE_API_KEY not found in environment variables. This is required for Gemini.")
+        raise ValueError("GOOGLE_API_KEY not found in environment variables.")
 
-    try:
-        # Explicitly set to None first to clear any potential implicit defaults
-        Settings.llm = None
-        Settings.embed_model = None
-
-        Settings.embed_model = GoogleGenAIEmbedding(model_name="models/text-embedding-004", api_key=google_api_key)
-        #                             Ensure this is the correct model name as per user feedback
-        Settings.llm = Gemini(model_name="models/gemini-2.5-flash-preview-05-20", # USER SPECIFIED MODEL
-                              api_key=google_api_key,
-                              temperature=0.7)
-        logger.info("Settings.llm (Gemini) and Settings.embed_model configured successfully with model gemini-2.5-flash-preview-05-20.")
-    except Exception as e:
-        logger.error(f"Error during Gemini LLM/Embedding model configuration (model gemini-2.5-flash-preview-05-20): {e}")
-        raise
+    # Use Google Generative AI Embeddings
+    Settings.embed_model = GoogleGenAIEmbedding(model_name="models/text-embedding-004", api_key=google_api_key)
+    # Use a potentially more stable model name and set a default temperature
+    Settings.llm = Gemini(model_name="models/gemini-2.5-flash-preview-04-17",
+                          api_key=google_api_key,
+                          temperature=0.7) 
 
 
 # --- Greeting Generation ---

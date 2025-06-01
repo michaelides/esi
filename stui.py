@@ -20,17 +20,20 @@ st.set_page_config(
 st.components.v1.html(
     """
     <script>
-    function copyToClipboard(event) {
-        const button = event.currentTarget;
-        const textToCopy = button.dataset.clipboardText;
+    function copyToClipboard(elementId) {
+        const textToCopy = document.getElementById(elementId).innerText;
         
         navigator.clipboard.writeText(textToCopy).then(function() {
-            // Optional: Provide visual feedback, e.g., a temporary tooltip or alert
-            const originalText = button.innerHTML;
-            button.innerHTML = '✅ Copied!';
-            setTimeout(() => {
-                button.innerHTML = originalText;
-            }, 1500); // Change back after 1.5 seconds
+            // Optional: Provide visual feedback on the button itself
+            // Find the button that triggered this by looking for its onclick attribute
+            const button = document.querySelector(`button[onclick*="${elementId}"]`); 
+            if (button) {
+                const originalText = button.innerHTML;
+                button.innerHTML = '✅ Copied!';
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                }, 1500); // Change back after 1.5 seconds
+            }
         }, function(err) {
             console.error('Async: Could not copy text: ', err);
             // alert('Failed to copy text.'); // Fallback alert if copy fails
@@ -193,30 +196,36 @@ def display_chat():
                     st.error(f"Error creating download button for {code_download_filename}: {e}")
 
             # --- Add Copy to Clipboard and Regenerate Buttons ---
-            # The regenerate button is only for the last assistant message
             is_last_assistant_message = (message["role"] == "assistant" and msg_idx == len(st.session_state.messages) - 1)
             
-            # Determine if regenerate button should be shown
             can_regenerate = False
             if is_last_assistant_message:
-                if len(st.session_state.messages) == 1: # Initial greeting
+                if len(st.session_state.messages) == 1:
                     can_regenerate = True
                 elif len(st.session_state.messages) > 1 and st.session_state.messages[msg_idx - 1]["role"] == "user":
                     can_regenerate = True
 
-            # Use html.escape to safely embed the content into a data attribute
-            escaped_content = html.escape(content)
+            # Generate a unique ID for the hidden content div
+            content_div_id = f"chat_content_{msg_idx}"
+            
+            # Add a hidden div containing the full content for copying
+            # This div is hidden using CSS, but its innerText is accessible to JS
+            # Use html.escape for the content inside the div to prevent HTML injection,
+            # but innerText will correctly retrieve the raw text.
+            st.markdown(
+                f'<div id="{content_div_id}" style="display:none;">{html.escape(content)}</div>',
+                unsafe_allow_html=True
+            )
 
             if can_regenerate:
-                col_copy, col_regen, _ = st.columns([0.05, 0.05, 0.9]) # Small columns for icons, then a large spacer
+                col_copy, col_regen, _ = st.columns([0.05, 0.05, 0.9])
             else:
-                col_copy, _ = st.columns([0.05, 0.95]) # One small column for copy, rest for spacing
+                col_copy, _ = st.columns([0.05, 0.95])
 
             with col_copy:
                 st.markdown(
                     f"""
-                    <button onclick="copyToClipboard(event)" 
-                            data-clipboard-text="{escaped_content}"
+                    <button onclick="copyToClipboard('{content_div_id}')" 
                             style="background: none; border: none; cursor: pointer; font-size: 1.2em; padding: 0; margin: 0; line-height: 1;" 
                             title="Copy to clipboard">
                         📋
@@ -227,7 +236,6 @@ def display_chat():
             
             if can_regenerate:
                 with col_regen:
-                    # Removed use_container_width=True to let column control width
                     if st.button("🔄", key=f"regenerate_{msg_idx}", help="Regenerate Response"):
                         st.session_state.do_regenerate = True
                         st.rerun()
@@ -242,7 +250,7 @@ def create_interface(
     current_chat_id: str,
     switch_chat_callback: Callable,
     get_discussion_markdown_callback: Callable,
-    get_discussion_docx_callback: Callable, # Added new callback for DOCX
+    get_discussion_docx_callback: Callable,
     suggested_prompts_list: Optional[List[str]],
     handle_user_input_callback: Callable
 ):

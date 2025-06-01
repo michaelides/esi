@@ -1,6 +1,5 @@
 import streamlit as st
 import os
-import time
 import json
 import re
 import uuid
@@ -14,13 +13,6 @@ from dotenv import load_dotenv
 load_dotenv()
 
 PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
-
-st.set_page_config(
-    page_title="ESI - ESI Scholarly Instructor",
-    page_icon="🎓",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
 
 cookies = esc.CookieManager(key="esi_cookie_manager")
 
@@ -313,9 +305,6 @@ def handle_user_input(chat_input_value: str | None):
 
         st.session_state.messages.append({"role": "user", "content": prompt_to_process})
 
-        with st.chat_message("user"):
-            st.markdown(prompt_to_process)
-
         formatted_history = format_chat_history(st.session_state.messages)
         response_text = get_agent_response(prompt_to_process, chat_history=formatted_history)
         st.session_state.messages.append({"role": "assistant", "content": response_text})
@@ -440,21 +429,18 @@ def main():
         chat_metadata=st.session_state.chat_metadata,
         current_chat_id=st.session_state.current_chat_id,
         switch_chat_callback=switch_chat,
-        get_discussion_markdown_callback=get_discussion_markdown
+        get_discussion_markdown_callback=get_discussion_markdown,
+        suggested_prompts_list=st.session_state.suggested_prompts,
+        handle_user_input_callback=handle_user_input
     )
 
-    if st.session_state.suggested_prompts:
-        st.markdown("---")
-        st.subheader("Suggested Prompts:")
-        cols = st.columns(len(st.session_state.suggested_prompts)) 
-        for i, prompt in enumerate(st.session_state.suggested_prompts):
-            with cols[i]:
-                if st.button(prompt, key=f"suggested_prompt_btn_{i}"):
-                    st.session_state.prompt_to_use = prompt
-                    st.rerun()
-
-    chat_input_value = st.chat_input("Ask me about dissertations, research methods, academic writing, etc.")
-    handle_user_input(chat_input_value)
+    chat_input_for_handler = st.session_state.get("chat_input_value_from_stui")
+    if "chat_input_value_from_stui" in st.session_state: # Ensure the key exists before deleting
+        del st.session_state.chat_input_value_from_stui # Or set to None: st.session_state.chat_input_value_from_stui = None
+    
+    # Call handle_user_input if there's a chat input or a suggested prompt pending
+    if chat_input_for_handler or st.session_state.get('prompt_to_use'):
+        handle_user_input(chat_input_for_handler)
 
 if __name__ == "__main__":
     if not os.getenv("GOOGLE_API_KEY"):

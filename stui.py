@@ -1,11 +1,17 @@
 import streamlit as st
-import datetime
 import os
 import re
 import json
 from typing import List, Dict, Any, Optional, Callable
 
 PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
+
+st.set_page_config(
+    page_title="ESI - ESI Scholarly Instructor",
+    page_icon="🎓",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
 
 def display_chat():
     """Display the chat messages from the session state, handling file downloads and image display."""
@@ -178,7 +184,9 @@ def create_interface(
     chat_metadata: Dict[str, str],
     current_chat_id: str,
     switch_chat_callback: Callable,
-    get_discussion_markdown_callback: Callable
+    get_discussion_markdown_callback: Callable,
+    suggested_prompts_list: Optional[List[str]],
+    handle_user_input_callback: Callable
 ):
     """Create the Streamlit UI for the chat interface."""
     st.title("🎓 ESI: ESI Scholarly Instructor")
@@ -283,3 +291,29 @@ def create_interface(
     st.html(f"<style>{CSS}</style>")
 
     display_chat()
+    display_main_chat_area(suggested_prompts_list, handle_user_input_callback)
+
+def display_main_chat_area(suggested_prompts_list: Optional[List[str]], handle_user_input_callback: Callable):
+    """
+    Displays the main chat area including suggested prompts and the chat input field.
+    """
+    if suggested_prompts_list:
+        st.markdown("---")
+        st.subheader("Suggested Prompts:")
+        # Ensure suggested_prompts_list is not None and not empty before creating columns
+        if suggested_prompts_list:
+            cols = st.columns(len(suggested_prompts_list))
+            for i, prompt in enumerate(suggested_prompts_list):
+                with cols[i]:
+                    if st.button(prompt, key=f"suggested_prompt_btn_{i}"):
+                        st.session_state.prompt_to_use = prompt
+                        # Call the callback immediately or indicate that a prompt was selected
+                        # For now, setting prompt_to_use and rerunning is consistent with app.py's old logic
+                        st.rerun() 
+        else:
+            # Optionally handle the case where suggested_prompts_list is empty but not None
+            pass
+
+
+    chat_input_value = st.chat_input("Ask me about dissertations, research methods, academic writing, etc.")
+    st.session_state.chat_input_value_from_stui = chat_input_value

@@ -1,0 +1,14 @@
+[
+  {
+    "role": "assistant",
+    "content": "Hi there! I'm ESI, your friendly AI assistant, ready to help with your dissertation journey."
+  },
+  {
+    "role": "user",
+    "content": "Help me brainstorm ideas."
+  },
+  {
+    "role": "assistant",
+    "content": "Alright, let's get those brain juices flowing for your dissertation! Brainstorming is a fantastic place to start.\n\nAs ESI (your ESI-group Scholarly Instructor, wink wink), I'm here to be your guide and sounding board throughout this exciting, sometimes slightly bewildering, process. I can help you:\n\n*   Pinpoint potential research topics within the vast and fascinating world of Organizational Psychology.\n*   Refine broad ideas into specific, researchable questions.\n*   Develop hypotheses (if your chosen method requires them!).\n*   Think through different research designs (quantitative, qualitative, or yes, even mixed methods, though we'll chat about the adventure that is!).\n*   Decide on the nitty-gritty details of your study.\n\nBasically, I'm here to help you shape that initial spark of interest into a solid research plan.\n\nSo, tell me, what's been bouncing around in your head about your dissertation today? Are there any particular areas of organizational psychology that have caught your eye, or perhaps a problem you've observed that you're curious to explore?"
+  }
+]

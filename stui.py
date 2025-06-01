@@ -375,22 +375,14 @@ def display_main_chat_area(suggested_prompts_list: Optional[List[str]], handle_u
     Displays the main chat area including suggested prompts and the chat input field.
     """
     if suggested_prompts_list:
-        st.markdown("---")
-        st.subheader("Suggested Prompts:")
-        # Ensure suggested_prompts_list is not None and not empty before creating columns
-        if suggested_prompts_list:
-            cols = st.columns(len(suggested_prompts_list))
-            for i, prompt in enumerate(suggested_prompts_list):
-                with cols[i]:
-                    if st.button(prompt, key=f"suggested_prompt_btn_{i}"):
-                        st.session_state.prompt_to_use = prompt
-                        # Call the callback immediately or indicate that a prompt was selected
-                        # For now, setting prompt_to_use and rerunning is consistent with app.py's old logic
-                        st.rerun() 
-        else:
-            # Optionally handle the case where suggested_prompts_list is empty but not None
-            pass
-
+        cols = st.columns(len(suggested_prompts_list))
+        for i, prompt in enumerate(suggested_prompts_list):
+            with cols[i]:
+                if st.button(prompt, key=f"suggested_prompt_btn_{i}"):
+                    st.session_state.prompt_to_use = prompt
+                    st.rerun() 
+    else:
+        pass
 
     chat_input_value = st.chat_input("Ask me about dissertations, research methods, academic writing, etc.")
     st.session_state.chat_input_value_from_stui = chat_input_value

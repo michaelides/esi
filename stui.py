@@ -3,7 +3,7 @@ import os
 import re
 import json
 from typing import List, Dict, Any, Optional, Callable
-import urllib.parse # To URL-encode content for JS
+import html # Import html for escaping HTML content
 
 PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 
@@ -20,10 +20,17 @@ st.set_page_config(
 st.components.v1.html(
     """
     <script>
-    function copyToClipboard(text) {
-        navigator.clipboard.writeText(text).then(function() {
+    function copyToClipboard(event) {
+        const button = event.currentTarget;
+        const textToCopy = button.dataset.clipboardText;
+        
+        navigator.clipboard.writeText(textToCopy).then(function() {
             // Optional: Provide visual feedback, e.g., a temporary tooltip or alert
-            // console.log('Async: Copying to clipboard was successful!');
+            const originalText = button.innerHTML;
+            button.innerHTML = '✅ Copied!';
+            setTimeout(() => {
+                button.innerHTML = originalText;
+            }, 1500); // Change back after 1.5 seconds
         }, function(err) {
             console.error('Async: Could not copy text: ', err);
             // alert('Failed to copy text.'); // Fallback alert if copy fails
@@ -197,20 +204,19 @@ def display_chat():
                 elif len(st.session_state.messages) > 1 and st.session_state.messages[msg_idx - 1]["role"] == "user":
                     can_regenerate = True
 
-            # Create columns for buttons. Adjust ratios for better spacing.
-            # If regenerate is present, need 2 columns for buttons, plus a spacer.
-            # If only copy, one column for button, plus a spacer.
+            # Use html.escape to safely embed the content into a data attribute
+            escaped_content = html.escape(content)
+
             if can_regenerate:
                 col_copy, col_regen, _ = st.columns([0.05, 0.05, 0.9]) # Small columns for icons, then a large spacer
             else:
                 col_copy, _ = st.columns([0.05, 0.95]) # One small column for copy, rest for spacing
 
             with col_copy:
-                # URL-encode the content to safely pass it to JavaScript
-                encoded_content = urllib.parse.quote(content)
                 st.markdown(
                     f"""
-                    <button onclick="copyToClipboard(decodeURIComponent('{encoded_content}'))" 
+                    <button onclick="copyToClipboard(event)" 
+                            data-clipboard-text="{escaped_content}"
                             style="background: none; border: none; cursor: pointer; font-size: 1.2em; padding: 0; margin: 0; line-height: 1;" 
                             title="Copy to clipboard">
                         📋

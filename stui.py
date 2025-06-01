@@ -7,42 +7,17 @@ import html # Import html for escaping HTML content
 
 PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 
+# Initialize session state for clipboard functionality
+if 'text_to_copy_payload' not in st.session_state:
+    st.session_state.text_to_copy_payload = None
+if 'clipboard_triggered_for_id' not in st.session_state:
+    st.session_state.clipboard_triggered_for_id = None
+
 st.set_page_config(
     page_title="ESI - ESI Scholarly Instructor",
     page_icon="🎓",
     layout="wide",
     initial_sidebar_state="expanded"
-)
-
-# Inject JavaScript for copy to clipboard functionality
-# This HTML component will be rendered once at the top of the page
-# and its JS will be available globally.
-st.components.v1.html(
-    """
-    <script>
-    function copyToClipboard(elementId) {
-        const textToCopy = document.getElementById(elementId).innerText;
-        
-        navigator.clipboard.writeText(textToCopy).then(function() {
-            // Optional: Provide visual feedback on the button itself
-            // Find the button that triggered this by looking for its onclick attribute
-            const button = document.querySelector(`button[onclick*="${elementId}"]`); 
-            if (button) {
-                const originalText = button.innerHTML;
-                button.innerHTML = '✅ Copied!';
-                setTimeout(() => {
-                    button.innerHTML = originalText;
-                }, 1500); // Change back after 1.5 seconds
-            }
-        }, function(err) {
-            console.error('Async: Could not copy text: ', err);
-            // alert('Failed to copy text.'); // Fallback alert if copy fails
-        });
-    }
-    </script>
-    """,
-    height=0, # Make it invisible
-    width=0,
 )
 
 def display_chat():
@@ -205,35 +180,61 @@ def display_chat():
                 elif len(st.session_state.messages) > 1 and st.session_state.messages[msg_idx - 1]["role"] == "user":
                     can_regenerate = True
 
-            # Generate a unique ID for the hidden content div
-            content_div_id = f"chat_content_{msg_idx}"
-            
-            # Add a hidden div containing the full content for copying
-            # This div is hidden using CSS, but its innerText is accessible to JS
-            # Use html.escape for the content inside the div to prevent HTML injection,
-            # but innerText will correctly retrieve the raw text.
-            st.markdown(
-                f'<div id="{content_div_id}" style="display:none;">{html.escape(content)}</div>',
-                unsafe_allow_html=True
-            )
+            # The hidden div and content_div_id are no longer needed.
 
             if can_regenerate:
                 col_copy, col_regen, _ = st.columns([0.05, 0.05, 0.9])
             else:
                 col_copy, _ = st.columns([0.05, 0.95])
 
+            # Define callback for the copy button
+            def _copy_button_callback(text_payload, message_id):
+                st.session_state.text_to_copy_payload = text_payload
+                st.session_state.clipboard_triggered_for_id = message_id
+                # Optional: log to server console for debugging
+                print(f"Copy button clicked for msg {message_id}. Payload set in session state.")
+
             with col_copy:
-                st.markdown(
-                    f"""
-                    <button onclick="copyToClipboard('{content_div_id}')" 
-                            style="background: none; border: none; cursor: pointer; font-size: 1.2em; padding: 0; margin: 0; line-height: 1;" 
-                            title="Copy to clipboard">
-                        📋
-                    </button>
-                    """,
-                    unsafe_allow_html=True
+                # Replace markdown button with st.button
+                # text_to_display and msg_idx are from the parent scope of display_chat's loop
+                col_copy.button(
+                    "📋",
+                    key=f"copy_btn_{msg_idx}",
+                    help="Copy message to clipboard",
+                    on_click=_copy_button_callback,
+                    args=(text_to_display, msg_idx)
                 )
             
+            # JS injection for clipboard based on session state
+            if st.session_state.get('clipboard_triggered_for_id') == msg_idx:
+                text_to_copy_js = st.session_state.get('text_to_copy_payload', "")
+                # Using json.dumps to safely escape the text for JavaScript
+                escaped_text_for_js = json.dumps(text_to_copy_js)
+
+                javascript_to_run = f"""
+                <script>
+                    (function() {{
+                        window.focus(); // Attempt to focus the current window/iframe
+                        const textToCopy = {escaped_text_for_js};
+                        navigator.clipboard.writeText(textToCopy).then(function() {{
+                            console.log('Async: Copying to clipboard was successful!', textToCopy);
+                            // Toast will be shown from Python side
+                        }}, function(err) {{
+                            console.error('Async: Could not copy text. Error object:', err); console.error('Error name:', err.name); console.error('Error message:', err.message);
+                            alert('Failed to copy text. Check console for errors.');
+                        }});
+                    }})();
+                </script>
+                """
+                st.components.v1.html(javascript_to_run, height=0, width=0)
+
+                # Display toast message
+                st.toast(f"Content from message {msg_idx + 1} copied!", icon="📋")
+
+                # Reset the trigger and payload
+                st.session_state.clipboard_triggered_for_id = None
+                st.session_state.text_to_copy_payload = None
+
             if can_regenerate:
                 with col_regen:
                     if st.button("🔄", key=f"regenerate_{msg_idx}", help="Regenerate Response"):

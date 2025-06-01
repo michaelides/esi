@@ -259,7 +259,8 @@ def rename_chat(chat_id: str, new_name: str): # Modified to accept chat_id
         st.session_state.chat_metadata[chat_id] = new_name
         save_chat_metadata(st.session_state.user_id, st.session_state.chat_metadata)
         print(f"Renamed chat {chat_id} to '{new_name}'")
-        st.rerun()
+        # Removed st.rerun() from here as it causes the "no-op" warning in on_change callbacks.
+        # Streamlit will automatically rerun after the on_change event completes.
 
 def get_discussion_markdown(chat_id: str) -> str:
     """Retrieves messages for a given chat_id and formats them into a Markdown string."""

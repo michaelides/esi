@@ -9,6 +9,8 @@ from llama_index.core.llms import ChatMessage, MessageRole
 import stui
 from agent import create_orchestrator_agent, generate_suggested_prompts, SUGGESTED_PROMPT_COUNT, DEFAULT_PROMPTS, initialize_settings as initialize_agent_settings, generate_llm_greeting
 from dotenv import load_dotenv
+from docx import Document
+from io import BytesIO
 
 load_dotenv()
 
@@ -269,6 +271,29 @@ def get_discussion_markdown(chat_id: str) -> str:
         markdown_content.append(f"**{role}:**\n{content}\n\n---")
     return "\n".join(markdown_content)
 
+def get_discussion_docx(chat_id: str) -> bytes:
+    """Retrieves messages for a given chat_id and formats them into a DOCX file."""
+    messages = st.session_state.all_chat_messages.get(chat_id, [])
+    document = Document()
+    
+    document.add_heading(f"Chat Discussion: {st.session_state.chat_metadata.get(chat_id, 'Untitled Chat')}", level=1)
+    # Use current_chat_name if available, otherwise default to a generic name
+    document.add_paragraph(f"Exported on: {st.session_state.chat_metadata.get(chat_id, 'Unknown Chat')}") 
+
+    for msg in messages:
+        role = msg["role"].capitalize()
+        content = msg["content"]
+        
+        document.add_heading(f"{role}:", level=3)
+        document.add_paragraph(content)
+        document.add_paragraph("---") # Separator
+
+    # Save document to a BytesIO object
+    byte_stream = BytesIO()
+    document.save(byte_stream)
+    byte_stream.seek(0) # Rewind to the beginning of the stream
+    return byte_stream.getvalue()
+
 def handle_user_input(chat_input_value: str | None):
     """
     Process user input (either from chat box or suggested prompt)
@@ -430,6 +455,7 @@ def main():
         current_chat_id=st.session_state.current_chat_id,
         switch_chat_callback=switch_chat,
         get_discussion_markdown_callback=get_discussion_markdown,
+        get_discussion_docx_callback=get_discussion_docx, # Pass the new DOCX callback
         suggested_prompts_list=st.session_state.suggested_prompts,
         handle_user_input_callback=handle_user_input
     )

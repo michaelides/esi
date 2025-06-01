@@ -185,6 +185,7 @@ def create_interface(
     current_chat_id: str,
     switch_chat_callback: Callable,
     get_discussion_markdown_callback: Callable,
+    get_discussion_docx_callback: Callable, # Added new callback for DOCX
     suggested_prompts_list: Optional[List[str]],
     handle_user_input_callback: Callable
 ):
@@ -235,13 +236,23 @@ def create_interface(
                     with st.popover("⋮", use_container_width=True):
                         st.write(f"Options for: **{chat_name}**")
                         
-                        # Option to download
+                        # Option to download Markdown
                         st.download_button(
                             label="⬇️ Download (.md)",
                             data=get_discussion_markdown_callback(chat_id),
                             file_name=f"{chat_name.replace(' ', '_')}.md",
                             mime="text/markdown",
-                            key=f"download_listed_{chat_id}",
+                            key=f"download_listed_md_{chat_id}", # Changed key to be unique
+                            use_container_width=True
+                        )
+
+                        # Option to download DOCX
+                        st.download_button(
+                            label="⬇️ Download (.docx)",
+                            data=get_discussion_docx_callback(chat_id),
+                            file_name=f"{chat_name.replace(' ', '_')}.docx",
+                            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                            key=f"download_listed_docx_{chat_id}", # New unique key
                             use_container_width=True
                         )
                         

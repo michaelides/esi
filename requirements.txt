@@ -44,3 +44,4 @@ trafilatura # For web reader dependency
 huggingface_hub 
 fsspec
 # sentence-transformers # REMOVED - Dependency for HF embeddings
+python-docx # Added for DOCX generation

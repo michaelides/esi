@@ -44,4 +44,5 @@ trafilatura # For web reader dependency
 huggingface_hub 
 fsspec
 # sentence-transformers # REMOVED - Dependency for HF embeddings
-python-docx # Added for DOCX generation
+python-docx>=1.1.0 # Added for DOCX generation, specifying compatible version
+lxml>=5.0.0 # Explicitly add lxml and specify compatible version for Python 3.13

@@ -3,6 +3,7 @@ import os
 import re
 import json
 from typing import List, Dict, Any, Optional, Callable
+import urllib.parse # To URL-encode content for JS
 
 PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 
@@ -11,6 +12,27 @@ st.set_page_config(
     page_icon="🎓",
     layout="wide",
     initial_sidebar_state="expanded"
+)
+
+# Inject JavaScript for copy to clipboard functionality
+# This HTML component will be rendered once at the top of the page
+# and its JS will be available globally.
+st.components.v1.html(
+    """
+    <script>
+    function copyToClipboard(text) {
+        navigator.clipboard.writeText(text).then(function() {
+            // Optional: Provide visual feedback, e.g., a temporary tooltip or alert
+            // console.log('Async: Copying to clipboard was successful!');
+        }, function(err) {
+            console.error('Async: Could not copy text: ', err);
+            // alert('Failed to copy text.'); // Fallback alert if copy fails
+        });
+    }
+    </script>
+    """,
+    height=0, # Make it invisible
+    width=0,
 )
 
 def display_chat():
@@ -163,14 +185,43 @@ def display_chat():
                 except Exception as e:
                     st.error(f"Error creating download button for {code_download_filename}: {e}")
 
-            if message["role"] == "assistant" and msg_idx == len(st.session_state.messages) - 1:
-                can_regenerate = False
-                if len(st.session_state.messages) == 1:
+            # --- Add Copy to Clipboard and Regenerate Buttons ---
+            # The regenerate button is only for the last assistant message
+            is_last_assistant_message = (message["role"] == "assistant" and msg_idx == len(st.session_state.messages) - 1)
+            
+            # Determine if regenerate button should be shown
+            can_regenerate = False
+            if is_last_assistant_message:
+                if len(st.session_state.messages) == 1: # Initial greeting
                     can_regenerate = True
                 elif len(st.session_state.messages) > 1 and st.session_state.messages[msg_idx - 1]["role"] == "user":
                     can_regenerate = True
-                
-                if can_regenerate:
+
+            # Create columns for buttons. Adjust ratios for better spacing.
+            # If regenerate is present, need 2 columns for buttons, plus a spacer.
+            # If only copy, one column for button, plus a spacer.
+            if can_regenerate:
+                col_copy, col_regen, _ = st.columns([0.05, 0.05, 0.9]) # Small columns for icons, then a large spacer
+            else:
+                col_copy, _ = st.columns([0.05, 0.95]) # One small column for copy, rest for spacing
+
+            with col_copy:
+                # URL-encode the content to safely pass it to JavaScript
+                encoded_content = urllib.parse.quote(content)
+                st.markdown(
+                    f"""
+                    <button onclick="copyToClipboard(decodeURIComponent('{encoded_content}'))" 
+                            style="background: none; border: none; cursor: pointer; font-size: 1.2em; padding: 0; margin: 0; line-height: 1;" 
+                            title="Copy to clipboard">
+                        📋
+                    </button>
+                    """,
+                    unsafe_allow_html=True
+                )
+            
+            if can_regenerate:
+                with col_regen:
+                    # Removed use_container_width=True to let column control width
                     if st.button("🔄", key=f"regenerate_{msg_idx}", help="Regenerate Response"):
                         st.session_state.do_regenerate = True
                         st.rerun()

@@ -4,7 +4,7 @@
 4. Report html link when finding rag files in web_markdown folder
 5. Show citations of weblinks used. 
 # 6. Fix page scrolling
-7. Add icon to export to markdown or word document
+# 7. Add icon to export to markdown or word document
 8. Add clear history button
 # 9. Add persistent long-term memory and user management via cookies. 
 10. Ensure that all different uploaded file formats are correct.

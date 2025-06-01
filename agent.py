@@ -146,6 +146,9 @@ Your process:
 Be proactive and thorough. Cite sources when possible (based on information from tools).
 If a tool returns an error or no useful information, acknowledge this politely in your final response. You may try another tool or ask the user for clarification if necessary to fulfill the original request.
 Your final output to the user should be a single, complete response directly addressing their query using the tool information. Avoid conversational filler about the chat history (e.g., don't say "As we discussed before..." or "Like I said earlier..."). Focus on delivering the answer.
+
+Never use the word "Ah". "Ah" is prohibited.
+
 """
 
     comprehensive_agent_worker = FunctionCallingAgentWorker.from_tools(
@@ -160,10 +163,11 @@ Your final output to the user should be a single, complete response directly add
 
 # --- Suggested Prompts ---
 DEFAULT_PROMPTS = [
-    "Find recent papers on qualitative data analysis methods.",
-    "Explain the structure of a typical literature review.",
-    "What are common challenges students face in writing?",
-    "Search for university policies on dissertation submission deadlines (uses RAG).",
+    "Help me brainstorm ideas.",
+    "I need to develop my research questions.",
+    "I have my topic but I need help with developing hypotheses.",
+    "I have my hypotheses but I am need help to design the study.",
+    "Can you help me design my qualitative study?" 
 ]
 
 def generate_suggested_prompts(chat_history: List[Dict[str, Any]]) -> List[str]:

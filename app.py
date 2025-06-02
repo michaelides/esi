@@ -132,12 +132,16 @@ def format_chat_history(streamlit_messages: List[Dict[str, Any]]) -> List[ChatMe
         history.append(ChatMessage(role=role, content=msg["content"]))
     return history
 
-def get_agent_response(query: str, chat_history: List[ChatMessage]) -> str:
+def get_agent_response(query: str, chat_history: List[ChatMessage]): # -> StreamingAgentChatResponse | Generator[str, None, None]:
     """
-    Get a response from the agent stored in the session state using the chat method,
+    Get a streaming response from the agent stored in the session state,
     explicitly passing the conversation history.
+    Returns a stream object (iterator/generator).
     """
     agent = st.session_state[AGENT_SESSION_KEY]
+
+    def error_stream_generator(error_msg: str):
+        yield error_msg
 
     try:
         current_temperature = st.session_state.get("llm_temperature", 0.7)
@@ -151,20 +155,18 @@ def get_agent_response(query: str, chat_history: List[ChatMessage]) -> str:
 
         # Prepend verbosity level to the query
         modified_query = f"Verbosity Level: {current_verbosity}. {query}"
-        print(f"Modified query with verbosity: {modified_query}")
+        print(f"Modified query with verbosity for streaming: {modified_query}")
 
-        with st.spinner("ESI is thinking..."):
-            response = agent.chat(modified_query, chat_history=chat_history)
-
-        response_text = response.response if hasattr(response, 'response') else str(response)
-
-        print(f"Orchestrator final response text for UI: \n{response_text[:500]}...")
-        return response_text
+        # Call stream_chat instead of chat
+        response_stream = agent.stream_chat(modified_query, chat_history=chat_history)
+        
+        # print(f"Orchestrator initiated streaming response for UI...") # Optional: log stream initiation
+        return response_stream
 
     except Exception as e:
-        print(f"Error getting orchestrator agent response: {e}")
-        print(f"Error getting agent response: {e}")
-        return f"I apologize, but I encountered an error while processing your request. Please try again or rephrase your question. Technical details: {str(e)}"
+        error_message = f"I apologize, but I encountered an error while processing your request. Please try again or rephrase your question. Technical details: {str(e)}"
+        print(f"Error getting orchestrator agent stream response: {e}")
+        return error_stream_generator(error_message)
 
 def create_new_chat_session_in_memory():
     """
@@ -360,16 +362,14 @@ def handle_user_input(chat_input_value: str | None):
 
 
         st.session_state.messages.append({"role": "user", "content": prompt_to_process})
-
-        formatted_history = format_chat_history(st.session_state.messages)
-        response_text = get_agent_response(prompt_to_process, chat_history=formatted_history)
-        st.session_state.messages.append({"role": "assistant", "content": response_text})
-
-        # Autosave the current chat history after AI response if it's been modified
-        if st.session_state.chat_modified:
-            save_chat_history(st.session_state.user_id, st.session_state.current_chat_id, st.session_state.messages)
-
-        st.session_state.suggested_prompts = generate_suggested_prompts(st.session_state.messages)
+        
+        # Prepare for streaming the assistant's response
+        st.session_state.stream_next_assistant_response = True
+        st.session_state.current_prompt_for_streaming = prompt_to_process
+        
+        # Remove direct call to get_agent_response and appending assistant message here.
+        # No longer generating suggested prompts here as it will be done after stream completion.
+        
         st.rerun()
 
 def reset_chat_callback():
@@ -517,6 +517,67 @@ def main():
 
     if st.session_state.get("do_regenerate", False):
         handle_regeneration_request()
+
+    # Display chat messages from history
+    # Note: st.session_state.messages may be temporarily modified by other callbacks like delete.
+    # Ensure it's valid before iterating.
+    if st.session_state.current_chat_id and st.session_state.current_chat_id in st.session_state.all_chat_messages:
+        current_messages = st.session_state.all_chat_messages[st.session_state.current_chat_id]
+        if current_messages is not None: # Messages might be None if not loaded yet (though main logic tries to load them)
+            for msg in current_messages: # Display currently loaded messages for the active chat
+                 with st.chat_message(msg["role"]):
+                    st.write(msg["content"])
+        # If current_messages is None, it implies an issue or that it's a new chat about to be populated.
+        # The streaming logic below will handle adding the first assistant message if needed.
+    elif not st.session_state.chat_metadata: # No chats at all, show initial greeting
+        with st.chat_message("assistant"):
+            st.write(generate_llm_greeting())
+
+
+    # Check if we need to stream a new assistant response
+    if st.session_state.get("stream_next_assistant_response", False):
+        prompt = st.session_state.current_prompt_for_streaming
+        
+        # Ensure there's a current chat session to associate the stream with
+        if st.session_state.current_chat_id is None:
+            # This can happen if it's the very first message in a new session
+            # or after all chats were deleted and a new one hasn't been formally created by create_new_chat_session_in_memory
+            # (though handle_user_input tries to create one if current_chat_id is None).
+            # For safety, ensure a chat session exists or create one.
+            if not st.session_state.chat_metadata: # No chats exist at all
+                 create_new_chat_session_in_memory() # This sets current_chat_id and initializes messages
+                 # It also reruns, so this streaming block might be re-entered.
+                 # However, create_new_chat_session_in_memory adds an initial assistant greeting,
+                 # so the history for the agent call below needs to be correct.
+                 # For simplicity, we'll assume handle_user_input's logic for new chats is sufficient.
+            # Fallback or error if still no current_chat_id might be needed if create_new_chat_session_in_memory isn't called
+            # or doesn't set current_chat_id as expected before this point in a specific edge case.
+
+        st.session_state.stream_next_assistant_response = False
+        st.session_state.current_prompt_for_streaming = None
+
+        # History should be all messages currently *in the active chat list* before the new response.
+        # st.session_state.messages should be pointing to the active chat's message list.
+        formatted_history = format_chat_history(st.session_state.messages)
+        
+        response_stream = get_agent_response(prompt, chat_history=formatted_history)
+        
+        with st.chat_message("assistant"):
+            full_response_text = st.write_stream(response_stream)
+        
+        # Append the full response to the official messages list for the current chat
+        st.session_state.messages.append({"role": "assistant", "content": full_response_text})
+        
+        # Ensure all_chat_messages is also updated if st.session_state.messages is a copy
+        # (It should be a direct reference to an item in all_chat_messages for existing chats)
+        if st.session_state.current_chat_id:
+             st.session_state.all_chat_messages[st.session_state.current_chat_id] = st.session_state.messages
+
+        if st.session_state.chat_modified and st.session_state.current_chat_id: # Save if chat was marked as modified
+            save_chat_history(st.session_state.user_id, st.session_state.current_chat_id, st.session_state.messages)
+        
+        st.session_state.suggested_prompts = generate_suggested_prompts(st.session_state.messages)
+        st.rerun()
 
     stui.create_interface(
         reset_callback=reset_chat_callback,

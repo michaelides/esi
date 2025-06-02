@@ -82,20 +82,20 @@ def _load_user_data_from_disk(user_id: str) -> Dict[str, Any]:
             all_chat_metadata = {}
     
     all_chat_messages = {}
-    for chat_id, chat_name in list(all_chat_metadata.items()):
+    # Iterate over a copy of items for safe deletion during iteration
+    for chat_id, chat_name in list(all_chat_metadata.items()): 
         chat_file = os.path.join(user_dir, f"{chat_id}.json")
         if os.path.exists(chat_file):
-            try:
-                with open(chat_file, "r", encoding="utf-8") as f:
-                    all_chat_messages[chat_id] = json.load(f)
-            except json.JSONDecodeError as e:
-                print(f"Error decoding chat history for chat {chat_id} (file: {chat_file}): {e}. Removing from metadata.")
-                del all_chat_metadata[chat_id]
+            # Instead of loading messages, set to None for lazy loading
+            all_chat_messages[chat_id] = None 
         else:
             print(f"Chat file {chat_file} not found for chat ID {chat_id}. Removing from metadata.")
-            del all_chat_metadata[chat_id]
+            # Remove chat_id from all_chat_metadata if its message file doesn't exist
+            if chat_id in all_chat_metadata:
+                del all_chat_metadata[chat_id]
+            # Do not add to all_chat_messages if file is missing
     
-    print(f"Loaded {len(all_chat_messages)} chat histories for user {user_id} from disk.")
+    print(f"Processed metadata for {len(all_chat_metadata)} chats. Messages will be lazy-loaded.")
     return {"metadata": all_chat_metadata, "messages": all_chat_messages}
 
 # Removed initialize_user_session_data function as its logic is now inlined in main().
@@ -132,12 +132,16 @@ def format_chat_history(streamlit_messages: List[Dict[str, Any]]) -> List[ChatMe
         history.append(ChatMessage(role=role, content=msg["content"]))
     return history
 
-def get_agent_response(query: str, chat_history: List[ChatMessage]) -> str:
+def get_agent_response(query: str, chat_history: List[ChatMessage]): # -> StreamingAgentChatResponse | Generator[str, None, None]:
     """
-    Get a response from the agent stored in the session state using the chat method,
+    Get a streaming response from the agent stored in the session state,
     explicitly passing the conversation history.
+    Returns a stream object (iterator/generator).
     """
     agent = st.session_state[AGENT_SESSION_KEY]
+
+    def error_stream_generator(error_msg: str):
+        yield error_msg
 
     try:
         current_temperature = st.session_state.get("llm_temperature", 0.7)
@@ -151,20 +155,18 @@ def get_agent_response(query: str, chat_history: List[ChatMessage]) -> str:
 
         # Prepend verbosity level to the query
         modified_query = f"Verbosity Level: {current_verbosity}. {query}"
-        print(f"Modified query with verbosity: {modified_query}")
+        print(f"Modified query with verbosity for streaming: {modified_query}")
 
-        with st.spinner("ESI is thinking..."):
-            response = agent.chat(modified_query, chat_history=chat_history)
-
-        response_text = response.response if hasattr(response, 'response') else str(response)
-
-        print(f"Orchestrator final response text for UI: \n{response_text[:500]}...")
-        return response_text
+        # Call stream_chat instead of chat
+        response_stream = agent.stream_chat(modified_query, chat_history=chat_history)
+        
+        # print(f"Orchestrator initiated streaming response for UI...") # Optional: log stream initiation
+        return response_stream
 
     except Exception as e:
-        print(f"Error getting orchestrator agent response: {e}")
-        print(f"Error getting agent response: {e}")
-        return f"I apologize, but I encountered an error while processing your request. Please try again or rephrase your question. Technical details: {str(e)}"
+        error_message = f"I apologize, but I encountered an error while processing your request. Please try again or rephrase your question. Technical details: {str(e)}"
+        print(f"Error getting orchestrator agent stream response: {e}")
+        return error_stream_generator(error_message)
 
 def create_new_chat_session_in_memory():
     """
@@ -198,13 +200,43 @@ def create_new_chat_session_in_memory():
     return new_chat_id # Return the new chat ID
 
 def switch_chat(chat_id: str):
-    """Switches to an existing chat."""
-    if chat_id not in st.session_state.all_chat_messages:
-        print(f"Attempted to switch to non-existent chat ID: {chat_id}")
-        return # Or handle error
+    """Switches to an existing chat, lazy-loading messages if necessary."""
+    if chat_id not in st.session_state.chat_metadata:
+        print(f"Error: Attempted to switch to chat ID '{chat_id}' not found in metadata.")
+        return
+
+    # Lazy load messages if they are not already loaded
+    if st.session_state.all_chat_messages.get(chat_id) is None:
+        print(f"Messages for chat ID '{chat_id}' not loaded. Loading from disk...")
+        user_dir = os.path.join(MEMORY_DIR, st.session_state.user_id)
+        chat_file = os.path.join(user_dir, f"{chat_id}.json")
+
+        if os.path.exists(chat_file):
+            try:
+                with open(chat_file, "r", encoding="utf-8") as f:
+                    st.session_state.all_chat_messages[chat_id] = json.load(f)
+                print(f"Successfully loaded messages for chat ID '{chat_id}'.")
+            except json.JSONDecodeError as e:
+                print(f"Error decoding JSON for chat {chat_id} (file: {chat_file}): {e}.")
+                st.session_state.all_chat_messages[chat_id] = [] # Set to empty list on error
+            except Exception as e:
+                print(f"An unexpected error occurred while reading chat file {chat_file}: {e}")
+                st.session_state.all_chat_messages[chat_id] = [] # Set to empty list on error
+        else:
+            print(f"Chat file {chat_file} not found for chat ID '{chat_id}'. Setting to empty messages.")
+            st.session_state.all_chat_messages[chat_id] = [] # Set to empty list if file not found
 
     st.session_state.current_chat_id = chat_id
     st.session_state.messages = st.session_state.all_chat_messages[chat_id]
+    # Ensure messages are not None before generating prompts
+    if st.session_state.messages is None: 
+        # This case should ideally be handled by the loading logic above,
+        # setting it to [] if loading fails.
+        print(f"Warning: Messages for chat {chat_id} are None even after loading attempt. Defaulting to empty list for prompts.")
+        st.session_state.messages = []
+        st.session_state.all_chat_messages[chat_id] = []
+
+
     st.session_state.suggested_prompts = generate_suggested_prompts(st.session_state.messages)
     st.session_state.chat_modified = True # Assume existing chat is modified if switched to (will be saved on next AI response)
     print(f"Switched to chat: ID={chat_id}, Name='{st.session_state.chat_metadata.get(chat_id, 'Unknown')}'")
@@ -330,16 +362,14 @@ def handle_user_input(chat_input_value: str | None):
 
 
         st.session_state.messages.append({"role": "user", "content": prompt_to_process})
-
-        formatted_history = format_chat_history(st.session_state.messages)
-        response_text = get_agent_response(prompt_to_process, chat_history=formatted_history)
-        st.session_state.messages.append({"role": "assistant", "content": response_text})
-
-        # Autosave the current chat history after AI response if it's been modified
-        if st.session_state.chat_modified:
-            save_chat_history(st.session_state.user_id, st.session_state.current_chat_id, st.session_state.messages)
-
-        st.session_state.suggested_prompts = generate_suggested_prompts(st.session_state.messages)
+        
+        # Prepare for streaming the assistant's response
+        st.session_state.stream_next_assistant_response = True
+        st.session_state.current_prompt_for_streaming = prompt_to_process
+        
+        # Remove direct call to get_agent_response and appending assistant message here.
+        # No longer generating suggested prompts here as it will be done after stream completion.
+        
         st.rerun()
 
 def reset_chat_callback():
@@ -429,6 +459,27 @@ def main():
             # If there are existing chats, switch to the first one
             first_available_chat_id = next(iter(st.session_state.chat_metadata))
             st.session_state.current_chat_id = first_available_chat_id
+            
+            # Lazy load messages for the first available chat if they are None
+            if st.session_state.all_chat_messages.get(first_available_chat_id) is None:
+                print(f"Initial load: Messages for chat ID '{first_available_chat_id}' not loaded. Loading from disk...")
+                user_dir = os.path.join(MEMORY_DIR, st.session_state.user_id)
+                chat_file = os.path.join(user_dir, f"{first_available_chat_id}.json")
+                if os.path.exists(chat_file):
+                    try:
+                        with open(chat_file, "r", encoding="utf-8") as f:
+                            st.session_state.all_chat_messages[first_available_chat_id] = json.load(f)
+                        print(f"Successfully loaded messages for initial chat ID '{first_available_chat_id}'.")
+                    except json.JSONDecodeError as e:
+                        print(f"Error decoding JSON for initial chat {first_available_chat_id} (file: {chat_file}): {e}.")
+                        st.session_state.all_chat_messages[first_available_chat_id] = [] # Default to empty
+                    except Exception as e:
+                        print(f"An unexpected error occurred while reading initial chat file {chat_file}: {e}")
+                        st.session_state.all_chat_messages[first_available_chat_id] = [] # Default to empty
+                else:
+                    print(f"Initial chat file {chat_file} not found for chat ID '{first_available_chat_id}'. Setting to empty messages.")
+                    st.session_state.all_chat_messages[first_available_chat_id] = [] # Default to empty
+            
             st.session_state.messages = st.session_state.all_chat_messages[first_available_chat_id]
             st.session_state.chat_modified = True # Existing chats are considered modified for saving
             print(f"No valid current chat found. Switched to first available chat: '{st.session_state.chat_metadata.get(first_available_chat_id, first_available_chat_id)}'")
@@ -439,13 +490,94 @@ def main():
             st.session_state.messages = [{"role": "assistant", "content": generate_llm_greeting()}]
             st.session_state.chat_modified = False # This state is not yet saved to disk
     else:
-        # Ensure st.session_state.messages points to the correct chat's messages
-        st.session_state.messages = st.session_state.all_chat_messages[st.session_state.current_chat_id]
+        # current_chat_id is valid and in all_chat_messages keys (but messages might be None)
+        chat_id_to_load = st.session_state.current_chat_id
+        if st.session_state.all_chat_messages.get(chat_id_to_load) is None:
+            print(f"Initial load: Messages for current chat ID '{chat_id_to_load}' not loaded. Loading from disk...")
+            user_dir = os.path.join(MEMORY_DIR, st.session_state.user_id)
+            chat_file = os.path.join(user_dir, f"{chat_id_to_load}.json")
+            if os.path.exists(chat_file):
+                try:
+                    with open(chat_file, "r", encoding="utf-8") as f:
+                        st.session_state.all_chat_messages[chat_id_to_load] = json.load(f)
+                    print(f"Successfully loaded messages for current chat ID '{chat_id_to_load}'.")
+                except json.JSONDecodeError as e:
+                    print(f"Error decoding JSON for current chat {chat_id_to_load} (file: {chat_file}): {e}.")
+                    st.session_state.all_chat_messages[chat_id_to_load] = [] # Default to empty
+                except Exception as e:
+                    print(f"An unexpected error occurred while reading current chat file {chat_file}: {e}")
+                    st.session_state.all_chat_messages[chat_id_to_load] = [] # Default to empty
+            else:
+                print(f"Current chat file {chat_file} not found for chat ID '{chat_id_to_load}'. Setting to empty messages.")
+                st.session_state.all_chat_messages[chat_id_to_load] = [] # Default to empty
+
+        st.session_state.messages = st.session_state.all_chat_messages[chat_id_to_load]
         st.session_state.chat_modified = True # Existing chats are considered modified for saving
         print(f"Continuing with chat: '{st.session_state.chat_metadata.get(st.session_state.current_chat_id, st.session_state.current_chat_id)}'")
 
     if st.session_state.get("do_regenerate", False):
         handle_regeneration_request()
+
+    # Display chat messages from history
+    # Note: st.session_state.messages may be temporarily modified by other callbacks like delete.
+    # Ensure it's valid before iterating.
+    if st.session_state.current_chat_id and st.session_state.current_chat_id in st.session_state.all_chat_messages:
+        current_messages = st.session_state.all_chat_messages[st.session_state.current_chat_id]
+        if current_messages is not None: # Messages might be None if not loaded yet (though main logic tries to load them)
+            for msg in current_messages: # Display currently loaded messages for the active chat
+                 with st.chat_message(msg["role"]):
+                    st.write(msg["content"])
+        # If current_messages is None, it implies an issue or that it's a new chat about to be populated.
+        # The streaming logic below will handle adding the first assistant message if needed.
+    elif not st.session_state.chat_metadata: # No chats at all, show initial greeting
+        with st.chat_message("assistant"):
+            st.write(generate_llm_greeting())
+
+
+    # Check if we need to stream a new assistant response
+    if st.session_state.get("stream_next_assistant_response", False):
+        prompt = st.session_state.current_prompt_for_streaming
+        
+        # Ensure there's a current chat session to associate the stream with
+        if st.session_state.current_chat_id is None:
+            # This can happen if it's the very first message in a new session
+            # or after all chats were deleted and a new one hasn't been formally created by create_new_chat_session_in_memory
+            # (though handle_user_input tries to create one if current_chat_id is None).
+            # For safety, ensure a chat session exists or create one.
+            if not st.session_state.chat_metadata: # No chats exist at all
+                 create_new_chat_session_in_memory() # This sets current_chat_id and initializes messages
+                 # It also reruns, so this streaming block might be re-entered.
+                 # However, create_new_chat_session_in_memory adds an initial assistant greeting,
+                 # so the history for the agent call below needs to be correct.
+                 # For simplicity, we'll assume handle_user_input's logic for new chats is sufficient.
+            # Fallback or error if still no current_chat_id might be needed if create_new_chat_session_in_memory isn't called
+            # or doesn't set current_chat_id as expected before this point in a specific edge case.
+
+        st.session_state.stream_next_assistant_response = False
+        st.session_state.current_prompt_for_streaming = None
+
+        # History should be all messages currently *in the active chat list* before the new response.
+        # st.session_state.messages should be pointing to the active chat's message list.
+        formatted_history = format_chat_history(st.session_state.messages)
+        
+        response_stream = get_agent_response(prompt, chat_history=formatted_history)
+        
+        with st.chat_message("assistant"):
+            full_response_text = st.write_stream(response_stream)
+        
+        # Append the full response to the official messages list for the current chat
+        st.session_state.messages.append({"role": "assistant", "content": full_response_text})
+        
+        # Ensure all_chat_messages is also updated if st.session_state.messages is a copy
+        # (It should be a direct reference to an item in all_chat_messages for existing chats)
+        if st.session_state.current_chat_id:
+             st.session_state.all_chat_messages[st.session_state.current_chat_id] = st.session_state.messages
+
+        if st.session_state.chat_modified and st.session_state.current_chat_id: # Save if chat was marked as modified
+            save_chat_history(st.session_state.user_id, st.session_state.current_chat_id, st.session_state.messages)
+        
+        st.session_state.suggested_prompts = generate_suggested_prompts(st.session_state.messages)
+        st.rerun()
 
     stui.create_interface(
         reset_callback=reset_chat_callback,

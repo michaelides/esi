@@ -6,10 +6,8 @@ import uuid
 import extra_streamlit_components as esc
 from typing import List, Dict, Any
 from llama_index.core.llms import ChatMessage, MessageRole
-from llama_index.core.memory import ChatMemoryBuffer
-from llama_index.core.workflow import Event # For type hinting if needed for handler events
 import stui
-from agent import create_orchestrator_agent, generate_suggested_prompts, SUGGESTED_PROMPT_COUNT, DEFAULT_PROMPTS, initialize_settings as initialize_agent_settings, generate_llm_greeting, StreamingOrchestratorAgentWorkflow # Import the workflow
+from agent import create_orchestrator_agent, generate_suggested_prompts, SUGGESTED_PROMPT_COUNT, DEFAULT_PROMPTS, initialize_settings as initialize_agent_settings, generate_llm_greeting
 from dotenv import load_dotenv
 from docx import Document
 from io import BytesIO
@@ -17,15 +15,6 @@ from io import BytesIO
 load_dotenv()
 
 PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
-
-# Load system prompt globally
-try:
-    with open(os.path.join(PROJECT_ROOT, "esi_agent_instruction.md"), "r") as f:
-        SYSTEM_PROMPT_TEXT = f.read().strip()
-except FileNotFoundError:
-    print("Warning: esi_agent_instruction.md not found. Using default system prompt.")
-    SYSTEM_PROMPT_TEXT = "You are ESI, an AI assistant for dissertation support. Please be helpful and try your best to assist the user with their queries, using the tools provided when necessary."
-
 
 cookies = esc.CookieManager(key="esi_cookie_manager")
 
@@ -99,14 +88,8 @@ def _load_user_data_from_disk(user_id: str) -> Dict[str, Any]:
         if os.path.exists(chat_file):
             # Instead of loading messages, set to None for lazy loading
             all_chat_messages[chat_id] = None 
-            # Instead of loading messages, set to None for lazy loading
-            all_chat_messages[chat_id] = None 
         else:
             print(f"Chat file {chat_file} not found for chat ID {chat_id}. Removing from metadata.")
-            # Remove chat_id from all_chat_metadata if its message file doesn't exist
-            if chat_id in all_chat_metadata:
-                del all_chat_metadata[chat_id]
-            # Do not add to all_chat_messages if file is missing
             # Remove chat_id from all_chat_metadata if its message file doesn't exist
             if chat_id in all_chat_metadata:
                 del all_chat_metadata[chat_id]
@@ -141,102 +124,47 @@ def save_chat_metadata(user_id: str, chat_metadata: Dict[str, str]):
     except Exception as e:
         print(f"Error saving chat metadata for user {user_id}): {e}")
 
-def format_chat_history(
-    streamlit_messages: List[Dict[str, Any]], 
-    ensure_system_prompt: bool = True
-) -> List[ChatMessage]:
-    """
-    Converts Streamlit message history to LlamaIndex ChatMessage list.
-    Optionally ensures the history starts with the system prompt.
-    """
+def format_chat_history(streamlit_messages: List[Dict[str, Any]]) -> List[ChatMessage]:
+    """Converts Streamlit message history to LlamaIndex ChatMessage list."""
     history = []
-    has_system_prompt = False
-    if streamlit_messages and streamlit_messages[0]["role"] == "system":
-        has_system_prompt = True
-
-    if ensure_system_prompt and not has_system_prompt:
-        history.append(ChatMessage(role=MessageRole.SYSTEM, content=SYSTEM_PROMPT_TEXT))
-
     for msg in streamlit_messages:
-        role = MessageRole.USER if msg["role"] == "user" else \
-               MessageRole.ASSISTANT if msg["role"] == "assistant" else \
-               MessageRole.SYSTEM if msg["role"] == "system" else MessageRole.TOOL 
-               # Added tool role, and explicit system role handling
-        history.append(ChatMessage(role=role, content=str(msg["content"]))) # Ensure content is string
+        role = MessageRole.USER if msg["role"] == "user" else MessageRole.ASSISTANT
+        history.append(ChatMessage(role=role, content=msg["content"]))
     return history
 
-def get_memory_for_chat(streamlit_messages: List[Dict[str, Any]]) -> ChatMemoryBuffer:
+def get_agent_response(query: str, chat_history: List[ChatMessage]) -> str:
     """
-    Creates a LlamaIndex ChatMemoryBuffer from Streamlit messages,
-    ensuring the system prompt is the first message.
+    Get a response from the agent stored in the session state using the chat method,
+    explicitly passing the conversation history.
     """
-    # Format messages, ensuring system prompt is first.
-    llama_chat_messages = format_chat_history(streamlit_messages, ensure_system_prompt=True)
-    # Create and return memory buffer
-    return ChatMemoryBuffer.from_messages(llama_chat_messages)
+    agent = st.session_state[AGENT_SESSION_KEY]
 
-
-async def get_agent_response_handler(query: str, current_chat_history: List[ChatMessage]):
-    """
-    Calls the agent workflow with the given query and history.
-    Returns the workflow handler.
-    Note: `current_chat_history` is List[ChatMessage] from format_chat_history.
-    The workflow's `prepare_chat_history` step will add the current `query` to this history.
-    """
-    agent_workflow: StreamingOrchestratorAgentWorkflow = st.session_state[AGENT_SESSION_KEY]
-
-    # The workflow's StartEvent expects 'user_query' and 'chat_history'
-    # `current_chat_history` here is the history *before* the current user query.
-    # The workflow's `prepare_chat_history` step will append the user_query.
     try:
-        # Note: Gemini LLM for workflow needs temperature set if not default in Settings.llm
-        # This is currently handled by initialize_settings and direct modification in old get_agent_response.
-        # The workflow uses Settings.llm, so temperature should be configured there.
-        # Verbosity is also handled by the LLM based on the prompt content.
+        current_temperature = st.session_state.get("llm_temperature", 0.7)
+        current_verbosity = st.session_state.get("llm_verbosity", 3) # Default to 3 if not found
 
-        handler = await agent_workflow.arun_async(
-            user_query=query,
-            chat_history=current_chat_history # Pass the history *before* the current user query
-        )
-        return handler
+        if hasattr(agent, 'llm') and hasattr(agent.llm, 'temperature'):
+            actual_llm_instance = agent.llm
+            actual_llm_instance.temperature = current_temperature
+        else:
+            print(f"Warning: Could not access LLM object within the agent to set temperature. Agent or LLM structure might have changed (agent.llm or agent.llm.temperature not found).")
+
+        # Prepend verbosity level to the query
+        modified_query = f"Verbosity Level: {current_verbosity}. {query}"
+        print(f"Modified query with verbosity: {modified_query}")
+
+        with st.spinner("ESI is thinking..."):
+            response = agent.chat(modified_query, chat_history=chat_history)
+
+        response_text = response.response if hasattr(response, 'response') else str(response)
+
+        print(f"Orchestrator final response text for UI: \n{response_text[:500]}...")
+        return response_text
+
     except Exception as e:
-        error_message = f"I apologize, but I encountered an error while processing your request. Technical details: {str(e)}"
-        print(f"Error getting agent workflow handler: {e}")
-        # Need a way to return a handler-like object that streams this error.
-        # For now, this will raise, and the calling function needs to handle it or we adjust this.
-        # Let's make it return a mock handler that streams the error.
-        
-        class MockHandler:
-            async def arun_async(self, *args, **kwargs): # Match signature if something tries to call run on it
-                return {"response_message": ChatMessage(role=MessageRole.ASSISTANT, content=error_message)}
-
-            async def stream_events(self):
-                yield Event(type="error", delta=error_message) # Simplified event, adapt as needed by consumer
-                # Or more aligned with StreamEvent:
-                # yield StreamEvent(delta=error_message)
-        
-        mock_handler = MockHandler()
-        # To make it directly usable by an event stream processor expecting StreamEvent:
-        async def error_event_stream_generator(msg):
-            from agent import StreamEvent # Local import for clarity
-            yield StreamEvent(delta=msg)
-
-        # Instead of returning a mock handler, let's make get_agent_response_handler return
-        # something that the event_stream_processor can iterate over.
-        # The event_stream_processor in main() expects an object with a `stream_events` async generator.
-        # So, the MockHandler approach is better.
-        
-        # However, the workflow might fail at `arun_async` itself.
-        # The current `get_agent_response` returns a stream generator for errors.
-        # Let's make this function simpler: it returns handler or raises, caller handles.
-        # No, the prompt implies this function should return a handler or a way to stream the error.
-        # The previous `get_agent_response` returned a generator.
-        # `st.write_stream` takes an async generator or a sync generator.
-        # The `event_stream_processor` will take the handler. If handler is None or error, it should cope.
-        
-        # For now, let get_agent_response_handler raise, and main logic will try-catch it.
-        # This is simpler than crafting a perfect mock handler here.
-        raise # Re-raise the exception to be caught by the caller in main()
+        print(f"Error getting orchestrator agent response: {e}")
+        print(f"Error getting agent response: {e}")
+        return f"I apologize, but I encountered an error while processing your request. Please try again or rephrase your question. Technical details: {str(e)}"
 
 def create_new_chat_session_in_memory():
     """
@@ -258,11 +186,7 @@ def create_new_chat_session_in_memory():
     new_chat_name = f"Idea {next_idea_num}"
 
     st.session_state.chat_metadata[new_chat_id] = new_chat_name
-    # Initialize with system prompt, then assistant greeting
-    st.session_state.all_chat_messages[new_chat_id] = [
-        {"role": "system", "content": SYSTEM_PROMPT_TEXT},
-        {"role": "assistant", "content": generate_llm_greeting()}
-    ]
+    st.session_state.all_chat_messages[new_chat_id] = [{"role": "assistant", "content": generate_llm_greeting()}]
     st.session_state.current_chat_id = new_chat_id
     st.session_state.messages = st.session_state.all_chat_messages[new_chat_id]
     st.session_state.chat_modified = False # New chats are initially unsaved
@@ -436,14 +360,16 @@ def handle_user_input(chat_input_value: str | None):
 
 
         st.session_state.messages.append({"role": "user", "content": prompt_to_process})
-        
-        # Prepare for streaming the assistant's response
-        st.session_state.stream_next_assistant_response = True
-        st.session_state.current_prompt_for_streaming = prompt_to_process
-        
-        # Remove direct call to get_agent_response and appending assistant message here.
-        # No longer generating suggested prompts here as it will be done after stream completion.
-        
+
+        formatted_history = format_chat_history(st.session_state.messages)
+        response_text = get_agent_response(prompt_to_process, chat_history=formatted_history)
+        st.session_state.messages.append({"role": "assistant", "content": response_text})
+
+        # Autosave the current chat history after AI response if it's been modified
+        if st.session_state.chat_modified:
+            save_chat_history(st.session_state.user_id, st.session_state.current_chat_id, st.session_state.messages)
+
+        st.session_state.suggested_prompts = generate_suggested_prompts(st.session_state.messages)
         st.rerun()
 
 def reset_chat_callback():
@@ -591,88 +517,6 @@ def main():
 
     if st.session_state.get("do_regenerate", False):
         handle_regeneration_request()
-
-    # Display chat messages from history
-    # Note: st.session_state.messages may be temporarily modified by other callbacks like delete.
-    # Ensure it's valid before iterating.
-    if st.session_state.current_chat_id and st.session_state.current_chat_id in st.session_state.all_chat_messages:
-        current_messages = st.session_state.all_chat_messages[st.session_state.current_chat_id]
-        if current_messages is not None: # Messages might be None if not loaded yet (though main logic tries to load them)
-            for msg in current_messages: # Display currently loaded messages for the active chat
-                 with st.chat_message(msg["role"]):
-                    st.write(msg["content"])
-        # If current_messages is None, it implies an issue or that it's a new chat about to be populated.
-        # The streaming logic below will handle adding the first assistant message if needed.
-    elif not st.session_state.chat_metadata: # No chats at all, show initial greeting
-        with st.chat_message("assistant"):
-            st.write(generate_llm_greeting())
-
-
-    # Check if we need to stream a new assistant response
-    if st.session_state.get("stream_next_assistant_response", False):
-        
-        async def run_agent_and_stream():
-            prompt = st.session_state.current_prompt_for_streaming
-            
-            if st.session_state.current_chat_id is None:
-                if not st.session_state.chat_metadata:
-                     create_new_chat_session_in_memory()
-                     # This rerun might short-circuit, handle_user_input will trigger another stream prep.
-                     # This is a bit complex; ideally, current_chat_id is always set before streaming.
-                     # For now, assume create_new_chat_session_in_memory + rerun correctly sets up for next pass.
-                     # Or, we might need to prevent rerun in create_new_chat_session_in_memory if called mid-logic.
-                     # Let's assume handle_user_input correctly establishes a chat session ID first.
-
-            st.session_state.stream_next_assistant_response = False # Reset flag early
-            st.session_state.current_prompt_for_streaming = None
-
-            history_for_agent_call = st.session_state.messages[:-1]
-            llama_chat_history = format_chat_history(history_for_agent_call, ensure_system_prompt=True)
-
-            final_agent_message_content = ""
-
-            try:
-                handler = await get_agent_response_handler(prompt, llama_chat_history)
-
-                async def event_stream_processor(handler_obj):
-                    async for event in handler_obj.stream_events():
-                        # Assuming StreamEvent is defined in agent.py and has 'delta'
-                        from agent import StreamEvent as AgentStreamEvent # Avoid conflict if stui has StreamEvent
-                        if isinstance(event, AgentStreamEvent) and event.delta is not None:
-                            yield str(event.delta)
-                
-                with st.chat_message("assistant"):
-                    # This will render the stream of deltas
-                    full_response_text_via_stream = st.write_stream(event_stream_processor(handler))
-                
-                stop_event_output = await handler 
-                final_agent_message_obj = stop_event_output.get("response_message")
-
-                if final_agent_message_obj and hasattr(final_agent_message_obj, 'content'):
-                    final_agent_message_content = final_agent_message_obj.content
-                else: 
-                    final_agent_message_content = full_response_text_via_stream 
-                    print("Warning: Could not retrieve final message from StopEvent, using concatenated stream content.")
-
-            except Exception as e:
-                print(f"Error during agent response streaming or handling: {e}")
-                error_message_for_ui = f"I apologize, but I encountered an error: {str(e)}"
-                with st.chat_message("assistant"):
-                    st.write(error_message_for_ui)
-                final_agent_message_content = error_message_for_ui
-            
-            # Update message lists and save history
-            st.session_state.messages.append({"role": "assistant", "content": final_agent_message_content})
-            if st.session_state.current_chat_id:
-                 st.session_state.all_chat_messages[st.session_state.current_chat_id] = st.session_state.messages
-            if st.session_state.chat_modified and st.session_state.current_chat_id:
-                save_chat_history(st.session_state.user_id, st.session_state.current_chat_id, st.session_state.messages)
-            
-            st.session_state.suggested_prompts = generate_suggested_prompts(st.session_state.messages)
-            st.rerun() # Rerun to reflect the completed response and new suggested prompts
-
-        import asyncio
-        asyncio.run(run_agent_and_stream())
 
     stui.create_interface(
         reset_callback=reset_chat_callback,

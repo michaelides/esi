@@ -264,7 +264,7 @@ def create_interface(
         st.session_state.editing_chat_id = None
 
     with st.sidebar:
-        with st.expander("**Chat History**", expanded=True, icon = ":material/forum:"):
+        with st.expander("**Chat History**", expanded=False, icon = ":material/forum:"):
             st.info("Conversations are automatically saved and linked to your browser via cookies. Clearing browser data will remove your saved discussions.")
             
             if st.button("➕ New Chat", key="new_chat_button", use_container_width=True):

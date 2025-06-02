@@ -82,20 +82,20 @@ def _load_user_data_from_disk(user_id: str) -> Dict[str, Any]:
             all_chat_metadata = {}
     
     all_chat_messages = {}
-    for chat_id, chat_name in list(all_chat_metadata.items()):
+    # Iterate over a copy of items for safe deletion during iteration
+    for chat_id, chat_name in list(all_chat_metadata.items()): 
         chat_file = os.path.join(user_dir, f"{chat_id}.json")
         if os.path.exists(chat_file):
-            try:
-                with open(chat_file, "r", encoding="utf-8") as f:
-                    all_chat_messages[chat_id] = json.load(f)
-            except json.JSONDecodeError as e:
-                print(f"Error decoding chat history for chat {chat_id} (file: {chat_file}): {e}. Removing from metadata.")
-                del all_chat_metadata[chat_id]
+            # Instead of loading messages, set to None for lazy loading
+            all_chat_messages[chat_id] = None 
         else:
             print(f"Chat file {chat_file} not found for chat ID {chat_id}. Removing from metadata.")
-            del all_chat_metadata[chat_id]
+            # Remove chat_id from all_chat_metadata if its message file doesn't exist
+            if chat_id in all_chat_metadata:
+                del all_chat_metadata[chat_id]
+            # Do not add to all_chat_messages if file is missing
     
-    print(f"Loaded {len(all_chat_messages)} chat histories for user {user_id} from disk.")
+    print(f"Processed metadata for {len(all_chat_metadata)} chats. Messages will be lazy-loaded.")
     return {"metadata": all_chat_metadata, "messages": all_chat_messages}
 
 # Removed initialize_user_session_data function as its logic is now inlined in main().
@@ -198,13 +198,43 @@ def create_new_chat_session_in_memory():
     return new_chat_id # Return the new chat ID
 
 def switch_chat(chat_id: str):
-    """Switches to an existing chat."""
-    if chat_id not in st.session_state.all_chat_messages:
-        print(f"Attempted to switch to non-existent chat ID: {chat_id}")
-        return # Or handle error
+    """Switches to an existing chat, lazy-loading messages if necessary."""
+    if chat_id not in st.session_state.chat_metadata:
+        print(f"Error: Attempted to switch to chat ID '{chat_id}' not found in metadata.")
+        return
+
+    # Lazy load messages if they are not already loaded
+    if st.session_state.all_chat_messages.get(chat_id) is None:
+        print(f"Messages for chat ID '{chat_id}' not loaded. Loading from disk...")
+        user_dir = os.path.join(MEMORY_DIR, st.session_state.user_id)
+        chat_file = os.path.join(user_dir, f"{chat_id}.json")
+
+        if os.path.exists(chat_file):
+            try:
+                with open(chat_file, "r", encoding="utf-8") as f:
+                    st.session_state.all_chat_messages[chat_id] = json.load(f)
+                print(f"Successfully loaded messages for chat ID '{chat_id}'.")
+            except json.JSONDecodeError as e:
+                print(f"Error decoding JSON for chat {chat_id} (file: {chat_file}): {e}.")
+                st.session_state.all_chat_messages[chat_id] = [] # Set to empty list on error
+            except Exception as e:
+                print(f"An unexpected error occurred while reading chat file {chat_file}: {e}")
+                st.session_state.all_chat_messages[chat_id] = [] # Set to empty list on error
+        else:
+            print(f"Chat file {chat_file} not found for chat ID '{chat_id}'. Setting to empty messages.")
+            st.session_state.all_chat_messages[chat_id] = [] # Set to empty list if file not found
 
     st.session_state.current_chat_id = chat_id
     st.session_state.messages = st.session_state.all_chat_messages[chat_id]
+    # Ensure messages are not None before generating prompts
+    if st.session_state.messages is None: 
+        # This case should ideally be handled by the loading logic above,
+        # setting it to [] if loading fails.
+        print(f"Warning: Messages for chat {chat_id} are None even after loading attempt. Defaulting to empty list for prompts.")
+        st.session_state.messages = []
+        st.session_state.all_chat_messages[chat_id] = []
+
+
     st.session_state.suggested_prompts = generate_suggested_prompts(st.session_state.messages)
     st.session_state.chat_modified = True # Assume existing chat is modified if switched to (will be saved on next AI response)
     print(f"Switched to chat: ID={chat_id}, Name='{st.session_state.chat_metadata.get(chat_id, 'Unknown')}'")
@@ -429,6 +459,27 @@ def main():
             # If there are existing chats, switch to the first one
             first_available_chat_id = next(iter(st.session_state.chat_metadata))
             st.session_state.current_chat_id = first_available_chat_id
+            
+            # Lazy load messages for the first available chat if they are None
+            if st.session_state.all_chat_messages.get(first_available_chat_id) is None:
+                print(f"Initial load: Messages for chat ID '{first_available_chat_id}' not loaded. Loading from disk...")
+                user_dir = os.path.join(MEMORY_DIR, st.session_state.user_id)
+                chat_file = os.path.join(user_dir, f"{first_available_chat_id}.json")
+                if os.path.exists(chat_file):
+                    try:
+                        with open(chat_file, "r", encoding="utf-8") as f:
+                            st.session_state.all_chat_messages[first_available_chat_id] = json.load(f)
+                        print(f"Successfully loaded messages for initial chat ID '{first_available_chat_id}'.")
+                    except json.JSONDecodeError as e:
+                        print(f"Error decoding JSON for initial chat {first_available_chat_id} (file: {chat_file}): {e}.")
+                        st.session_state.all_chat_messages[first_available_chat_id] = [] # Default to empty
+                    except Exception as e:
+                        print(f"An unexpected error occurred while reading initial chat file {chat_file}: {e}")
+                        st.session_state.all_chat_messages[first_available_chat_id] = [] # Default to empty
+                else:
+                    print(f"Initial chat file {chat_file} not found for chat ID '{first_available_chat_id}'. Setting to empty messages.")
+                    st.session_state.all_chat_messages[first_available_chat_id] = [] # Default to empty
+            
             st.session_state.messages = st.session_state.all_chat_messages[first_available_chat_id]
             st.session_state.chat_modified = True # Existing chats are considered modified for saving
             print(f"No valid current chat found. Switched to first available chat: '{st.session_state.chat_metadata.get(first_available_chat_id, first_available_chat_id)}'")
@@ -439,8 +490,28 @@ def main():
             st.session_state.messages = [{"role": "assistant", "content": generate_llm_greeting()}]
             st.session_state.chat_modified = False # This state is not yet saved to disk
     else:
-        # Ensure st.session_state.messages points to the correct chat's messages
-        st.session_state.messages = st.session_state.all_chat_messages[st.session_state.current_chat_id]
+        # current_chat_id is valid and in all_chat_messages keys (but messages might be None)
+        chat_id_to_load = st.session_state.current_chat_id
+        if st.session_state.all_chat_messages.get(chat_id_to_load) is None:
+            print(f"Initial load: Messages for current chat ID '{chat_id_to_load}' not loaded. Loading from disk...")
+            user_dir = os.path.join(MEMORY_DIR, st.session_state.user_id)
+            chat_file = os.path.join(user_dir, f"{chat_id_to_load}.json")
+            if os.path.exists(chat_file):
+                try:
+                    with open(chat_file, "r", encoding="utf-8") as f:
+                        st.session_state.all_chat_messages[chat_id_to_load] = json.load(f)
+                    print(f"Successfully loaded messages for current chat ID '{chat_id_to_load}'.")
+                except json.JSONDecodeError as e:
+                    print(f"Error decoding JSON for current chat {chat_id_to_load} (file: {chat_file}): {e}.")
+                    st.session_state.all_chat_messages[chat_id_to_load] = [] # Default to empty
+                except Exception as e:
+                    print(f"An unexpected error occurred while reading current chat file {chat_file}: {e}")
+                    st.session_state.all_chat_messages[chat_id_to_load] = [] # Default to empty
+            else:
+                print(f"Current chat file {chat_file} not found for chat ID '{chat_id_to_load}'. Setting to empty messages.")
+                st.session_state.all_chat_messages[chat_id_to_load] = [] # Default to empty
+
+        st.session_state.messages = st.session_state.all_chat_messages[chat_id_to_load]
         st.session_state.chat_modified = True # Existing chats are considered modified for saving
         print(f"Continuing with chat: '{st.session_state.chat_metadata.get(st.session_state.current_chat_id, st.session_state.current_chat_id)}'")
 

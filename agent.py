@@ -4,7 +4,8 @@ from llama_index.llms.gemini import Gemini
 from llama_index.embeddings.google_genai import GoogleGenAIEmbedding
 from typing import Any, List, Dict, Optional, Type
 from llama_index.core.tools import FunctionTool, ToolOutput
-from llama_index.core.llms import LLM, ChatMessage, MessageRole, ToolCall # Import base LLM type, ChatMessage, and ToolCall
+from llama_index.core.llms import LLM, ChatMessage, MessageRole
+from llama_index.core.base.llms.types import ToolCall # Corrected import path for ToolCall
 from llama_index.core.memory import ChatMemoryBuffer # For chat history management
 
 # Workflow specific imports
@@ -353,7 +354,7 @@ How do I structure section Z?
 
         print("Generating suggested prompts using LLM...")
         response = llm.complete(prompt)
-        suggestions_text = response.text.strip()
+        suggestions_text = response.strip()
 
         # Parse the response (split by newline, remove empty lines)
         suggested_prompts = [line.strip() for line in suggestions_text.split('\n') if line.strip()]

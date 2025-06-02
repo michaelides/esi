@@ -2,10 +2,9 @@ import os
 from llama_index.core import Settings
 from llama_index.llms.gemini import Gemini
 from llama_index.embeddings.google_genai import GoogleGenAIEmbedding
-from llama_index.core.agent import AgentRunner, FunctionCallingAgentWorker # Keep for now if any part still uses it, but target for removal
 from typing import Any, List, Dict, Optional, Type
 from llama_index.core.tools import FunctionTool, ToolOutput
-from llama_index.core.llms import LLM, ChatMessage, MessageRole # Import base LLM type and ChatMessage
+from llama_index.core.llms import LLM, ChatMessage, MessageRole, ToolCall # Import base LLM type, ChatMessage, and ToolCall
 from llama_index.core.memory import ChatMemoryBuffer # For chat history management
 
 # Workflow specific imports
@@ -16,12 +15,11 @@ from llama_index.core.workflow import (
     Event,
     Context,
     step,
-    OpenAIToolCall, # Assuming Gemini tool calls are compatible or a similar structure is used
 )
 
 
 from tools import (
-    get_search_tools, 
+    get_search_tools,
     get_semantic_scholar_tool_for_agent,
     get_web_scraper_tool_for_agent,
     get_rag_tool_for_agent,
@@ -50,7 +48,7 @@ def initialize_settings():
     # Use a potentially more stable model name and set a default temperature
     Settings.llm = Gemini(model_name="models/gemini-1.5-flash-latest", # Updated model name
                           api_key=google_api_key,
-                          temperature=0.7) 
+                          temperature=0.7)
 
 
 # --- Workflow Event Classes ---
@@ -61,7 +59,7 @@ class StreamEvent(Event):
     delta: str # The delta content from the LLM stream
 
 class ToolCallEvent(Event): # Redefined
-    tool_calls: List[OpenAIToolCall] 
+    tool_calls: List[ToolCall] # Changed from OpenAIToolCall to ToolCall
     history_before_llm_call: List[ChatMessage]
     llm_tool_request_message: ChatMessage # The LLM message that contained the tool call requests
     # If Gemini has a different ToolCall object, OpenAIToolCall might need adjustment.
@@ -90,11 +88,11 @@ class StreamingOrchestratorAgentWorkflow(Workflow):
         # Add the new user query to the chat history
         current_chat_history = list(chat_history) # Make a copy
         current_chat_history.append(ChatMessage(role=MessageRole.USER, content=user_query))
-        
+
         if self._verbose:
             print(f"Workflow Step: prepare_chat_history. Input query: {user_query}")
             print(f"Workflow Step: prepare_chat_history. History length: {len(current_chat_history)}")
-        
+
         return InputEvent(input=current_chat_history)
 
     @step
@@ -117,9 +115,9 @@ class StreamingOrchestratorAgentWorkflow(Workflow):
             # Ensure delta is a string, handle None or other types if necessary
             delta_content = response_chunk.delta if response_chunk.delta is not None else ""
             ctx.write_event_to_stream(StreamEvent(delta=delta_content))
-            
+
             # Store the last message chunk, which should contain the full response and tool calls
-            full_response_message = response_chunk 
+            full_response_message = response_chunk
 
         if self._verbose:
             print(f"Workflow Step: handle_llm_input. LLM stream complete. Final message: {full_response_message}")
@@ -181,7 +179,7 @@ class StreamingOrchestratorAgentWorkflow(Workflow):
                 # For now, direct call. If tools are async, this needs `await`.
                 # LlamaIndex tools' `__call__` is typically synchronous.
                 output = tool(**tool_call.arguments) # Pass arguments as kwargs
-                
+
                 if self._verbose:
                     print(f"Tool {tool_call.name} output: {output.content[:100]}...")
 
@@ -201,7 +199,7 @@ class StreamingOrchestratorAgentWorkflow(Workflow):
                         additional_kwargs={"tool_call_id": tool_call.id, "name": tool_call.name}
                     )
                 )
-        
+
         # Construct the new history for the next LLM call
         # History up to (and including) user message -> LLM message requesting tools -> Tool outputs
         new_history = list(ev.history_before_llm_call) # This history already includes the user query that led to LLM call.
@@ -228,7 +226,12 @@ def generate_llm_greeting() -> str:
              return static_fallback
 
         # Use a simple prompt for a greeting
-        prompt = """Generate a short, friendly greeting (1-2 sentences) for ESI, an AI dissertation assistant. Mention ESI by name and offer help. Provide only the greeting."""
+        # Updated prompt to include the specific open-ended question from esi_agent_instruction.md
+        prompt = """Generate a short, friendly greeting (1-2 sentences) for ESI, an AI dissertation assistant. Mention ESI by name and offer help.
+        After the greeting, include one of these open-ended questions:
+        - "So, what's on your mind about your dissertation today?"
+        - "How can I lend a hand with your research?"
+        Combine the greeting and the question naturally. Provide only the combined greeting and question."""
         response = llm.complete(prompt)
         greeting = response.text.strip()
 
@@ -306,7 +309,7 @@ def create_orchestrator_agent() -> StreamingOrchestratorAgentWorkflow: # Return 
         tools=all_tools_list,
         verbose=True # Set to False for production
     )
-    
+
     print("Streaming Orchestrator Agent Workflow created.")
     return workflow
 
@@ -316,7 +319,7 @@ DEFAULT_PROMPTS = [
     "I need to develop my research questions.",
     "I have my topic but I need help with developing hypotheses.",
     "I have my hypotheses but I am need help to design the study.",
-    "Can you help me design my qualitative study?" 
+    "Can you help me design my qualitative study?"
 ]
 
 def generate_suggested_prompts(chat_history: List[Dict[str, Any]]) -> List[str]:

@@ -95,8 +95,6 @@ def _load_user_data_from_disk(user_id: str) -> Dict[str, Any]:
     all_chat_messages = {}
     # Iterate over a copy of items for safe deletion during iteration
     for chat_id, chat_name in list(all_chat_metadata.items()): 
-    # Iterate over a copy of items for safe deletion during iteration
-    for chat_id, chat_name in list(all_chat_metadata.items()): 
         chat_file = os.path.join(user_dir, f"{chat_id}.json")
         if os.path.exists(chat_file):
             # Instead of loading messages, set to None for lazy loading

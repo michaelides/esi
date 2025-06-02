@@ -19,7 +19,7 @@ llama-index-tools-code-interpreter # Optional: If using code interpreter
 
 # Readers
 llama-index-readers-web
-llama-index-readers-semantic-scholar
+llama-index-readers-semanticscholar
 llama-index-readers-file # Handles various file types via SimpleDirectoryReader
 
 # Vector Store
@@ -43,6 +43,7 @@ semanticscholar
 trafilatura # For web reader dependency
 huggingface_hub 
 fsspec
+extra_streamlit_components
 # sentence-transformers # REMOVED - Dependency for HF embeddings
 python-docx>=1.1.0 # Added for DOCX generation, specifying compatible version
 lxml>=5.0.0 # Explicitly add lxml and specify compatible version for Python 3.13

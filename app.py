@@ -9,7 +9,7 @@ from llama_index.core.llms import ChatMessage, MessageRole
 from llama_index.core import Settings # Import Settings for LLM temperature
 import stui
 from agent import create_orchestrator_agent, generate_suggested_prompts, SUGGESTED_PROMPT_COUNT, DEFAULT_PROMPTS, initialize_settings as initialize_agent_settings, generate_llm_greeting
-from tools import process_uploaded_file, clear_uploaded_data, get_user_document_tool, clear_user_data_tools # Import new functions/constants from tools
+from tools import process_uploaded_file, clear_uploaded_data, get_user_document_tool, clear_user_data_tools # Import all necessary functions from tools
 from dotenv import load_dotenv
 from docx import Document
 from io import BytesIO
@@ -179,7 +179,7 @@ def get_agent_response(query: str, chat_history: List[ChatMessage]) -> str:
         print(f"Modified query with verbosity: {modified_query}")
 
         with st.spinner("ESI is thinking..."):
-            response = agent.chat(modified_query, chat_history=chat_history) # Use passed chat_history
+            response = agent.chat(modified_query, chat_history=formatted_history) # Use passed chat_history
 
         response_text = response.response if hasattr(response, 'response') else str(response)
 

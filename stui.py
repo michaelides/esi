@@ -267,12 +267,8 @@ def create_interface(
     handle_user_input_callback: Callable
 ):
     """Create the Streamlit UI for the chat interface."""
-    st.set_page_config(
-        page_title="ESI: ESI Scholarly Instructor",
-        page_icon="🎓",
-        layout="wide",
-        initial_sidebar_state="expanded"
-    )
+    # Removed st.set_page_config, st.title, st.caption from here.
+    # They are now in app.py at the top level.
 
     # Initialize editing state if not present
     if 'editing_chat_id' not in st.session_state:
@@ -384,8 +380,7 @@ def create_interface(
     """
     st.html(f"<style>{CSS}</style>")
 
-    st.title("🎓 ESI: ESI Scholarly Instructor")
-    st.caption("Your AI partner for brainstorming and structuring your dissertation research")
+    # Removed st.title and st.caption from here.
 
     display_chat()
     

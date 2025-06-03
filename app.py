@@ -6,14 +6,28 @@ import uuid
 import extra_streamlit_components as esc
 from typing import List, Dict, Any
 from llama_index.core.llms import ChatMessage, MessageRole
+from llama_index.core import Settings # Import Settings for LLM temperature
 import stui
 from agent import create_orchestrator_agent, generate_suggested_prompts, SUGGESTED_PROMPT_COUNT, DEFAULT_PROMPTS, initialize_settings as initialize_agent_settings, generate_llm_greeting
-from tools import process_uploaded_file, clear_uploaded_data # Import new functions
+from tools import process_uploaded_file, clear_uploaded_data, get_user_document_tool, clear_user_data_tools # Import new functions/constants from tools
 from dotenv import load_dotenv
 from docx import Document
 from io import BytesIO
 
 load_dotenv()
+
+# --- Streamlit Page Configuration (MUST be the first Streamlit command) ---
+st.set_page_config(
+    page_title="ESI: ESI Scholarly Instructor",
+    page_icon="🎓",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
+st.title("🎓 ESI: ESI Scholarly Instructor")
+st.caption("Your AI partner for brainstorming and structuring your dissertation research")
+# --- End Streamlit Page Configuration ---
+
 
 PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 
@@ -31,6 +45,9 @@ MEMORY_DIR = os.path.join(PROJECT_ROOT, "user_memories")
 UPLOADED_FILES_TEMP_DIR_RELATIVE = "./uploaded_files_temp"
 UPLOADED_FILES_TEMP_DIR = os.path.join(PROJECT_ROOT, UPLOADED_FILES_TEMP_DIR_RELATIVE)
 os.makedirs(UPLOADED_FILES_TEMP_DIR, exist_ok=True)
+
+# Define accepted file types (must match stui.py)
+ACCEPTED_FILE_TYPES = ["sav", "Rdata", "rds", "csv", "xlsx", "pdf", "docx", "md"]
 
 
 @st.cache_resource
@@ -162,7 +179,7 @@ def get_agent_response(query: str, chat_history: List[ChatMessage]) -> str:
         print(f"Modified query with verbosity: {modified_query}")
 
         with st.spinner("ESI is thinking..."):
-            response = agent.chat(modified_query, chat_history=formatted_history)
+            response = agent.chat(modified_query, chat_history=chat_history) # Use passed chat_history
 
         response_text = response.response if hasattr(response, 'response') else str(response)
 
@@ -202,7 +219,8 @@ def create_new_chat_session_in_memory():
     st.session_state.suggested_prompts = DEFAULT_PROMPTS # Reset suggested prompts for new chat
 
     # Clear any uploaded data from previous sessions
-    clear_uploaded_data()
+    clear_uploaded_data() # Clears temp files
+    clear_user_data_tools(st.session_state[AGENT_SESSION_KEY]) # Clears in-memory index and removes tool
     st.session_state.current_uploaded_file_info = [] # Clear UI state for uploaded files
     
     print(f"Created new chat in memory: ID={new_chat_id}, Name='{new_chat_name}' (not yet saved to disk)")
@@ -215,7 +233,8 @@ def switch_chat(chat_id: str):
         return
 
     # Clear any uploaded data from previous sessions/chats
-    clear_uploaded_data()
+    clear_uploaded_data() # Clears temp files
+    clear_user_data_tools(st.session_state[AGENT_SESSION_KEY]) # Clears in-memory index and removes tool
     st.session_state.current_uploaded_file_info = [] # Clear UI state for uploaded files
 
     # Lazy load messages if they are not already loaded
@@ -279,7 +298,8 @@ def delete_chat_session(chat_id: str):
         # If the deleted chat was the current one, switch to another or create a new one
         if is_current_chat:
             # Clear any uploaded data associated with the deleted chat
-            clear_uploaded_data()
+            clear_uploaded_data() # Clears temp files
+            clear_user_data_tools(st.session_state[AGENT_SESSION_KEY]) # Clears in-memory index and removes tool
             st.session_state.current_uploaded_file_info = [] # Clear UI state for uploaded files
 
             if st.session_state.chat_metadata:
@@ -352,6 +372,7 @@ def handle_user_input(chat_input_value: str | None, uploaded_file_info: List[Dic
     Also processes any newly uploaded files.
     """
     prompt_to_process = None
+    agent = st.session_state[AGENT_SESSION_KEY]
 
     # Check for suggested prompt first
     if hasattr(st.session_state, 'prompt_to_use') and st.session_state.prompt_to_use:
@@ -366,11 +387,22 @@ def handle_user_input(chat_input_value: str | None, uploaded_file_info: List[Dic
         for file_info in uploaded_file_info:
             original_name = file_info['original_name']
             temp_path = file_info['temp_path']
+            mime_type = file_info['mime_type']
             
             # Call the file processing function from tools.py
-            processing_result = process_uploaded_file(temp_path, original_name)
-            file_processing_messages.append(f"Processed '{original_name}': {processing_result}")
-            print(f"File processing result for {original_name}: {processing_result}")
+            # This function now returns a tool (for documents) or a message (for datasets)
+            processing_result_or_tool = process_uploaded_file(temp_path, original_name, mime_type)
+            
+            if isinstance(processing_result_or_tool, str):
+                # It's a message (e.g., for datasets moved to workspace)
+                file_processing_messages.append(f"Processed '{original_name}': {processing_result_or_tool}")
+                print(f"File processing result for {original_name}: {processing_result_or_tool}")
+            else:
+                # It's a LlamaIndex tool (for documents added to RAG)
+                new_tool = processing_result_or_tool
+                agent.add_tool(new_tool)
+                file_processing_messages.append(f"Processed '{original_name}': Added to knowledge base for querying.")
+                print(f"Added new tool '{new_tool.metadata.name}' to agent for file '{original_name}'.")
         
         # Add a user message indicating file upload and processing
         file_upload_user_message = "I have uploaded the following files:\n" + "\n".join([f"- {f['original_name']}" for f in uploaded_file_info])

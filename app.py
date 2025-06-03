@@ -8,6 +8,7 @@ from typing import List, Dict, Any
 from llama_index.core.llms import ChatMessage, MessageRole
 import stui
 from agent import create_orchestrator_agent, generate_suggested_prompts, SUGGESTED_PROMPT_COUNT, DEFAULT_PROMPTS, initialize_settings as initialize_agent_settings, generate_llm_greeting
+from tools import process_uploaded_file, clear_uploaded_data # Import new functions
 from dotenv import load_dotenv
 from docx import Document
 from io import BytesIO
@@ -25,6 +26,12 @@ DOWNLOAD_MARKER = "---DOWNLOAD_FILE---"
 RAG_SOURCE_MARKER_PREFIX = "---RAG_SOURCE---"
 
 MEMORY_DIR = os.path.join(PROJECT_ROOT, "user_memories")
+
+# Directory for temporarily uploaded files (must match stui.py and tools.py)
+UPLOADED_FILES_TEMP_DIR_RELATIVE = "./uploaded_files_temp"
+UPLOADED_FILES_TEMP_DIR = os.path.join(PROJECT_ROOT, UPLOADED_FILES_TEMP_DIR_RELATIVE)
+os.makedirs(UPLOADED_FILES_TEMP_DIR, exist_ok=True)
+
 
 @st.cache_resource
 def setup_global_llm_settings():
@@ -143,18 +150,19 @@ def get_agent_response(query: str, chat_history: List[ChatMessage]) -> str:
         current_temperature = st.session_state.get("llm_temperature", 0.7)
         current_verbosity = st.session_state.get("llm_verbosity", 3) # Default to 3 if not found
 
-        if hasattr(agent, 'llm') and hasattr(agent.llm, 'temperature'):
-            actual_llm_instance = agent.llm
-            actual_llm_instance.temperature = current_temperature
+        # The agent object itself might not have a direct 'llm' attribute if it's wrapped.
+        # Access the underlying LLM from Settings.llm which is globally configured.
+        if Settings.llm:
+            Settings.llm.temperature = current_temperature
         else:
-            print(f"Warning: Could not access LLM object within the agent to set temperature. Agent or LLM structure might have changed (agent.llm or agent.llm.temperature not found).")
+            print(f"Warning: Settings.llm not found. Cannot set temperature.")
 
         # Prepend verbosity level to the query
         modified_query = f"Verbosity Level: {current_verbosity}. {query}"
         print(f"Modified query with verbosity: {modified_query}")
 
         with st.spinner("ESI is thinking..."):
-            response = agent.chat(modified_query, chat_history=chat_history)
+            response = agent.chat(modified_query, chat_history=formatted_history)
 
         response_text = response.response if hasattr(response, 'response') else str(response)
 
@@ -170,6 +178,7 @@ def create_new_chat_session_in_memory():
     """
     Creates a new chat session (ID, name, empty messages) in memory (st.session_state)
     and sets it as the current chat. Does NOT save to disk immediately.
+    Also clears any previously uploaded data.
     """
     new_chat_id = str(uuid.uuid4())
     
@@ -190,9 +199,11 @@ def create_new_chat_session_in_memory():
     st.session_state.current_chat_id = new_chat_id
     st.session_state.messages = st.session_state.all_chat_messages[new_chat_id]
     st.session_state.chat_modified = False # New chats are initially unsaved
-    
-    # Removed immediate save_chat_metadata call here.
-    # Metadata will be saved when the first user message is sent in handle_user_input.
+    st.session_state.suggested_prompts = DEFAULT_PROMPTS # Reset suggested prompts for new chat
+
+    # Clear any uploaded data from previous sessions
+    clear_uploaded_data()
+    st.session_state.current_uploaded_file_info = [] # Clear UI state for uploaded files
     
     print(f"Created new chat in memory: ID={new_chat_id}, Name='{new_chat_name}' (not yet saved to disk)")
     return new_chat_id # Return the new chat ID
@@ -202,6 +213,10 @@ def switch_chat(chat_id: str):
     if chat_id not in st.session_state.chat_metadata:
         print(f"Error: Attempted to switch to chat ID '{chat_id}' not found in metadata.")
         return
+
+    # Clear any uploaded data from previous sessions/chats
+    clear_uploaded_data()
+    st.session_state.current_uploaded_file_info = [] # Clear UI state for uploaded files
 
     # Lazy load messages if they are not already loaded
     if st.session_state.all_chat_messages.get(chat_id) is None:
@@ -263,6 +278,10 @@ def delete_chat_session(chat_id: str):
 
         # If the deleted chat was the current one, switch to another or create a new one
         if is_current_chat:
+            # Clear any uploaded data associated with the deleted chat
+            clear_uploaded_data()
+            st.session_state.current_uploaded_file_info = [] # Clear UI state for uploaded files
+
             if st.session_state.chat_metadata:
                 # Switch to the first available chat
                 first_available_chat_id = next(iter(st.session_state.chat_metadata))
@@ -275,6 +294,7 @@ def delete_chat_session(chat_id: str):
                 st.session_state.current_chat_id = None
                 st.session_state.messages = [{"role": "assistant", "content": generate_llm_greeting()}]
                 st.session_state.chat_modified = False
+                st.session_state.suggested_prompts = DEFAULT_PROMPTS # Reset suggested prompts
                 st.rerun() # Rerun to display the new state
         else:
             # If a non-current chat was deleted, just rerun to update the sidebar
@@ -325,18 +345,49 @@ def get_discussion_docx(chat_id: str) -> bytes:
     byte_stream.seek(0) # Rewind to the beginning of the stream
     return byte_stream.getvalue()
 
-def handle_user_input(chat_input_value: str | None):
+def handle_user_input(chat_input_value: str | None, uploaded_file_info: List[Dict[str, Any]]):
     """
     Process user input (either from chat box or suggested prompt)
     and update chat with AI response.
+    Also processes any newly uploaded files.
     """
     prompt_to_process = None
 
+    # Check for suggested prompt first
     if hasattr(st.session_state, 'prompt_to_use') and st.session_state.prompt_to_use:
         prompt_to_process = st.session_state.prompt_to_use
-        st.session_state.prompt_to_use = None
+        st.session_state.prompt_to_use = None # Clear it after use
     elif chat_input_value:
         prompt_to_process = chat_input_value
+
+    # Process uploaded files first, if any
+    if uploaded_file_info:
+        file_processing_messages = []
+        for file_info in uploaded_file_info:
+            original_name = file_info['original_name']
+            temp_path = file_info['temp_path']
+            
+            # Call the file processing function from tools.py
+            processing_result = process_uploaded_file(temp_path, original_name)
+            file_processing_messages.append(f"Processed '{original_name}': {processing_result}")
+            print(f"File processing result for {original_name}: {processing_result}")
+        
+        # Add a user message indicating file upload and processing
+        file_upload_user_message = "I have uploaded the following files:\n" + "\n".join([f"- {f['original_name']}" for f in uploaded_file_info])
+        st.session_state.messages.append({"role": "user", "content": file_upload_user_message})
+        
+        # Add an assistant message confirming processing
+        st.session_state.messages.append({"role": "assistant", "content": "\n".join(file_processing_messages)})
+        
+        # Clear the uploaded file info from session state after processing
+        st.session_state.current_uploaded_file_info = []
+        
+        # If there's no text prompt, just display the file processing messages and rerun
+        if not prompt_to_process:
+            st.session_state.chat_modified = True # Mark as modified for history saving
+            save_chat_history(st.session_state.user_id, st.session_state.current_chat_id, st.session_state.messages)
+            st.rerun()
+            return # Exit if only files were uploaded
 
     if prompt_to_process:
         # If this is the first user message in a new, unsaved chat, mark it as modified
@@ -441,6 +492,8 @@ def main():
         st.session_state.suggested_prompts = DEFAULT_PROMPTS
     if 'renaming_chat_id' not in st.session_state:
         st.session_state.renaming_chat_id = None
+    if 'current_uploaded_file_info' not in st.session_state: # Initialize for uploaded files
+        st.session_state.current_uploaded_file_info = []
 
     # Load user data from disk only if chat_metadata is empty (i.e., first run of a new session)
     # This prevents redundant disk reads on subsequent reruns.
@@ -505,7 +558,7 @@ def main():
                     print(f"Error decoding JSON for current chat {chat_id_to_load} (file: {chat_file}): {e}.")
                     st.session_state.all_chat_messages[chat_id_to_load] = [] # Default to empty
                 except Exception as e:
-                    print(f"An unexpected error occurred while reading current chat file {chat_file}: {e}")
+                    print(f"An unexpected error occurred while reading current chat file {chat_id_to_load}: {e}")
                     st.session_state.all_chat_messages[chat_id_to_load] = [] # Default to empty
             else:
                 print(f"Current chat file {chat_file} not found for chat ID '{chat_id_to_load}'. Setting to empty messages.")
@@ -518,6 +571,7 @@ def main():
     if st.session_state.get("do_regenerate", False):
         handle_regeneration_request()
 
+    # Call the UI creation function, passing the updated handle_user_input_callback
     stui.create_interface(
         reset_callback=reset_chat_callback,
         new_chat_callback=lambda: create_new_chat_session_in_memory() and st.rerun(),
@@ -529,16 +583,22 @@ def main():
         get_discussion_markdown_callback=get_discussion_markdown,
         get_discussion_docx_callback=get_discussion_docx, # Pass the new DOCX callback
         suggested_prompts_list=st.session_state.suggested_prompts,
-        handle_user_input_callback=handle_user_input
+        handle_user_input_callback=handle_user_input # Pass the updated handle_user_input
     )
 
+    # This block ensures that handle_user_input is called only when there's actual input
+    # from the chat box or a pending suggested prompt.
     chat_input_for_handler = st.session_state.get("chat_input_value_from_stui")
-    if "chat_input_value_from_stui" in st.session_state: # Ensure the key exists before deleting
-        del st.session_state.chat_input_value_from_stui # Or set to None: st.session_state.chat_input_value_from_stui = None
-    
-    # Call handle_user_input if there's a chat input or a suggested prompt pending
-    if chat_input_for_handler or st.session_state.get('prompt_to_use'):
-        handle_user_input(chat_input_for_handler)
+    uploaded_file_info_for_handler = st.session_state.get("current_uploaded_file_info", [])
+
+    # Only call handle_user_input if there's a text input OR new files were uploaded
+    if chat_input_for_handler or uploaded_file_info_for_handler:
+        # Clear the input value from session state immediately after retrieving it
+        if "chat_input_value_from_stui" in st.session_state:
+            del st.session_state.chat_input_value_from_stui
+        
+        handle_user_input(chat_input_for_handler, uploaded_file_info_for_handler)
+        # handle_user_input will call st.rerun() if needed
 
 if __name__ == "__main__":
     if not os.getenv("GOOGLE_API_KEY"):

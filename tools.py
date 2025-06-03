@@ -1,5 +1,6 @@
 import os
 import json
+import shutil # Import shutil for directory operations
 
 from llama_index.core.tools import FunctionTool, QueryEngineTool
 from llama_index.core.vector_stores import SimpleVectorStore
@@ -28,6 +29,59 @@ PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 UI_ACCESSIBLE_WORKSPACE_RELATIVE = "./code_interpreter_ws"
 UI_ACCESSIBLE_WORKSPACE = os.path.join(PROJECT_ROOT, UI_ACCESSIBLE_WORKSPACE_RELATIVE)
 os.makedirs(UI_ACCESSIBLE_WORKSPACE, exist_ok=True)
+
+# Directory for temporarily uploaded files (must match app.py and stui.py)
+UPLOADED_FILES_TEMP_DIR_RELATIVE = "./uploaded_files_temp"
+UPLOADED_FILES_TEMP_DIR = os.path.join(PROJECT_ROOT, UPLOADED_FILES_TEMP_DIR_RELATIVE)
+os.makedirs(UPLOADED_FILES_TEMP_DIR, exist_ok=True)
+
+
+# --- New functions for file handling ---
+def process_uploaded_file(temp_file_path: str, original_file_name: str) -> str:
+    """
+    Processes an uploaded file. For now, it just acknowledges the file
+    and deletes the temporary copy. In a real scenario, this would
+    add the file to the RAG index or perform other operations.
+    """
+    print(f"Processing uploaded file: {original_file_name} (temp path: {temp_file_path})")
+    
+    # In a real application, you would add logic here to:
+    # 1. Read the file content (e.g., PDF, DOCX, TXT).
+    # 2. Parse it into documents.
+    # 3. Add these documents to your RAG vector store.
+    # For example:
+    # from llama_index.readers.file import PyMuPDFReader
+    # if original_file_name.lower().endswith(".pdf"):
+    #     loader = PyMuPDFReader()
+    #     documents = loader.load_data(file=Path(temp_file_path))
+    #     # Then add documents to your index
+    #     # index.insert_nodes(documents)
+    #     # Or rebuild/update index if necessary
+
+    # After processing, delete the temporary file
+    try:
+        os.remove(temp_file_path)
+        print(f"Deleted temporary file: {temp_file_path}")
+    except OSError as e:
+        print(f"Error deleting temporary file {temp_file_path}: {e}")
+
+    return f"Successfully received and processed '{original_file_name}'. (Note: Actual RAG indexing for this file type is not yet implemented.)"
+
+def clear_uploaded_data():
+    """
+    Clears all temporary uploaded files from the UPLOADED_FILES_TEMP_DIR.
+    """
+    print(f"Clearing all files from temporary upload directory: {UPLOADED_FILES_TEMP_DIR}")
+    for filename in os.listdir(UPLOADED_FILES_TEMP_DIR):
+        file_path = os.path.join(UPLOADED_FILES_TEMP_DIR, filename)
+        try:
+            if os.path.isfile(file_path) or os.path.islink(file_path):
+                os.unlink(file_path)
+            elif os.path.isdir(file_path):
+                shutil.rmtree(file_path)
+        except Exception as e:
+            print(f"Failed to delete {file_path}. Reason: {e}")
+    print("Temporary uploaded files cleared.")
 
 
 # --- Individual Tool Initializations ---

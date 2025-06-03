@@ -30,6 +30,10 @@ if 'text_to_copy_payload' not in st.session_state:
     st.session_state.text_to_copy_payload = None
 if 'clipboard_triggered_for_id' not in st.session_state:
     st.session_state.clipboard_triggered_for_id = None
+# Initialize session state for temporary uploaded files from sidebar
+if 'temp_uploaded_files_from_sidebar' not in st.session_state:
+    st.session_state.temp_uploaded_files_from_sidebar = None
+
 
 def display_chat():
     """Display the chat messages from the session state, handling file downloads and image display."""
@@ -367,6 +371,21 @@ def create_interface(
                 help="Controls the detail level of the AI's responses. 1 is concise, 5 is very detailed."
             )
 
+        with st.expander("**Upload Files**", expanded=False, icon=":material/upload_file:"):
+            st.info("Upload SPSS (.sav), Rdata (.Rdata, .rds), CSV, XLSX, PDF, DOCX, or Markdown files. These will be added to ESI's knowledge base or workspace.")
+            uploaded_files_raw = st.file_uploader(
+                "Select files to upload",
+                type=ACCEPTED_FILE_TYPES,
+                accept_multiple_files=True,
+                key="sidebar_file_uploader",
+                label_visibility="collapsed",
+                help="Upload SPSS (.sav), Rdata (.Rdata, .rds), CSV, XLSX, PDF, DOCX, or Markdown files."
+            )
+            if uploaded_files_raw:
+                # Store the raw uploaded files in session state for processing outside the sidebar
+                st.session_state.temp_uploaded_files_from_sidebar = uploaded_files_raw
+                st.rerun() # Trigger a rerun to process these files in the main body
+
         with st.expander("**About ESI**", expanded=False, icon = ":material/info:"):
             st.info("ESI uses AI to help you navigate the dissertation process. It has access to some of the literature in your reading lists and also uses search tools for web lookups.")
             st.warning("⚠️  Remember: Always consult your dissertation supervisor for final guidance and decisions.")
@@ -379,8 +398,6 @@ def create_interface(
     }
     """
     st.html(f"<style>{CSS}</style>")
-
-    # Removed st.title and st.caption from here.
 
     display_chat()
     
@@ -395,68 +412,43 @@ def create_interface(
                     st.session_state.prompt_to_use = prompt_text
                     st.rerun()
 
-    # --- Chat Input and File Uploader ---
-    # Use a form for the chat input to allow for a "submit" button and file uploader
-    # within the same logical input area.
+    # --- Chat Input ---
+    # Use a form for the chat input to allow for a "submit" button
     with st.form("chat_form", clear_on_submit=True):
-        chat_input_col, upload_button_col = st.columns([0.9, 0.1])
-        
-        with chat_input_col:
-            user_query = st.text_area(
-                "Your message:",
-                key="chat_input_area",
-                placeholder="Type your message here or drag and drop files...",
-                label_visibility="collapsed",
-                height=100 # Adjust height as needed
-            )
-        
-        with upload_button_col:
-            # Use st.file_uploader directly, it handles the button click and file selection
-            uploaded_files = st.file_uploader(
-                "Upload Files",
-                type=ACCEPTED_FILE_TYPES,
-                accept_multiple_files=True,
-                key="file_uploader",
-                label_visibility="collapsed",
-                help="Upload SPSS (.sav), Rdata (.Rdata, .rds), CSV, XLSX, PDF, DOCX, or Markdown files."
-            )
-            # A submit button is still needed for the form
-            st.form_submit_button("Send", use_container_width=True)
+        user_query = st.text_area(
+            "Your message:",
+            key="chat_input_area",
+            placeholder="Type your message here...", # Removed drag and drop hint
+            label_visibility="collapsed",
+            height=100 # Adjust height as needed
+        )
+        st.form_submit_button("Send", use_container_width=True)
 
-        # Process uploaded files immediately after form submission (or on file change)
-        if uploaded_files:
-            # Store info about uploaded files in session state for app.py to process
-            st.session_state.current_uploaded_file_info = []
-            for uploaded_file in uploaded_files:
-                # Save the file temporarily
-                # Use UPLOADED_FILES_TEMP_DIR for consistency
-                temp_dir = UPLOADED_FILES_TEMP_DIR 
-                os.makedirs(temp_dir, exist_ok=True)
-                temp_file_path = os.path.join(temp_dir, f"{uuid.uuid4()}_{uploaded_file.name}")
-                with open(temp_file_path, "wb") as f:
-                    f.write(uploaded_file.getbuffer())
-                
-                st.session_state.current_uploaded_file_info.append({
-                    "original_name": uploaded_file.name,
-                    "temp_path": temp_file_path,
-                    "mime_type": uploaded_file.type
-                })
+    # --- Process uploaded files from sidebar (triggered by sidebar uploader) ---
+    if st.session_state.temp_uploaded_files_from_sidebar:
+        uploaded_files_to_process = st.session_state.temp_uploaded_files_from_sidebar
+        st.session_state.temp_uploaded_files_from_sidebar = None # Clear it after retrieval
+
+        # Store info about uploaded files in session state for app.py to process
+        st.session_state.current_uploaded_file_info = []
+        for uploaded_file in uploaded_files_to_process:
+            temp_dir = UPLOADED_FILES_TEMP_DIR 
+            os.makedirs(temp_dir, exist_ok=True)
+            temp_file_path = os.path.join(temp_dir, f"{uuid.uuid4()}_{uploaded_file.name}")
+            with open(temp_file_path, "wb") as f:
+                f.write(uploaded_file.getbuffer())
             
-            # Display uploaded file names
-            st.info(f"Uploaded: {', '.join([f.name for f in uploaded_files])}. Processing...")
-            # Trigger rerun to process files via handle_user_input_callback
-            st.session_state.chat_input_value_from_stui = user_query # Pass text input too
-            st.rerun() # Rerun to trigger handle_user_input_callback
+            st.session_state.current_uploaded_file_info.append({
+                "original_name": uploaded_file.name,
+                "temp_path": temp_file_path,
+                "mime_type": uploaded_file.type
+            })
+        
+        # Display uploaded file names in the main area
+        st.info(f"Uploaded: {', '.join([f.name for f in uploaded_files_to_process])}. Processing...")
+        st.rerun() # Trigger rerun to process files via handle_user_input_callback in app.py
 
-        # If the form was submitted with text input (and potentially files)
-        if user_query:
-            st.session_state.chat_input_value_from_stui = user_query
-            st.rerun()
-
-    # Display currently uploaded files (if any, after processing)
-    if st.session_state.get('current_uploaded_file_info'):
-        st.markdown("---")
-        st.subheader("Files Ready for Processing:")
-        for file_info in st.session_state.current_uploaded_file_info:
-            st.write(f"- {file_info['original_name']}")
-        st.info("These files will be processed with your next message or when you click 'Send'.")
+    # If the form was submitted with text input
+    if user_query:
+        st.session_state.chat_input_value_from_stui = user_query
+        st.rerun()

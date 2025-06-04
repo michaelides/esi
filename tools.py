@@ -10,7 +10,8 @@ from llama_index.tools.tavily_research import TavilyToolSpec
 from llama_index.tools.duckduckgo import DuckDuckGoSearchToolSpec
 from llama_index.core import VectorStoreIndex, StorageContext, load_index_from_storage
 from llama_index.core import Settings
-from llama_index.tools.code_interpreter import CodeInterpreterToolSpec, CodeInterpreter # Import CodeInterpreter
+# Removed CodeInterpreter from import as it's no longer directly exposed
+from llama_index.tools.code_interpreter import CodeInterpreterToolSpec 
 from huggingface_hub import HfFileSystem
 
 # --- Hugging Face RAG Configuration ---
@@ -230,11 +231,12 @@ def get_coder_tools():
     Returns the original tool spec's tool list.
     """
     try:
-        # Instantiate CodeInterpreterToolSpec without arguments as per error message
+        # Instantiate CodeInterpreterToolSpec without arguments
         code_spec = CodeInterpreterToolSpec()
 
         # Access the underlying CodeInterpreter instance and set its work_dir
-        if hasattr(code_spec, '_code_interpreter') and isinstance(code_spec._code_interpreter, CodeInterpreter):
+        # Removed isinstance check as CodeInterpreter is no longer directly importable
+        if hasattr(code_spec, '_code_interpreter') and hasattr(code_spec._code_interpreter, 'work_dir'):
             code_spec._code_interpreter.work_dir = UI_ACCESSIBLE_WORKSPACE
             print(f"Code interpreter work_dir set to: {code_spec._code_interpreter.work_dir}")
         else:

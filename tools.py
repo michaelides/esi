@@ -10,7 +10,7 @@ from llama_index.tools.tavily_research import TavilyToolSpec
 from llama_index.tools.duckduckgo import DuckDuckGoSearchToolSpec
 from llama_index.core import VectorStoreIndex, StorageContext, load_index_from_storage
 from llama_index.core import Settings
-from llama_index.tools.code_interpreter import CodeInterpreterToolSpec
+from llama_index.tools.code_interpreter import CodeInterpreterToolSpec, CodeInterpreter # Import CodeInterpreter
 from huggingface_hub import HfFileSystem
 
 # --- Hugging Face RAG Configuration ---
@@ -230,18 +230,15 @@ def get_coder_tools():
     Returns the original tool spec's tool list.
     """
     try:
-        # Pass the UI_ACCESSIBLE_WORKSPACE to the CodeInterpreterToolSpec
-        code_spec = CodeInterpreterToolSpec(code_interpreter_kwargs={"work_dir": UI_ACCESSIBLE_WORKSPACE})
+        # Instantiate CodeInterpreterToolSpec without arguments as per error message
+        code_spec = CodeInterpreterToolSpec()
 
-        # The work_dir is now set during initialization via code_interpreter_kwargs
-        # The following block is mostly for verification/debugging
-        if hasattr(code_spec, 'code_interpreter') and code_spec.code_interpreter is not None:
-            if hasattr(code_spec.code_interpreter, 'work_dir'):
-                print(f"Code interpreter work_dir is set to: {getattr(code_spec.code_interpreter, 'work_dir', 'N/A')}")
-            else:
-                print("Warning: code_spec.code_interpreter does not have a 'work_dir' attribute after initialization.")
+        # Access the underlying CodeInterpreter instance and set its work_dir
+        if hasattr(code_spec, '_code_interpreter') and isinstance(code_spec._code_interpreter, CodeInterpreter):
+            code_spec._code_interpreter.work_dir = UI_ACCESSIBLE_WORKSPACE
+            print(f"Code interpreter work_dir set to: {code_spec._code_interpreter.work_dir}")
         else:
-            print("Warning: code_spec.code_interpreter is not available. Files may be saved to a temporary location.")
+            print("Warning: Could not access or set work_dir on CodeInterpreter instance. Files may be saved to a temporary location.")
 
         original_tools = code_spec.to_tool_list()
 

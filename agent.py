@@ -165,8 +165,8 @@ Never use the word "Ah". "Ah" is prohibited.
 DEFAULT_PROMPTS = [
     "Help me brainstorm ideas.",
     "I need to develop my research questions.",
-    "I have my topic but I need help with developing hypotheses.",
-    "I have my hypotheses but I am need help to design the study.",
+    "I have my topic and I need help with developing hypotheses.",
+    "I have my hypotheses and I need help to design the study.",
     "Can you help me design my qualitative study?" 
 ]
 

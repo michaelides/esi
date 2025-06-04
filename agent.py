@@ -4,7 +4,7 @@ from llama_index.llms.gemini import Gemini
 from llama_index.embeddings.google_genai import GoogleGenAIEmbedding
 from llama_index.core.agent import AgentRunner, FunctionCallingAgentWorker
 from typing import Any, List, Dict
-from llama_index.core.tools import FunctionTool
+from llama_index.core.tools import FunctionTool # Ensure FunctionTool is imported
 from llama_index.core.llms import LLM # Import base LLM type for type hinting
 
 from tools import (
@@ -73,16 +73,21 @@ def generate_llm_greeting() -> str:
 
 
 # --- Comprehensive Agent Definition ---
-def create_orchestrator_agent() -> AgentRunner:
+def create_orchestrator_agent(dynamic_tools: List[FunctionTool] = None) -> AgentRunner:
     """
     Creates a single comprehensive agent that has access to all specialized tools.
     This agent will act as the primary interface, leveraging various tools as needed.
+    
+    Args:
+        dynamic_tools (List[FunctionTool], optional): A list of FunctionTool instances
+            to be added to the agent's available tools. These are typically created
+            dynamically based on user session (e.g., uploaded files). Defaults to None.
     """
     initialize_settings() # Ensure LLM settings are initialized
 
     print("Initializing all tools for the comprehensive agent...")
 
-    # Initialize all tools
+    # Initialize all static tools
     search_tools = get_search_tools()
     lit_reviewer_tool = get_semantic_scholar_tool_for_agent() # This returns a single FunctionTool
     web_scraper_tool = get_web_scraper_tool_for_agent() # This returns a single FunctionTool
@@ -101,6 +106,10 @@ def create_orchestrator_agent() -> AgentRunner:
         all_tools.append(rag_tool)
     if coder_tools:
         all_tools.extend(coder_tools)
+    
+    # Add dynamic tools if provided
+    if dynamic_tools:
+        all_tools.extend(dynamic_tools)
 
     if not all_tools:
         raise RuntimeError("No tools could be initialized for the comprehensive agent. Agent cannot function.")
@@ -130,6 +139,8 @@ You have access to the following tools:
 *   **Web Scraper Tool**: To fetch the textual content of a specific webpage URL.
 *   **RAG Tool (rag_dissertation_retriever)**: For queries about specific institutional knowledge, previously saved research, or topics likely covered in the local dissertation knowledge base. Use this first for university-specific questions.
 *   **Coder Tool (code_interpreter)**: To write and execute Python code for tasks like data analysis, plotting, complex calculations, or file generation.
+*   **read_uploaded_document**: Reads the full text content of a document previously uploaded by the user.
+*   **analyze_uploaded_dataframe**: Provides summary information about a pandas DataFrame previously uploaded by the user.
 
 Your process:
 1.  Analyze the user's query carefully.

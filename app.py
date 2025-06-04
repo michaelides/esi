@@ -11,6 +11,10 @@ from agent import create_orchestrator_agent, generate_suggested_prompts, SUGGEST
 from dotenv import load_dotenv
 from docx import Document
 from io import BytesIO
+import pandas as pd
+from PyPDF2 import PdfReader
+import io # Import io module for BytesIO
+from llama_index.core.tools import FunctionTool # Import FunctionTool
 
 load_dotenv()
 
@@ -26,6 +30,9 @@ RAG_SOURCE_MARKER_PREFIX = "---RAG_SOURCE---"
 
 MEMORY_DIR = os.path.join(PROJECT_ROOT, "user_memories")
 
+# Import UI_ACCESSIBLE_WORKSPACE from tools.py
+from tools import UI_ACCESSIBLE_WORKSPACE
+
 @st.cache_resource
 def setup_global_llm_settings():
     """Initializes global LLM settings using st.cache_resource to run only once."""
@@ -37,12 +44,61 @@ def setup_global_llm_settings():
         st.error(f"Fatal Error: Could not initialize LLM settings. {e}")
         st.stop()
 
+# Define dynamic tool functions that can access st.session_state
+def read_uploaded_document_tool_fn(filename: str) -> str:
+    """Reads the full text content of a document previously uploaded by the user.
+    Input is the exact filename (e.g., 'my_dissertation.pdf')."""
+    if "uploaded_documents" not in st.session_state or filename not in st.session_state.uploaded_documents:
+        return f"Error: Document '{filename}' not found in uploaded documents. Available documents: {list(st.session_state.uploaded_documents.keys())}"
+    return st.session_state.uploaded_documents[filename]
+
+def analyze_dataframe_tool_fn(filename: str, head_rows: int = 5) -> str:
+    """Provides summary information (shape, columns, dtypes, head, describe) about a pandas DataFrame
+    previously uploaded by the user. Input is the exact filename (e.g., 'my_data.csv').
+    For more complex analysis, use the 'code_interpreter' tool."""
+    if "uploaded_dataframes" not in st.session_state or filename not in st.session_state.uploaded_dataframes:
+        return f"Error: DataFrame '{filename}' not found in uploaded dataframes. Available dataframes: {list(st.session_state.uploaded_dataframes.keys())}"
+    
+    df = st.session_state.uploaded_dataframes[filename]
+    
+    info_str = f"DataFrame: {filename}\n"
+    info_str += f"Shape: {df.shape}\n"
+    info_str += f"Columns: {', '.join(df.columns)}\n"
+    info_str += f"Data Types:\n{df.dtypes.to_string()}\n"
+    
+    # Ensure head_rows is not negative and not too large
+    head_rows = max(0, min(head_rows, len(df)))
+    if head_rows > 0:
+        info_str += f"First {head_rows} rows:\n{df.head(head_rows).to_string()}\n"
+    else:
+        info_str += "No head rows requested or available.\n"
+
+    info_str += f"Summary Statistics:\n{df.describe().to_string()}\n"
+    
+    return info_str
+
 @st.cache_resource
 def setup_agent():
     """Initializes the orchestrator agent using st.cache_resource to run only once."""
     print("Initializing orchestrator agent (cached)...")
     try:
-        agent_instance = create_orchestrator_agent()
+        # Create dynamic tools here, passing the functions defined above
+        uploaded_doc_reader_tool = FunctionTool.from_defaults(
+            fn=read_uploaded_document_tool_fn,
+            name="read_uploaded_document",
+            description="Reads the full text content of a document previously uploaded by the user. Input is the exact filename (e.g., 'my_dissertation.pdf'). Use this to answer questions about the content of uploaded documents."
+        )
+        
+        dataframe_analyzer_tool = FunctionTool.from_defaults(
+            fn=analyze_dataframe_tool_fn,
+            name="analyze_uploaded_dataframe",
+            description="Provides summary information (shape, columns, dtypes, head, describe) about a pandas DataFrame previously uploaded by the user. Input is the exact filename (e.g., 'my_data.csv'). Use this to understand the structure and basic statistics of uploaded datasets. For more complex analysis, use the 'code_interpreter' tool."
+        )
+
+        # Pass these dynamic tools to the agent creation function
+        agent_instance = create_orchestrator_agent(
+            dynamic_tools=[uploaded_doc_reader_tool, dataframe_analyzer_tool]
+        )
         print("Orchestrator agent object initialized (cached) successfully.")
         return agent_instance
     except Exception as e:
@@ -154,7 +210,7 @@ def get_agent_response(query: str, chat_history: List[ChatMessage]) -> str:
         print(f"Modified query with verbosity: {modified_query}")
 
         with st.spinner("ESI is thinking..."):
-            response = agent.chat(modified_query, chat_history=chat_history)
+            response = agent.chat(modified_query, chat_history=formatted_history) # Use formatted_history here
 
         response_text = response.response if hasattr(response, 'response') else str(response)
 
@@ -223,6 +279,7 @@ def switch_chat(chat_id: str):
         else:
             print(f"Chat file {chat_file} not found for chat ID '{chat_id}'. Setting to empty messages.")
             st.session_state.all_chat_messages[chat_id] = [] # Set to empty list if file not found
+
 
     st.session_state.current_chat_id = chat_id
     st.session_state.messages = st.session_state.all_chat_messages[chat_id]
@@ -325,6 +382,63 @@ def get_discussion_docx(chat_id: str) -> bytes:
     byte_stream.seek(0) # Rewind to the beginning of the stream
     return byte_stream.getvalue()
 
+def process_uploaded_file(uploaded_file):
+    file_name = uploaded_file.name
+    file_extension = os.path.splitext(file_name)[1].lower()
+
+    if file_extension in [".pdf", ".docx", ".md"]:
+        text_content = ""
+        try:
+            if file_extension == ".pdf":
+                reader = PdfReader(io.BytesIO(uploaded_file.getvalue()))
+                for page in reader.pages:
+                    text_content += page.extract_text() or ""
+            elif file_extension == ".docx":
+                document = Document(io.BytesIO(uploaded_file.getvalue()))
+                for para in document.paragraphs:
+                    text_content += para.text + "\n"
+            elif file_extension == ".md":
+                text_content = uploaded_file.getvalue().decode("utf-8")
+            
+            st.session_state.uploaded_documents[file_name] = text_content
+            st.success(f"Document '{file_name}' uploaded and processed.")
+            return "document", file_name
+        except Exception as e:
+            st.error(f"Error processing document '{file_name}': {e}")
+            return None, None
+    
+    elif file_extension in [".csv", ".xlsx", ".sav"]:
+        df = None
+        try:
+            if file_extension == ".csv":
+                df = pd.read_csv(uploaded_file)
+            elif file_extension == ".xlsx":
+                df = pd.read_excel(uploaded_file)
+            elif file_extension == ".sav":
+                # pandas.read_spss requires pyreadstat
+                df = pd.read_spss(io.BytesIO(uploaded_file.getvalue()))
+            
+            if df is not None:
+                # Save DataFrame to a temporary CSV in the workspace for code interpreter access
+                # Sanitize filename for file system
+                safe_file_name = re.sub(r'[^\w\s.-]', '', file_name).replace(' ', '_') 
+                csv_path = os.path.join(UI_ACCESSIBLE_WORKSPACE, f"{os.path.splitext(safe_file_name)[0]}.csv")
+                df.to_csv(csv_path, index=False)
+                
+                st.session_state.uploaded_dataframes[file_name] = df
+                st.success(f"Dataset '{file_name}' uploaded, processed, and saved to workspace as '{os.path.basename(csv_path)}'.")
+                return "dataframe", file_name
+        except Exception as e:
+            st.error(f"Error processing dataset '{file_name}': {e}")
+            return None, None
+    
+    elif file_extension in [".rdata", ".rds"]:
+        st.warning(f"File type '{file_extension}' for '{file_name}' is not directly supported for processing in Python. Please convert it to CSV or XLSX.")
+        return None, None
+    else:
+        st.warning(f"Unsupported file type: {file_extension} for '{file_name}'.")
+        return None, None
+
 def handle_user_input(chat_input_value: str | None):
     """
     Process user input (either from chat box or suggested prompt)
@@ -422,6 +536,12 @@ def main():
     if "user_id" not in st.session_state:
         st.session_state.user_id = get_cached_user_id()
     
+    # Initialize session state for uploaded files
+    if "uploaded_documents" not in st.session_state:
+        st.session_state.uploaded_documents = {}
+    if "uploaded_dataframes" not in st.session_state:
+        st.session_state.uploaded_dataframes = {}
+
     if AGENT_SESSION_KEY not in st.session_state:
         st.session_state[AGENT_SESSION_KEY] = setup_agent()
 
@@ -474,7 +594,7 @@ def main():
                         print(f"Error decoding JSON for initial chat {first_available_chat_id} (file: {chat_file}): {e}.")
                         st.session_state.all_chat_messages[first_available_chat_id] = [] # Default to empty
                     except Exception as e:
-                        print(f"An unexpected error occurred while reading initial chat file {chat_file}: {e}")
+                        print(f"An unexpected error occurred while reading initial chat file {first_available_chat_id}: {e}")
                         st.session_state.all_chat_messages[first_available_chat_id] = [] # Default to empty
                 else:
                     print(f"Initial chat file {chat_file} not found for chat ID '{first_available_chat_id}'. Setting to empty messages.")
@@ -505,7 +625,7 @@ def main():
                     print(f"Error decoding JSON for current chat {chat_id_to_load} (file: {chat_file}): {e}.")
                     st.session_state.all_chat_messages[chat_id_to_load] = [] # Default to empty
                 except Exception as e:
-                    print(f"An unexpected error occurred while reading current chat file {chat_file}: {e}")
+                    print(f"An unexpected error occurred while reading current chat file {chat_id_to_load}: {e}")
                     st.session_state.all_chat_messages[chat_id_to_load] = [] # Default to empty
             else:
                 print(f"Current chat file {chat_file} not found for chat ID '{chat_id_to_load}'. Setting to empty messages.")
@@ -517,6 +637,40 @@ def main():
 
     if st.session_state.get("do_regenerate", False):
         handle_regeneration_request()
+
+    # --- File Upload Section in Sidebar ---
+    with st.sidebar:
+        st.subheader("Upload Files")
+        uploaded_file = st.file_uploader(
+            "Upload a document or dataset",
+            type=["pdf", "docx", "md", "csv", "xlsx", "sav", "rdata", "rds"],
+            accept_multiple_files=False,
+            key="file_uploader"
+        )
+
+        if uploaded_file is not None:
+            # Check if the file has already been processed in this session
+            if uploaded_file.name not in st.session_state.uploaded_documents and \
+               uploaded_file.name not in st.session_state.uploaded_dataframes:
+                process_uploaded_file(uploaded_file)
+            else:
+                st.info(f"File '{uploaded_file.name}' has already been uploaded and processed.")
+        
+        st.subheader("Uploaded Files")
+        if st.session_state.uploaded_documents or st.session_state.uploaded_dataframes:
+            st.markdown("---")
+            if st.session_state.uploaded_documents:
+                st.markdown("##### Documents:")
+                for doc_name in st.session_state.uploaded_documents.keys():
+                    st.write(f"- 📄 {doc_name}")
+            if st.session_state.uploaded_dataframes:
+                st.markdown("##### Datasets:")
+                for df_name in st.session_state.uploaded_dataframes.keys():
+                    st.write(f"- 📊 {df_name}")
+            st.markdown("---")
+        else:
+            st.info("No files uploaded yet.")
+
 
     stui.create_interface(
         reset_callback=reset_chat_callback,

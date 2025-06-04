@@ -230,17 +230,18 @@ def get_coder_tools():
     Returns the original tool spec's tool list.
     """
     try:
-        code_spec = CodeInterpreterToolSpec()
+        # Pass the UI_ACCESSIBLE_WORKSPACE to the CodeInterpreterToolSpec
+        code_spec = CodeInterpreterToolSpec(code_interpreter_kwargs={"work_dir": UI_ACCESSIBLE_WORKSPACE})
 
+        # The work_dir is now set during initialization via code_interpreter_kwargs
+        # The following block is mostly for verification/debugging
         if hasattr(code_spec, 'code_interpreter') and code_spec.code_interpreter is not None:
             if hasattr(code_spec.code_interpreter, 'work_dir'):
-                print(f"Attempting to set work_dir for code_interpreter to: {UI_ACCESSIBLE_WORKSPACE}")
-                code_spec.code_interpreter.work_dir = UI_ACCESSIBLE_WORKSPACE
-                print(f"Code interpreter work_dir is now: {getattr(code_spec.code_interpreter, 'work_dir', 'N/A')}")
+                print(f"Code interpreter work_dir is set to: {getattr(code_spec.code_interpreter, 'work_dir', 'N/A')}")
             else:
-                print("Warning: code_spec.code_interpreter does not have a 'work_dir' attribute.")
+                print("Warning: code_spec.code_interpreter does not have a 'work_dir' attribute after initialization.")
         else:
-            print("Warning: code_spec.code_interpreter is not available. Cannot set work_dir. Files may be saved to a temporary location.")
+            print("Warning: code_spec.code_interpreter is not available. Files may be saved to a temporary location.")
 
         original_tools = code_spec.to_tool_list()
 
@@ -250,7 +251,6 @@ def get_coder_tools():
 
         print(f"Initialized Code Interpreter Tool(s) for Coder Agent: {[t.metadata.name for t in original_tools]}")
         return original_tools
-
     except Exception as e:
         print(f"Error initializing Code Interpreter Tool for Coder Agent: {e}. Code execution will be unavailable.")
         return []

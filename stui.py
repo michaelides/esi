@@ -5,7 +5,14 @@ import json
 from typing import List, Dict, Any, Optional, Callable
 import html # Import html for escaping HTML content
 import pandas as pd
+from PyPDF2 import PdfReader # Added for PDF processing in stui.py
+from docx import Document # Added for DOCX processing in stui.py
+import io # Added for BytesIO in stui.py
+
 PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
+
+# Import UI_ACCESSIBLE_WORKSPACE from tools.py
+from tools import UI_ACCESSIBLE_WORKSPACE
 
 # Initialize session state for clipboard functionality
 if 'text_to_copy_payload' not in st.session_state:
@@ -25,9 +32,8 @@ def display_chat():
     CODE_DOWNLOAD_MARKER = "---DOWNLOAD_FILE---"
     RAG_SOURCE_MARKER = "---RAG_SOURCE---"
     
-    CODE_WORKSPACE_RELATIVE = "./code_interpreter_ws"
-    code_workspace_absolute = os.path.join(PROJECT_ROOT, CODE_WORKSPACE_RELATIVE)
-    os.makedirs(code_workspace_absolute, exist_ok=True)
+    # Use the imported UI_ACCESSIBLE_WORKSPACE directly
+    os.makedirs(UI_ACCESSIBLE_WORKSPACE, exist_ok=True)
 
     for msg_idx, message in enumerate(st.session_state.messages):
         with st.chat_message(message["role"]):
@@ -72,7 +78,8 @@ def display_chat():
                     
                     print(f"Found code download marker. Filename: {extracted_filename}")
                     code_download_filename = extracted_filename
-                    code_download_filepath_relative = os.path.join(CODE_WORKSPACE_RELATIVE, extracted_filename)
+                    # Use UI_ACCESSIBLE_WORKSPACE for relative path construction
+                    code_download_filepath_relative = os.path.relpath(os.path.join(UI_ACCESSIBLE_WORKSPACE, extracted_filename), PROJECT_ROOT)
 
                     code_download_filepath_absolute = os.path.join(PROJECT_ROOT, code_download_filepath_relative)
 
@@ -245,7 +252,19 @@ def process_uploaded_file(uploaded_file):
     file_name = uploaded_file.name
     file_extension = os.path.splitext(file_name)[1].lower()
 
-    if file_extension in [".pdf", ".docx", ".md"]:
+    # Save the raw file to the UI_ACCESSIBLE_WORKSPACE first
+    try:
+        os.makedirs(UI_ACCESSIBLE_WORKSPACE, exist_ok=True)
+        file_path_in_workspace = os.path.join(UI_ACCESSIBLE_WORKSPACE, file_name)
+        with open(file_path_in_workspace, "wb") as f:
+            f.write(uploaded_file.getbuffer())
+        st.success(f"File '{file_name}' saved to workspace.")
+    except Exception as e:
+        st.error(f"Error saving file '{file_name}' to workspace: {e}")
+        return None, None # Indicate failure
+
+    # Now, process the file content and store in session state for agent tools
+    if file_extension in [".pdf", ".docx", ".md", ".txt"]: # Added .txt
         text_content = ""
         try:
             if file_extension == ".pdf":
@@ -256,14 +275,14 @@ def process_uploaded_file(uploaded_file):
                 document = Document(io.BytesIO(uploaded_file.getvalue()))
                 for para in document.paragraphs:
                     text_content += para.text + "\n"
-            elif file_extension == ".md":
+            elif file_extension in [".md", ".txt"]: # Handle .md and .txt as plain text
                 text_content = uploaded_file.getvalue().decode("utf-8")
             
             st.session_state.uploaded_documents[file_name] = text_content
-            st.success(f"Document '{file_name}' uploaded and processed.")
+            st.success(f"Document '{file_name}' processed for agent access.")
             return "document", file_name
         except Exception as e:
-            st.error(f"Error processing document '{file_name}': {e}")
+            st.error(f"Error processing document '{file_file_name}' for agent access: {e}")
             return None, None
     
     elif file_extension in [".csv", ".xlsx", ".sav"]:
@@ -275,27 +294,28 @@ def process_uploaded_file(uploaded_file):
                 df = pd.read_excel(uploaded_file)
             elif file_extension == ".sav":
                 # pandas.read_spss requires pyreadstat
-                df = pd.read_spss(io.BytesIO(uploaded_file.getvalue()))
+                try:
+                    df = pd.read_spss(io.BytesIO(uploaded_file.getvalue()))
+                except ImportError:
+                    st.error("`pyreadstat` library not found. Please install it (`pip install pyreadstat`) to read .sav files.")
+                    return None, None
             
             if df is not None:
-                # Save DataFrame to a temporary CSV in the workspace for code interpreter access
-                # Sanitize filename for file system
-                safe_file_name = re.sub(r'[^\w\s.-]', '', file_name).replace(' ', '_') 
-                csv_path = os.path.join(UI_ACCESSIBLE_WORKSPACE, f"{os.path.splitext(safe_file_name)[0]}.csv")
-                df.to_csv(csv_path, index=False)
-                
                 st.session_state.uploaded_dataframes[file_name] = df
-                st.success(f"Dataset '{file_name}' uploaded, processed, and saved to workspace as '{os.path.basename(csv_path)}'.")
+                st.success(f"Dataset '{file_name}' processed for agent access.")
                 return "dataframe", file_name
+            else:
+                st.error(f"Could not load dataframe from '{file_name}'.")
+                return None, None
         except Exception as e:
-            st.error(f"Error processing dataset '{file_name}': {e}")
+            st.error(f"Error processing dataset '{file_name}' for agent access: {e}")
             return None, None
     
     elif file_extension in [".rdata", ".rds"]:
         st.warning(f"File type '{file_extension}' for '{file_name}' is not directly supported for processing in Python. Please convert it to CSV or XLSX.")
         return None, None
     else:
-        st.warning(f"Unsupported file type: {file_extension} for '{file_name}'.")
+        st.warning(f"Unsupported file type: {file_extension} for '{file_name}'. File saved to workspace but not processed for agent tools.")
         return None, None
 
 def create_interface(
@@ -392,7 +412,7 @@ def create_interface(
         with st.expander("**Upload files**", expanded=False, icon = ":material/tune:"):
             uploaded_file = st.file_uploader(
                 "Upload a document or dataset",
-                type=["pdf", "docx", "md", "csv", "xlsx", "sav", "rdata", "rds"],
+                type=["pdf", "docx", "md", "txt", "csv", "xlsx", "sav", "rdata", "rds"], # Added .txt
                 accept_multiple_files=False,
                 key="file_uploader"
             )
@@ -401,7 +421,14 @@ def create_interface(
                 # Check if the file has already been processed in this session
                 if uploaded_file.name not in st.session_state.uploaded_documents and \
                 uploaded_file.name not in st.session_state.uploaded_dataframes:
-                    process_uploaded_file(uploaded_file)
+                    file_type, file_name = process_uploaded_file(uploaded_file)
+                    if file_name:
+                        # Add a message to the chat history about the upload
+                        if file_type == "document":
+                            st.session_state.messages.append({"role": "assistant", "content": f"I've received your document: `{file_name}`. You can now ask me to `read_uploaded_document('{file_name}')`."})
+                        elif file_type == "dataframe":
+                            st.session_state.messages.append({"role": "assistant", "content": f"I've received your dataset: `{file_name}`. You can now ask me to `analyze_uploaded_dataframe('{file_name}')` or use the `code_interpreter` tool for more complex analysis."})
+                        st.rerun() # Rerun to display the new assistant message
                 else:
                     st.info(f"File '{uploaded_file.name}' has already been uploaded and processed.")
             

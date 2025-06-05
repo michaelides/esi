@@ -209,7 +209,7 @@ def display_chat():
                     key=f"copy_btn_{msg_idx}",
                     help="Copy message to clipboard",
                     on_click=_copy_button_callback,
-                    args=(text_to_display, msg_idx)
+                    args=(text_to_copy_js, msg_idx) # Use text_to_display here
                 )
             
             # JS injection for clipboard based on session state
@@ -282,7 +282,8 @@ def process_uploaded_file(uploaded_file):
             st.success(f"Document '{file_name}' processed for agent access.")
             return "document", file_name
         except Exception as e:
-            st.error(f"Error processing document '{file_file_name}' for agent access: {e}")
+            # Corrected typo from file_file_name to file_name
+            st.error(f"Error processing document '{file_name}' for agent access: {e}")
             return None, None
     
     elif file_extension in [".csv", ".xlsx", ".sav"]:

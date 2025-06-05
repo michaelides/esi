@@ -11,7 +11,7 @@ from agent import create_orchestrator_agent, generate_suggested_prompts, SUGGEST
 from dotenv import load_dotenv
 from docx import Document
 from io import BytesIO
-import pandas as pd
+
 from PyPDF2 import PdfReader
 import io # Import io module for BytesIO
 from llama_index.core.tools import FunctionTool # Import FunctionTool
@@ -384,63 +384,6 @@ def get_discussion_docx(chat_id: str) -> bytes:
     byte_stream.seek(0) # Rewind to the beginning of the stream
     return byte_stream.getvalue()
 
-def process_uploaded_file(uploaded_file):
-    file_name = uploaded_file.name
-    file_extension = os.path.splitext(file_name)[1].lower()
-
-    if file_extension in [".pdf", ".docx", ".md"]:
-        text_content = ""
-        try:
-            if file_extension == ".pdf":
-                reader = PdfReader(io.BytesIO(uploaded_file.getvalue()))
-                for page in reader.pages:
-                    text_content += page.extract_text() or ""
-            elif file_extension == ".docx":
-                document = Document(io.BytesIO(uploaded_file.getvalue()))
-                for para in document.paragraphs:
-                    text_content += para.text + "\n"
-            elif file_extension == ".md":
-                text_content = uploaded_file.getvalue().decode("utf-8")
-            
-            st.session_state.uploaded_documents[file_name] = text_content
-            st.success(f"Document '{file_name}' uploaded and processed.")
-            return "document", file_name
-        except Exception as e:
-            st.error(f"Error processing document '{file_name}': {e}")
-            return None, None
-    
-    elif file_extension in [".csv", ".xlsx", ".sav"]:
-        df = None
-        try:
-            if file_extension == ".csv":
-                df = pd.read_csv(uploaded_file)
-            elif file_extension == ".xlsx":
-                df = pd.read_excel(uploaded_file)
-            elif file_extension == ".sav":
-                # pandas.read_spss requires pyreadstat
-                df = pd.read_spss(io.BytesIO(uploaded_file.getvalue()))
-            
-            if df is not None:
-                # Save DataFrame to a temporary CSV in the workspace for code interpreter access
-                # Sanitize filename for file system
-                safe_file_name = re.sub(r'[^\w\s.-]', '', file_name).replace(' ', '_') 
-                csv_path = os.path.join(UI_ACCESSIBLE_WORKSPACE, f"{os.path.splitext(safe_file_name)[0]}.csv")
-                df.to_csv(csv_path, index=False)
-                
-                st.session_state.uploaded_dataframes[file_name] = df
-                st.success(f"Dataset '{file_name}' uploaded, processed, and saved to workspace as '{os.path.basename(csv_path)}'.")
-                return "dataframe", file_name
-        except Exception as e:
-            st.error(f"Error processing dataset '{file_name}': {e}")
-            return None, None
-    
-    elif file_extension in [".rdata", ".rds"]:
-        st.warning(f"File type '{file_extension}' for '{file_name}' is not directly supported for processing in Python. Please convert it to CSV or XLSX.")
-        return None, None
-    else:
-        st.warning(f"Unsupported file type: {file_extension} for '{file_name}'.")
-        return None, None
-
 def handle_user_input(chat_input_value: str | None):
     """
     Process user input (either from chat box or suggested prompt)
@@ -641,37 +584,7 @@ def main():
         handle_regeneration_request()
 
     # --- File Upload Section in Sidebar ---
-    with st.sidebar:
-        st.subheader("Upload Files")
-        uploaded_file = st.file_uploader(
-            "Upload a document or dataset",
-            type=["pdf", "docx", "md", "csv", "xlsx", "sav", "rdata", "rds"],
-            accept_multiple_files=False,
-            key="file_uploader"
-        )
 
-        if uploaded_file is not None:
-            # Check if the file has already been processed in this session
-            if uploaded_file.name not in st.session_state.uploaded_documents and \
-               uploaded_file.name not in st.session_state.uploaded_dataframes:
-                process_uploaded_file(uploaded_file)
-            else:
-                st.info(f"File '{uploaded_file.name}' has already been uploaded and processed.")
-        
-        st.subheader("Uploaded Files")
-        if st.session_state.uploaded_documents or st.session_state.uploaded_dataframes:
-            st.markdown("---")
-            if st.session_state.uploaded_documents:
-                st.markdown("##### Documents:")
-                for doc_name in st.session_state.uploaded_documents.keys():
-                    st.write(f"- 📄 {doc_name}")
-            if st.session_state.uploaded_dataframes:
-                st.markdown("##### Datasets:")
-                for df_name in st.session_state.uploaded_dataframes.keys():
-                    st.write(f"- 📊 {df_name}")
-            st.markdown("---")
-        else:
-            st.info("No files uploaded yet.")
 
 
     stui.create_interface(

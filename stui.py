@@ -209,7 +209,7 @@ def display_chat():
                     key=f"copy_btn_{msg_idx}",
                     help="Copy message to clipboard",
                     on_click=_copy_button_callback,
-                    args=(text_to_copy_js, msg_idx) # Use text_to_display here
+                    args=(text_to_display, msg_idx) # Corrected: Use text_to_display here
                 )
             
             # JS injection for clipboard based on session state

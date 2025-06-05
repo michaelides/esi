@@ -231,16 +231,10 @@ def get_coder_tools():
     Returns the original tool spec's tool list.
     """
     try:
-        # Instantiate CodeInterpreterToolSpec without arguments
-        code_spec = CodeInterpreterToolSpec()
-
-        # Access the underlying CodeInterpreter instance and set its work_dir
-        # Removed isinstance check as CodeInterpreter is no longer directly importable
-        if hasattr(code_spec, '_code_interpreter') and hasattr(code_spec._code_interpreter, 'work_dir'):
-            code_spec._code_interpreter.work_dir = UI_ACCESSIBLE_WORKSPACE
-            print(f"Code interpreter work_dir set to: {code_spec._code_interpreter.work_dir}")
-        else:
-            print("Warning: Could not access or set work_dir on CodeInterpreter instance. Files may be saved to a temporary location.")
+        # Pass work_dir directly during initialization
+        code_spec = CodeInterpreterToolSpec(
+            code_interpreter_kwargs={"work_dir": UI_ACCESSIBLE_WORKSPACE}
+        )
 
         original_tools = code_spec.to_tool_list()
 

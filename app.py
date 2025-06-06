@@ -33,6 +33,9 @@ MEMORY_DIR = os.path.join(PROJECT_ROOT, "user_memories")
 # Import UI_ACCESSIBLE_WORKSPACE from tools.py
 from tools import UI_ACCESSIBLE_WORKSPACE
 
+# Constant to control the maximum number of messages sent in chat history to the LLM
+MAX_CHAT_HISTORY_MESSAGES = 15 # Keep the last N messages to manage context length
+
 @st.cache_resource
 def setup_global_llm_settings():
     """Initializes global LLM settings using st.cache_resource to run only once."""
@@ -181,9 +184,16 @@ def save_chat_metadata(user_id: str, chat_metadata: Dict[str, str]):
         print(f"Error saving chat metadata for user {user_id}): {e}")
 
 def format_chat_history(streamlit_messages: List[Dict[str, Any]]) -> List[ChatMessage]:
-    """Converts Streamlit message history to LlamaIndex ChatMessage list."""
+    """
+    Converts Streamlit message history to LlamaIndex ChatMessage list,
+    truncating to the most recent messages to manage context length.
+    """
+    # Truncate messages to keep only the most recent ones
+    # If the list is shorter than MAX_CHAT_HISTORY_MESSAGES, it will take all.
+    truncated_messages = streamlit_messages[-MAX_CHAT_HISTORY_MESSAGES:]
+
     history = []
-    for msg in streamlit_messages:
+    for msg in truncated_messages:
         role = MessageRole.USER if msg["role"] == "user" else MessageRole.ASSISTANT
         history.append(ChatMessage(role=role, content=msg["content"]))
     return history

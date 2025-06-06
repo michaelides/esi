@@ -35,6 +35,9 @@ def initialize_settings():
     # Use Google Generative AI Embeddings
     Settings.embed_model = GoogleGenAIEmbedding(model_name="models/text-embedding-004", api_key=google_api_key)
     # Use a potentially more stable model name and set a default temperature
+    # The 'gemini-2.5-flash-preview-04-17' model is a "flash" model, which is generally
+    # more efficient and has a larger context window compared to "pro" models,
+    # helping to mitigate "input context too long" errors.
     Settings.llm = Gemini(model_name="models/gemini-2.5-flash-preview-04-17",
                           api_key=google_api_key,
                           temperature=0.7) 

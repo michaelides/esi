@@ -109,16 +109,17 @@ def setup_agent():
         st.error(f"Failed to initialize the AI agent. Please check configurations. Error: {e}")
         st.stop()
 
-@st.cache_resource
-def get_cached_user_id():
-    """Retrieves user ID from cookies or creates a new one, cached to run once per session."""
+# Removed @st.cache_resource from get_cached_user_id as its logic is now inlined in main()
+# and needs to be dynamic based on session state.
+def get_user_id_from_cookie():
+    """Retrieves user ID from cookies."""
     user_id = cookies.get(cookie="user_id")
     if not user_id:
         user_id = str(uuid.uuid4())
         cookies.set(cookie="user_id", val=user_id)
-        print(f"New user ID created and set (cached): {user_id}")
+        print(f"New user ID created and set in cookie: {user_id}")
     else:
-        print(f"Existing user ID retrieved (cached): {user_id}")
+        print(f"Existing user ID retrieved from cookie: {user_id}")
     return user_id
 
 def _load_user_data_from_disk(user_id: str) -> Dict[str, Any]:
@@ -157,10 +158,11 @@ def _load_user_data_from_disk(user_id: str) -> Dict[str, Any]:
     print(f"Processed metadata for {len(all_chat_metadata)} chats. Messages will be lazy-loaded.")
     return {"metadata": all_chat_metadata, "messages": all_chat_messages}
 
-# Removed initialize_user_session_data function as its logic is now inlined in main().
-
 def save_chat_history(user_id: str, chat_id: str, messages: List[Dict[str, Any]]):
     """Saves a specific chat history for a given user ID to a JSON file."""
+    if not st.session_state.long_term_memory_enabled:
+        print("Long-term memory disabled. Not saving chat history to disk.")
+        return
     user_dir = os.path.join(MEMORY_DIR, user_id)
     os.makedirs(user_dir, exist_ok=True)
     memory_file = os.path.join(user_dir, f"{chat_id}.json")
@@ -173,6 +175,9 @@ def save_chat_history(user_id: str, chat_id: str, messages: List[Dict[str, Any]]
 
 def save_chat_metadata(user_id: str, chat_metadata: Dict[str, str]):
     """Saves the chat metadata (ID to name mapping) for a user."""
+    if not st.session_state.long_term_memory_enabled:
+        print("Long-term memory disabled. Not saving chat metadata to disk.")
+        return
     user_dir = os.path.join(MEMORY_DIR, user_id)
     os.makedirs(user_dir, exist_ok=True)
     metadata_file = os.path.join(user_dir, "chat_metadata.json")
@@ -241,17 +246,18 @@ def create_new_chat_session_in_memory():
     """
     new_chat_id = str(uuid.uuid4())
     
-    existing_idea_nums = []
-    for name in st.session_state.chat_metadata.values():
-        match = re.match(r"Idea (\d+)", name)
-        if match:
-            existing_idea_nums.append(int(match.group(1)))
-    
-    next_idea_num = 1
-    if existing_idea_nums:
-        next_idea_num = max(existing_idea_nums) + 1
-
-    new_chat_name = f"Idea {next_idea_num}"
+    new_chat_name = "Current Session" # Default for disabled memory
+    if st.session_state.long_term_memory_enabled:
+        existing_idea_nums = []
+        for name in st.session_state.chat_metadata.values():
+            match = re.match(r"Idea (\d+)", name)
+            if match:
+                existing_idea_nums.append(int(match.group(1)))
+        
+        next_idea_num = 1
+        if existing_idea_nums:
+            next_idea_num = max(existing_idea_nums) + 1
+        new_chat_name = f"Idea {next_idea_num}"
 
     st.session_state.chat_metadata[new_chat_id] = new_chat_name
     st.session_state.all_chat_messages[new_chat_id] = [{"role": "assistant", "content": generate_llm_greeting()}]
@@ -259,14 +265,17 @@ def create_new_chat_session_in_memory():
     st.session_state.messages = st.session_state.all_chat_messages[new_chat_id]
     st.session_state.chat_modified = False # New chats are initially unsaved
     
-    # Removed immediate save_chat_metadata call here.
-    # Metadata will be saved when the first user message is sent in handle_user_input.
-    
     print(f"Created new chat in memory: ID={new_chat_id}, Name='{new_chat_name}' (not yet saved to disk)")
     return new_chat_id # Return the new chat ID
 
 def switch_chat(chat_id: str):
     """Switches to an existing chat, lazy-loading messages if necessary."""
+    if not st.session_state.long_term_memory_enabled:
+        print("Long-term memory disabled. Cannot switch to historical chats. Starting a new temporary session.")
+        create_new_chat_session_in_memory()
+        st.rerun()
+        return
+
     if chat_id not in st.session_state.chat_metadata:
         print(f"Error: Attempted to switch to chat ID '{chat_id}' not found in metadata.")
         return
@@ -311,6 +320,13 @@ def switch_chat(chat_id: str):
 
 def delete_chat_session(chat_id: str):
     """Deletes a chat history and its metadata."""
+    if not st.session_state.long_term_memory_enabled:
+        print("Long-term memory disabled. Cannot delete historical chats from disk. Resetting current session.")
+        if chat_id == st.session_state.current_chat_id:
+            create_new_chat_session_in_memory()
+            st.rerun()
+        return
+
     # Check if the chat to be deleted is the currently active one
     is_current_chat = (chat_id == st.session_state.current_chat_id)
 
@@ -354,6 +370,9 @@ def delete_chat_session(chat_id: str):
 
 def rename_chat(chat_id: str, new_name: str): # Modified to accept chat_id
     """Renames the specified chat."""
+    if not st.session_state.long_term_memory_enabled:
+        print("Long-term memory disabled. Cannot rename chats.")
+        return
     if chat_id and new_name and new_name != st.session_state.chat_metadata.get(chat_id):
         st.session_state.chat_metadata[chat_id] = new_name
         save_chat_metadata(st.session_state.user_id, st.session_state.chat_metadata)
@@ -417,14 +436,18 @@ def handle_user_input(chat_input_value: str | None):
             # with the new chat's entry.
             new_chat_id = create_new_chat_session_in_memory()
             # Now that the chat is created and current_chat_id is set, save its metadata to disk.
-            save_chat_metadata(st.session_state.user_id, st.session_state.chat_metadata)
+            # Only save metadata if long-term memory is enabled
+            if st.session_state.long_term_memory_enabled:
+                save_chat_metadata(st.session_state.user_id, st.session_state.chat_metadata)
             st.session_state.chat_modified = True # Mark as modified for history saving
             print(f"Activated new chat '{st.session_state.chat_metadata.get(st.session_state.current_chat_id)}' with first user input.")
         elif not st.session_state.chat_modified and len(st.session_state.messages) == 1 and st.session_state.messages[0]["role"] == "assistant":
             # This handles the case where a new chat was created via the "New Chat" button
             # and this is the first user message in it.
             st.session_state.chat_modified = True 
-            save_chat_metadata(st.session_state.user_id, st.session_state.chat_metadata) # Save metadata now that chat is active
+            # Only save metadata if long-term memory is enabled
+            if st.session_state.long_term_memory_enabled:
+                save_chat_metadata(st.session_state.user_id, st.session_state.chat_metadata) # Save metadata now that chat is active
             print(f"Chat '{st.session_state.chat_metadata.get(st.session_state.current_chat_id)}' activated and metadata saved.")
 
 
@@ -435,7 +458,7 @@ def handle_user_input(chat_input_value: str | None):
         st.session_state.messages.append({"role": "assistant", "content": response_text})
 
         # Autosave the current chat history after AI response if it's been modified
-        if st.session_state.chat_modified:
+        if st.session_state.chat_modified and st.session_state.long_term_memory_enabled:
             save_chat_history(st.session_state.user_id, st.session_state.current_chat_id, st.session_state.messages)
 
         st.session_state.suggested_prompts = generate_suggested_prompts(st.session_state.messages)
@@ -463,7 +486,8 @@ def handle_regeneration_request():
         print("Regenerating initial greeting...")
         new_greeting = generate_llm_greeting()
         st.session_state.messages[0]['content'] = new_greeting
-        save_chat_history(st.session_state.user_id, st.session_state.current_chat_id, st.session_state.messages)
+        if st.session_state.long_term_memory_enabled: # Only save if memory is enabled
+            save_chat_history(st.session_state.user_id, st.session_state.current_chat_id, st.session_state.messages)
         st.rerun()
         return
 
@@ -480,7 +504,8 @@ def handle_regeneration_request():
 
     response_text = get_agent_response(prompt_to_regenerate, chat_history=formatted_history_for_regen)
     st.session_state.messages.append({"role": "assistant", "content": response_text})
-    save_chat_history(st.session_state.user_id, st.session_state.current_chat_id, st.session_state.messages)
+    if st.session_state.long_term_memory_enabled: # Only save if memory is enabled
+        save_chat_history(st.session_state.user_id, st.session_state.current_chat_id, st.session_state.messages)
     st.session_state.suggested_prompts = generate_suggested_prompts(st.session_state.messages)
     st.rerun()
 
@@ -488,9 +513,27 @@ def main():
     """Main function to run the Streamlit app."""
     setup_global_llm_settings()
 
-    if "user_id" not in st.session_state:
-        st.session_state.user_id = get_cached_user_id()
+    # Initialize long_term_memory_enabled setting
+    if "long_term_memory_enabled" not in st.session_state:
+        st.session_state.long_term_memory_enabled = True # Default to enabled
     
+    # Track if memory state has changed to trigger a reset
+    if "_last_memory_state_was_enabled" not in st.session_state:
+        st.session_state._last_memory_state_was_enabled = st.session_state.long_term_memory_enabled
+    
+    # User ID management based on long-term memory setting
+    if st.session_state.long_term_memory_enabled:
+        if "user_id" not in st.session_state:
+            st.session_state.user_id = get_user_id_from_cookie() # Uses cookies
+        st.session_state._last_memory_state_was_enabled = True # Update tracking state
+    else:
+        # If long-term memory is disabled, generate a temporary user_id for the session
+        # This user_id is not persisted via cookies.
+        if st.session_state.get("_last_memory_state_was_enabled", True): # If memory was just disabled
+            st.session_state.user_id = str(uuid.uuid4())
+            print(f"Long-term memory disabled. Generated temporary user ID: {st.session_state.user_id}")
+        st.session_state._last_memory_state_was_enabled = False # Update tracking state
+
     # Initialize session state for uploaded files
     if "uploaded_documents" not in st.session_state:
         st.session_state.uploaded_documents = {}
@@ -501,7 +544,6 @@ def main():
         st.session_state[AGENT_SESSION_KEY] = setup_agent()
 
     # Initialize all necessary session state variables with default empty values
-    # This ensures they always exist, preventing AttributeError.
     if "chat_metadata" not in st.session_state:
         st.session_state.chat_metadata = {}
     if "all_chat_messages" not in st.session_state:
@@ -517,85 +559,116 @@ def main():
     if 'renaming_chat_id' not in st.session_state:
         st.session_state.renaming_chat_id = None
 
-    # Load user data from disk only if chat_metadata is empty (i.e., first run of a new session)
-    # This prevents redundant disk reads on subsequent reruns.
-    if not st.session_state.chat_metadata and not st.session_state.all_chat_messages:
-        user_data = _load_user_data_from_disk(st.session_state.user_id)
-        st.session_state.chat_metadata = user_data["metadata"]
-        st.session_state.all_chat_messages = user_data["messages"]
-        print(f"Initial load of user data for {st.session_state.user_id}: {len(st.session_state.chat_metadata)} chats.")
+    # Load user data from disk only if long-term memory is enabled and data not already loaded
+    if st.session_state.long_term_memory_enabled:
+        # Only load if chat_metadata is empty (i.e., first run of a new session or after memory re-enable)
+        if not st.session_state.chat_metadata and not st.session_state.all_chat_messages:
+            user_data = _load_user_data_from_disk(st.session_state.user_id)
+            st.session_state.chat_metadata = user_data["metadata"]
+            st.session_state.all_chat_messages = user_data["messages"]
+            print(f"Initial load of user data for {st.session_state.user_id}: {len(st.session_state.chat_metadata)} chats.")
+        else:
+            print(f"User data already in session state. Current chats: {len(st.session_state.chat_metadata)}.")
     else:
-        print(f"User data already in session state. Current chats: {len(st.session_state.chat_metadata)}.")
+        # If long-term memory is disabled, ensure chat_metadata and all_chat_messages are empty
+        # and reset current chat to a fresh, in-memory session if it was previously enabled.
+        if st.session_state.get("_last_memory_state_was_enabled", False): # If memory was just disabled
+            print("Long-term memory disabled. Resetting chat history.")
+            st.session_state.chat_metadata = {}
+            st.session_state.all_chat_messages = {}
+            st.session_state.current_chat_id = None
+            st.session_state.messages = [{"role": "assistant", "content": generate_llm_greeting()}]
+            st.session_state.chat_modified = False
+            st.session_state.suggested_prompts = DEFAULT_PROMPTS # Reset prompts too
+        # If already disabled, just ensure the current in-memory chat is active (handled below)
+
 
     # Determine the active chat or present initial greeting
     # This logic ensures a valid current chat is always selected or a new blank state is presented.
-    if st.session_state.current_chat_id is None or st.session_state.current_chat_id not in st.session_state.all_chat_messages:
-        if st.session_state.chat_metadata:
-            # If there are existing chats, switch to the first one
-            first_available_chat_id = next(iter(st.session_state.chat_metadata))
-            st.session_state.current_chat_id = first_available_chat_id
-            
-            # Lazy load messages for the first available chat if they are None
-            if st.session_state.all_chat_messages.get(first_available_chat_id) is None:
-                print(f"Initial load: Messages for chat ID '{first_available_chat_id}' not loaded. Loading from disk...")
+    if st.session_state.long_term_memory_enabled:
+        if st.session_state.current_chat_id is None or st.session_state.current_chat_id not in st.session_state.all_chat_messages:
+            if st.session_state.chat_metadata:
+                # If there are existing chats, switch to the first one
+                first_available_chat_id = next(iter(st.session_state.chat_metadata))
+                st.session_state.current_chat_id = first_available_chat_id
+                
+                # Lazy load messages for the first available chat if they are None
+                if st.session_state.all_chat_messages.get(first_available_chat_id) is None:
+                    print(f"Initial load: Messages for chat ID '{first_available_chat_id}' not loaded. Loading from disk...")
+                    user_dir = os.path.join(MEMORY_DIR, st.session_state.user_id)
+                    chat_file = os.path.join(user_dir, f"{first_available_chat_id}.json")
+                    if os.path.exists(chat_file):
+                        try:
+                            with open(chat_file, "r", encoding="utf-8") as f:
+                                st.session_state.all_chat_messages[first_available_chat_id] = json.load(f)
+                            print(f"Successfully loaded messages for initial chat ID '{first_available_chat_id}'.")
+                        except json.JSONDecodeError as e:
+                            print(f"Error decoding JSON for initial chat {first_available_chat_id} (file: {chat_file}): {e}.")
+                            st.session_state.all_chat_messages[first_available_chat_id] = [] # Default to empty
+                        except Exception as e:
+                            print(f"An unexpected error occurred while reading initial chat file {first_available_chat_id}: {e}")
+                            st.session_state.all_chat_messages[first_available_chat_id] = [] # Default to empty
+                    else:
+                        print(f"Initial chat file {chat_file} not found for chat ID '{first_available_chat_id}'. Setting to empty messages.")
+                        st.session_state.all_chat_messages[first_available_chat_id] = [] # Default to empty
+                
+                st.session_state.messages = st.session_state.all_chat_messages[first_available_chat_id]
+                st.session_state.chat_modified = True # Existing chats are considered modified for saving
+                print(f"No valid current chat found. Switched to first available chat: '{st.session_state.chat_metadata.get(first_available_chat_id, first_available_chat_id)}'")
+            else:
+                # No chats exist, present a blank slate with initial greeting
+                print("No valid current chat found and no existing chats. Presenting initial greeting.")
+                st.session_state.current_chat_id = None # Indicate no active chat ID
+                st.session_state.messages = [{"role": "assistant", "content": generate_llm_greeting()}]
+                st.session_state.chat_modified = False # This state is not yet saved to disk
+        else:
+            # current_chat_id is valid and in all_chat_messages keys (but messages might be None)
+            chat_id_to_load = st.session_state.current_chat_id
+            if st.session_state.all_chat_messages.get(chat_id_to_load) is None:
+                print(f"Initial load: Messages for current chat ID '{chat_id_to_load}' not loaded. Loading from disk...")
                 user_dir = os.path.join(MEMORY_DIR, st.session_state.user_id)
-                chat_file = os.path.join(user_dir, f"{first_available_chat_id}.json")
+                chat_file = os.path.join(user_dir, f"{chat_id_to_load}.json")
                 if os.path.exists(chat_file):
                     try:
                         with open(chat_file, "r", encoding="utf-8") as f:
-                            st.session_state.all_chat_messages[first_available_chat_id] = json.load(f)
-                        print(f"Successfully loaded messages for initial chat ID '{first_available_chat_id}'.")
+                            st.session_state.all_chat_messages[chat_id_to_load] = json.load(f)
+                        print(f"Successfully loaded messages for current chat ID '{chat_id_to_load}'.")
                     except json.JSONDecodeError as e:
-                        print(f"Error decoding JSON for initial chat {first_available_chat_id} (file: {chat_file}): {e}.")
-                        st.session_state.all_chat_messages[first_available_chat_id] = [] # Default to empty
+                        print(f"Error decoding JSON for current chat {chat_id_to_load} (file: {chat_file}): {e}.")
+                        st.session_state.all_chat_messages[chat_id_to_load] = [] # Default to empty
                     except Exception as e:
-                        print(f"An unexpected error occurred while reading initial chat file {first_available_chat_id}: {e}")
-                        st.session_state.all_chat_messages[first_available_chat_id] = [] # Default to empty
+                        print(f"An unexpected error occurred while reading current chat file {chat_id_to_load}: {e}")
+                        st.session_state.all_chat_messages[chat_id_to_load] = [] # Default to empty
                 else:
-                    print(f"Initial chat file {chat_file} not found for chat ID '{first_available_chat_id}'. Setting to empty messages.")
-                    st.session_state.all_chat_messages[first_available_chat_id] = [] # Default to empty
-            
-            st.session_state.messages = st.session_state.all_chat_messages[first_available_chat_id]
-            st.session_state.chat_modified = True # Existing chats are considered modified for saving
-            print(f"No valid current chat found. Switched to first available chat: '{st.session_state.chat_metadata.get(first_available_chat_id, first_available_chat_id)}'")
-        else:
-            # No chats exist, present a blank slate with initial greeting
-            print("No valid current chat found and no existing chats. Presenting initial greeting.")
-            st.session_state.current_chat_id = None # Indicate no active chat ID
-            st.session_state.messages = [{"role": "assistant", "content": generate_llm_greeting()}]
-            st.session_state.chat_modified = False # This state is not yet saved to disk
-    else:
-        # current_chat_id is valid and in all_chat_messages keys (but messages might be None)
-        chat_id_to_load = st.session_state.current_chat_id
-        if st.session_state.all_chat_messages.get(chat_id_to_load) is None:
-            print(f"Initial load: Messages for current chat ID '{chat_id_to_load}' not loaded. Loading from disk...")
-            user_dir = os.path.join(MEMORY_DIR, st.session_state.user_id)
-            chat_file = os.path.join(user_dir, f"{chat_id_to_load}.json")
-            if os.path.exists(chat_file):
-                try:
-                    with open(chat_file, "r", encoding="utf-8") as f:
-                        st.session_state.all_chat_messages[chat_id_to_load] = json.load(f)
-                    print(f"Successfully loaded messages for current chat ID '{chat_id_to_load}'.")
-                except json.JSONDecodeError as e:
-                    print(f"Error decoding JSON for current chat {chat_id_to_load} (file: {chat_file}): {e}.")
+                    print(f"Current chat file {chat_file} not found for chat ID '{chat_id_to_load}'. Setting to empty messages.")
                     st.session_state.all_chat_messages[chat_id_to_load] = [] # Default to empty
-                except Exception as e:
-                    print(f"An unexpected error occurred while reading current chat file {chat_id_to_load}: {e}")
-                    st.session_state.all_chat_messages[chat_id_to_load] = [] # Default to empty
-            else:
-                print(f"Current chat file {chat_file} not found for chat ID '{chat_id_to_load}'. Setting to empty messages.")
-                st.session_state.all_chat_messages[chat_id_to_load] = [] # Default to empty
 
-        st.session_state.messages = st.session_state.all_chat_messages[chat_id_to_load]
-        st.session_state.chat_modified = True # Existing chats are considered modified for saving
-        print(f"Continuing with chat: '{st.session_state.chat_metadata.get(st.session_state.current_chat_id, st.session_state.current_chat_id)}'")
+            st.session_state.messages = st.session_state.all_chat_messages[chat_id_to_load]
+            st.session_state.chat_modified = True # Existing chats are considered modified for saving
+            print(f"Continuing with chat: '{st.session_state.chat_metadata.get(st.session_state.current_chat_id, st.session_state.current_chat_id)}'")
+    else: # Long-term memory is disabled
+        # Ensure a fresh, in-memory chat session is always active
+        # This condition checks if current_chat_id is None (fresh start)
+        # or if the messages list is empty/not properly initialized (e.g., after toggling off memory)
+        if st.session_state.current_chat_id is None or \
+           not st.session_state.messages or \
+           st.session_state.messages[0]["role"] != "assistant" or \
+           st.session_state.get("_last_memory_state_was_enabled", False): # If memory was just disabled
+            
+            # Create a new temporary chat if none exists or if it's not properly initialized
+            # This will ensure a greeting is always present for a new session
+            new_chat_id = str(uuid.uuid4()) # Temporary ID
+            st.session_state.current_chat_id = new_chat_id
+            st.session_state.messages = [{"role": "assistant", "content": generate_llm_greeting()}]
+            st.session_state.chat_metadata = {new_chat_id: "Current Session"} # Only one "chat" in metadata
+            st.session_state.all_chat_messages = {new_chat_id: st.session_state.messages}
+            st.session_state.chat_modified = False # Not saved to disk
+            print("Long-term memory disabled. Initialized new temporary chat session.")
+        else:
+            print("Long-term memory disabled. Continuing with current temporary chat session.")
 
     if st.session_state.get("do_regenerate", False):
         handle_regeneration_request()
-
-    # --- File Upload Section in Sidebar ---
-
-
 
     stui.create_interface(
         reset_callback=reset_chat_callback,
@@ -608,7 +681,8 @@ def main():
         get_discussion_markdown_callback=get_discussion_markdown,
         get_discussion_docx_callback=get_discussion_docx, # Pass the new DOCX callback
         suggested_prompts_list=st.session_state.suggested_prompts,
-        handle_user_input_callback=handle_user_input
+        handle_user_input_callback=handle_user_input,
+        long_term_memory_enabled=st.session_state.long_term_memory_enabled # Pass the new setting
     )
 
     chat_input_for_handler = st.session_state.get("chat_input_value_from_stui")

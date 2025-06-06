@@ -332,7 +332,8 @@ def create_interface(
     get_discussion_markdown_callback: Callable,
     get_discussion_docx_callback: Callable,
     suggested_prompts_list: Optional[List[str]],
-    handle_user_input_callback: Callable
+    handle_user_input_callback: Callable,
+    long_term_memory_enabled: bool # New parameter
 ):
     """Create the Streamlit UI for the chat interface."""
     st.title("🎓 ESI: ESI Scholarly Instructor")
@@ -344,74 +345,86 @@ def create_interface(
 
     with st.sidebar:
         with st.expander("**Chat History**", expanded=False, icon = ":material/forum:"):
-            st.info("Conversations are automatically saved and linked to your browser via cookies. Clearing browser data will remove your saved discussions.")
-            
-            if st.button("➕ New Chat", key="new_chat_button", use_container_width=True):
-                # Clear any active editing state when creating a new chat
-                st.session_state.editing_chat_id = None
-                new_chat_callback()
+            if not long_term_memory_enabled:
+                st.warning("Long-term memory is currently **disabled**. Your chat history will not be saved and will be lost when you close this tab or refresh the page.")
+                st.info("To enable long-term memory, check the option in 'LLM Settings'.")
+                # Only show "New Chat" button, no list of past chats
+                if st.button("➕ New Chat (Temporary)", key="new_chat_button_temp", use_container_width=True):
+                    st.session_state.editing_chat_id = None
+                    new_chat_callback() # This will create a new in-memory session
+            else:
+                st.info("Conversations are automatically saved and linked to your browser via cookies. Clearing browser data will remove your saved discussions.")
+                
+                if st.button("➕ New Chat", key="new_chat_button", use_container_width=True):
+                    # Clear any active editing state when creating a new chat
+                    st.session_state.editing_chat_id = None
+                    new_chat_callback()
 
-            # Display existing chats
-            sorted_chat_items = sorted(chat_metadata.items(), key=lambda item: item[1].lower())
-            
-            for chat_id, chat_name in sorted_chat_items:
-                col1, col2 = st.columns([0.8, 0.2])
-                with col1:
-                    if st.session_state.editing_chat_id == chat_id:
-                        # Display text input for renaming
-                        new_name = st.text_input(
-                            "New name:",
-                            value=chat_name,
-                            key=f"rename_input_{chat_id}",
-                            label_visibility="collapsed",
-                            on_change=lambda current_chat_id_in_loop=chat_id: (
-                                rename_chat_callback(current_chat_id_in_loop, st.session_state[f"rename_input_{current_chat_id_in_loop}"]) if st.session_state[f"rename_input_{current_chat_id_in_loop}"] and st.session_state[f"rename_input_{current_chat_id_in_loop}"] != chat_metadata.get(current_chat_id_in_loop) else None,
-                                setattr(st.session_state, 'editing_chat_id', None) # Clear editing state
-                            )
-                        )
-                    else:
-                        # Display button for switching chat
-                        if st.button(chat_name, key=f"chat_select_{chat_id}", use_container_width=True,
-                                    type="primary" if chat_id == current_chat_id else "secondary"):
-                            if chat_id != current_chat_id:
-                                # Clear any active editing state when switching chats
-                                st.session_state.editing_chat_id = None
-                                switch_chat_callback(chat_id)
-                with col2:
-                    with st.popover("", use_container_width=True):
-                        st.write(f"Options for: **{chat_name}**")
-                        
-                        # Option to download Markdown
-                        st.download_button(
-                            label="⬇️ Download (.md)",
-                            data=get_discussion_markdown_callback(chat_id),
-                            file_name=f"{chat_name.replace(' ', '_')}.md",
-                            mime="text/markdown",
-                            key=f"download_listed_md_{chat_id}", # Changed key to be unique
-                            use_container_width=True
-                        )
-
-                        # Option to download DOCX
-                        st.download_button(
-                            label="⬇️ Download (.docx)",
-                            data=get_discussion_docx_callback(chat_id),
-                            file_name=f"{chat_name.replace(' ', '_')}.docx",
-                            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                            key=f"download_listed_docx_{chat_id}", # New unique key
-                            use_container_width=True
-                        )
-                        
-                        # Option to rename (sets editing_chat_id and reruns)
-                        if st.button("✏️ Rename", key=f"rename_btn_{chat_id}", use_container_width=True):
-                            st.session_state.editing_chat_id = chat_id
-                            st.rerun() # Rerun to show the input field
-
-                        # Option to delete
-                        if st.button("♻ Delete", key=f"delete_from_popover_{chat_id}", use_container_width=True):
-                            # Clear any active editing state if the chat being edited is deleted
+                # Display existing chats
+                if chat_metadata: # Only iterate if there's metadata
+                    sorted_chat_items = sorted(chat_metadata.items(), key=lambda item: item[1].lower())
+                    
+                    for chat_id, chat_name in sorted_chat_items:
+                        col1, col2 = st.columns([0.8, 0.2])
+                        with col1:
                             if st.session_state.editing_chat_id == chat_id:
-                                st.session_state.editing_chat_id = None
-                            delete_chat_callback(chat_id)
+                                # Display text input for renaming
+                                new_name = st.text_input(
+                                    "New name:",
+                                    value=chat_name,
+                                    key=f"rename_input_{chat_id}",
+                                    label_visibility="collapsed",
+                                    on_change=lambda current_chat_id_in_loop=chat_id: (
+                                        rename_chat_callback(current_chat_id_in_loop, st.session_state[f"rename_input_{current_chat_id_in_loop}"]) if st.session_state[f"rename_input_{current_chat_id_in_loop}"] and st.session_state[f"rename_input_{current_chat_id_in_loop}"] != chat_metadata.get(current_chat_id_in_loop) else None,
+                                        setattr(st.session_state, 'editing_chat_id', None) # Clear editing state
+                                    )
+                                )
+                            else:
+                                # Display button for switching chat
+                                if st.button(chat_name, key=f"chat_select_{chat_id}", use_container_width=True,
+                                            type="primary" if chat_id == current_chat_id else "secondary"):
+                                    if chat_id != current_chat_id:
+                                        # Clear any active editing state when switching chats
+                                        st.session_state.editing_chat_id = None
+                                        switch_chat_callback(chat_id)
+                        with col2:
+                            with st.popover("⋮", use_container_width=True):
+                                st.write(f"Options for: **{chat_name}**")
+                                
+                                # Option to download Markdown
+                                st.download_button(
+                                    label="⬇️ Download (.md)",
+                                    data=get_discussion_markdown_callback(chat_id),
+                                    file_name=f"{chat_name.replace(' ', '_')}.md",
+                                    mime="text/markdown",
+                                    key=f"download_listed_md_{chat_id}", # Changed key to be unique
+                                    use_container_width=True
+                                )
+
+                                # Option to download DOCX
+                                st.download_button(
+                                    label="⬇️ Download (.docx)",
+                                    data=get_discussion_docx_callback(chat_id),
+                                    file_name=f"{chat_name.replace(' ', '_')}.docx",
+                                    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                                    key=f"download_listed_docx_{chat_id}", # New unique key
+                                    use_container_width=True
+                                )
+                                
+                                # Option to rename (sets editing_chat_id and reruns)
+                                if st.button("✏️ Rename", key=f"rename_btn_{chat_id}", use_container_width=True):
+                                    st.session_state.editing_chat_id = chat_id
+                                    st.rerun() # Rerun to show the input field
+
+                                # Option to delete
+                                if st.button("♻ Delete", key=f"delete_from_popover_{chat_id}", use_container_width=True):
+                                    # Clear any active editing state if the chat being edited is deleted
+                                    if st.session_state.editing_chat_id == chat_id:
+                                        st.session_state.editing_chat_id = None
+                                    delete_chat_callback(chat_id)
+                else:
+                    st.info("No saved chats yet. Start a new conversation!")
+
         with st.expander("**Upload files**", expanded=False, icon = ":material/upload_file:"):
             uploaded_file = st.file_uploader(
                 "Upload a document or dataset",
@@ -468,6 +481,13 @@ def create_interface(
                 step=1,
                 key="llm_verbosity",
                 help="Controls the detail level of the AI's responses. 1 is concise, 5 is very detailed."
+            )
+            # New checkbox for long-term memory
+            st.checkbox(
+                "Enable Long-term Memory (saves chat history)",
+                value=st.session_state.get("long_term_memory_enabled", True), # Default to True
+                key="long_term_memory_enabled",
+                help="If enabled, your chat history will be saved and loaded across sessions using browser cookies. If disabled, your chats will be forgotten when you close the browser or refresh the page."
             )
 
         with st.expander("**About ESI**", expanded=False, icon = ":material/info:"):

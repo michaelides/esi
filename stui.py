@@ -410,7 +410,7 @@ def create_interface(
                             if st.session_state.editing_chat_id == chat_id:
                                 st.session_state.editing_chat_id = None
                             delete_chat_callback(chat_id)
-        with st.expander("**Upload files**", expanded=False, icon = ":material/tune:"):
+        with st.expander("**Upload files**", expanded=False, icon = ":material/upload_file:"):
             uploaded_file = st.file_uploader(
                 "Upload a document or dataset",
                 type=["pdf", "docx", "md", "txt", "csv", "xlsx", "sav", "rdata", "rds"], # Added .txt

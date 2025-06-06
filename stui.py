@@ -491,12 +491,10 @@ def create_interface(
                 help="If enabled, your chat history will be saved and loaded across sessions using browser cookies. If disabled, your chats will be forgotten when you close the browser or refresh the page."
             )
 
-            st.markdown("---") # Separator for destructive action
-            st.subheader("Data Management")
-
+           # Implement the forget me button 
             if long_term_memory_enabled:
                 # Use a popover for confirmation
-                with st.popover("🗑️ Forget Me (Delete All Data)", use_container_width=True):
+                with st.popover("Forget Me (Delete All Data)", use_container_width=True):
                     st.warning("This will permanently delete ALL your saved chat histories and remove your user ID cookie from this browser. This action cannot be undone.")
                     st.write("Are you sure you want to proceed?")
                     col_yes, col_no = st.columns(2)

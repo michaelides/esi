@@ -229,21 +229,38 @@ def get_coder_tools():
     """
     Initializes the Code Interpreter tool, configured to use the shared workspace.
     Returns the original tool spec's tool list.
+    Attempts various initialization methods for CodeInterpreterToolSpec to set work_dir.
     """
     try:
-        # Pass work_dir directly during initialization
-        code_spec = CodeInterpreterToolSpec(
-            code_interpreter_kwargs={"work_dir": UI_ACCESSIBLE_WORKSPACE}
-        )
+        # Attempt 1: Direct work_dir argument
+        code_spec = CodeInterpreterToolSpec(work_dir=UI_ACCESSIBLE_WORKSPACE)
+        print(f"CodeInterpreterToolSpec initialized successfully with direct work_dir: {UI_ACCESSIBLE_WORKSPACE}")
+    except TypeError as e1:
+        print(f"Failed to initialize CodeInterpreterToolSpec with direct work_dir: {e1}. Trying code_interpreter_kwargs...")
+        try:
+            # Attempt 2: Original method (code_interpreter_kwargs)
+            code_spec = CodeInterpreterToolSpec(code_interpreter_kwargs={"work_dir": UI_ACCESSIBLE_WORKSPACE})
+            print(f"CodeInterpreterToolSpec initialized successfully with code_interpreter_kwargs, work_dir: {UI_ACCESSIBLE_WORKSPACE}")
+        except TypeError as e2:
+            print(f"Failed to initialize CodeInterpreterToolSpec with code_interpreter_kwargs: {e2}. Trying no arguments...")
+            try:
+                # Attempt 3: No arguments (last resort)
+                code_spec = CodeInterpreterToolSpec()
+                print("Warning: CodeInterpreterToolSpec initialized with no arguments. work_dir may not be set as intended. Default behavior will be used.")
+            except Exception as e3: # Catch any exception during the no-arg instantiation
+                print(f"Error initializing CodeInterpreterToolSpec even with no arguments: {e3}. Code execution will be unavailable.")
+                return []
+    except Exception as e_outer: # Catch any other unexpected error during the first attempt
+        print(f"An unexpected error occurred during CodeInterpreterToolSpec initialization: {e_outer}. Code execution will be unavailable.")
+        return []
 
+    try:
         original_tools = code_spec.to_tool_list()
-
         if not original_tools:
-            print("Warning: CodeInterpreterToolSpec returned no tools.")
+            print("Warning: CodeInterpreterToolSpec returned no tools even after successful/fallback initialization.")
             return []
-
-        print(f"Initialized Code Interpreter Tool(s) for Coder Agent: {[t.metadata.name for t in original_tools]}")
+        print(f"Code Interpreter Tool(s) for Coder Agent successfully retrieved: {[t.metadata.name for t in original_tools]}")
         return original_tools
-    except Exception as e:
-        print(f"Error initializing Code Interpreter Tool for Coder Agent: {e}. Code execution will be unavailable.")
+    except Exception as e_tools:
+        print(f"Error converting CodeInterpreterToolSpec to tool list: {e_tools}. Code execution will be unavailable.")
         return []

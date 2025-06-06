@@ -20,7 +20,9 @@
 20. Fix hallucinations of paper - use SS, RAG and wiki info
 
 21. Initial suggested prompts seem to be always the same 
-22. Add copy button after each chat message
+# 22. Add copy button after each chat message
 23. Add upload data option
-24.  Greeding message seems to always be the same
+# 24.  Greeding message seems to always be the same
 25. Fixed initial warning about cache
+
+add the ability to upload files in the sidebar. Acceptable files include SPSS files (.sav), Rdata, rds, csv, xlsx, pdf, docx, and md. If it is a document then the file should be read and user can ask questions about the content. The files should NOT be added to the RAG - but should be an alternative temporary resource for that user.  If it is a dataset it should be imported as a pandas data.frame and the user can ask questions about thier variables, what analysis to perform etc. They can also ask the ai to perform data analysis procedures. If the later the ai should use the code execution functionality to write python code and execute it to run the analysis                                      

@@ -561,10 +561,7 @@ def main():
     # Initialize long_term_memory_enabled setting
     if "long_term_memory_enabled" not in st.session_state:
         st.session_state.long_term_memory_enabled = True # Default to enabled
-    
-    # Track if memory state has changed to trigger a reset
-    if "_last_memory_state_was_enabled" not in st.session_state:
-    # --- Session Control Flags Initialization ---
+
     if "session_control_flags_initialized" not in st.session_state:
         print("First run in session: Initializing session control flags and core variables.")
         st.session_state.long_term_memory_enabled = True  # Default

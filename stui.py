@@ -501,7 +501,7 @@ def create_interface(
                     st.write("Are you sure you want to proceed?")
                     col_yes, col_no = st.columns(2)
                     with col_yes:
-                        if st.button("Yes, Delete All Data", key="confirm_forget_me_yes", type="danger", use_container_width=True):
+                        if st.button("Yes, Delete All Data", key="confirm_forget_me_yes", type="primary", use_container_width=True):
                             forget_me_callback() # Call the function passed from app.py
                             st.success("All data deleted. Restarting session...")
                             # No need for st.rerun() here, as the callback will handle it.

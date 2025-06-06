@@ -561,10 +561,7 @@ def main():
     # Initialize long_term_memory_enabled setting
     if "long_term_memory_enabled" not in st.session_state:
         st.session_state.long_term_memory_enabled = True # Default to enabled
-    
-    # --- Session Control Flags Initialization ---
-    # This is the primary block for one-time session setup.
-    # The check for "_last_memory_state_was_enabled" was removed from here as it's part of this initial setup.
+
     if "session_control_flags_initialized" not in st.session_state:
         print("First run in session: Initializing session control flags and core variables.")
         st.session_state.long_term_memory_enabled = True  # Default

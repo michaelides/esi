@@ -388,7 +388,7 @@ def create_interface(
                                         st.session_state.editing_chat_id = None
                                         switch_chat_callback(chat_id)
                         with col2:
-                            with st.popover("⋮", use_container_width=True):
+                            with st.popover("", use_container_width=True):
                                 st.write(f"Options for: **{chat_name}**")
                                 
                                 # Option to download Markdown
@@ -485,7 +485,7 @@ def create_interface(
             # New checkbox for long-term memory
             st.checkbox(
                 "Enable Long-term Memory (saves chat history)",
-                value=st.session_state.get("long_term_memory_enabled", True), # Default to True
+                value=st.session_state.get("long_term_memory_enabled", False), # Default to False
                 key="long_term_memory_enabled",
                 help="If enabled, your chat history will be saved and loaded across sessions using browser cookies. If disabled, your chats will be forgotten when you close the browser or refresh the page."
             )

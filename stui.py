@@ -8,6 +8,7 @@ import pandas as pd
 from PyPDF2 import PdfReader # Added for PDF processing in stui.py
 from docx import Document # Added for DOCX processing in stui.py
 import io # Added for BytesIO in stui.py
+import pyreadstat # Ensure pyreadstat is imported if read_spss is used
 
 PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 
@@ -296,7 +297,8 @@ def process_uploaded_file(uploaded_file):
             elif file_extension == ".sav":
                 # pandas.read_spss requires pyreadstat
                 try:
-                    df = pd.read_spss(io.BytesIO(uploaded_file.getvalue()))
+                    # Use the file path from the saved file in the workspace
+                    df = pd.read_spss(file_path_in_workspace)
                 except ImportError:
                     st.error("`pyreadstat` library not found. Please install it (`pip install pyreadstat`) to read .sav files.")
                     return None, None

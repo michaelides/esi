@@ -11,6 +11,7 @@ from agent import create_orchestrator_agent, generate_suggested_prompts, SUGGEST
 from dotenv import load_dotenv
 from docx import Document
 from io import BytesIO
+import shutil # Import shutil for directory deletion
 
 from PyPDF2 import PdfReader
 import io # Import io module for BytesIO
@@ -509,6 +510,50 @@ def handle_regeneration_request():
     st.session_state.suggested_prompts = generate_suggested_prompts(st.session_state.messages)
     st.rerun()
 
+def forget_me_and_reset():
+    """
+    Deletes all user chat histories from disk, removes the user ID cookie,
+    and resets the Streamlit session state to a fresh start.
+    """
+    user_id_to_delete = st.session_state.get("user_id")
+    if user_id_to_delete:
+        user_dir = os.path.join(MEMORY_DIR, user_id_to_delete)
+        if os.path.exists(user_dir):
+            try:
+                shutil.rmtree(user_dir)
+                print(f"Successfully deleted user directory: {user_dir}")
+            except Exception as e:
+                print(f"Error deleting user directory {user_dir}: {e}")
+                st.error(f"Failed to delete user data from disk: {e}")
+        
+        # Delete the user ID cookie
+        cookies.delete(cookie="user_id")
+        print(f"Deleted user ID cookie for {user_id_to_delete}")
+
+    # Reset session state to clear all chat history and user data in memory
+    # This effectively simulates a fresh start for the user.
+    st.session_state.chat_metadata = {}
+    st.session_state.all_chat_messages = {}
+    st.session_state.current_chat_id = None
+    st.session_state.messages = [{"role": "assistant", "content": generate_llm_greeting()}] # New greeting
+    st.session_state.chat_modified = False
+    st.session_state.suggested_prompts = DEFAULT_PROMPTS
+    st.session_state.renaming_chat_id = None
+    st.session_state.uploaded_documents = {}
+    st.session_state.uploaded_dataframes = {}
+    
+    # Crucially, set long_term_memory_enabled to False and update the tracking state
+    # so the app starts in a "no memory" mode after "forget me".
+    st.session_state.long_term_memory_enabled = False
+    st.session_state._last_memory_state_was_enabled = False # Ensure this is updated
+
+    # Generate a new temporary user ID for the fresh session
+    st.session_state.user_id = str(uuid.uuid4())
+    print(f"Session reset. New temporary user ID: {st.session_state.user_id}")
+
+    st.rerun()
+
+
 def main():
     """Main function to run the Streamlit app."""
     setup_global_llm_settings()
@@ -682,7 +727,8 @@ def main():
         get_discussion_docx_callback=get_discussion_docx, # Pass the new DOCX callback
         suggested_prompts_list=st.session_state.suggested_prompts,
         handle_user_input_callback=handle_user_input,
-        long_term_memory_enabled=st.session_state.long_term_memory_enabled # Pass the new setting
+        long_term_memory_enabled=st.session_state.long_term_memory_enabled, # Pass the new setting
+        forget_me_callback=forget_me_and_reset # Pass the new callback
     )
 
     chat_input_for_handler = st.session_state.get("chat_input_value_from_stui")

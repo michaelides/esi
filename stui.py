@@ -333,7 +333,8 @@ def create_interface(
     get_discussion_docx_callback: Callable,
     suggested_prompts_list: Optional[List[str]],
     handle_user_input_callback: Callable,
-    long_term_memory_enabled: bool # New parameter
+    long_term_memory_enabled: bool, # New parameter
+    forget_me_callback: Callable # New parameter
 ):
     """Create the Streamlit UI for the chat interface."""
     st.title("🎓 ESI: ESI Scholarly Instructor")
@@ -388,7 +389,7 @@ def create_interface(
                                         st.session_state.editing_chat_id = None
                                         switch_chat_callback(chat_id)
                         with col2:
-                            with st.popover("", use_container_width=True):
+                            with st.popover("⋮", use_container_width=True):
                                 st.write(f"Options for: **{chat_name}**")
                                 
                                 # Option to download Markdown
@@ -489,6 +490,29 @@ def create_interface(
                 key="long_term_memory_enabled",
                 help="If enabled, your chat history will be saved and loaded across sessions using browser cookies. If disabled, your chats will be forgotten when you close the browser or refresh the page."
             )
+
+            st.markdown("---") # Separator for destructive action
+            st.subheader("Data Management")
+
+            if long_term_memory_enabled:
+                # Use a popover for confirmation
+                with st.popover("🗑️ Forget Me (Delete All Data)", use_container_width=True):
+                    st.warning("This will permanently delete ALL your saved chat histories and remove your user ID cookie from this browser. This action cannot be undone.")
+                    st.write("Are you sure you want to proceed?")
+                    col_yes, col_no = st.columns(2)
+                    with col_yes:
+                        if st.button("Yes, Delete All Data", key="confirm_forget_me_yes", type="danger", use_container_width=True):
+                            forget_me_callback() # Call the function passed from app.py
+                            st.success("All data deleted. Restarting session...")
+                            # No need for st.rerun() here, as the callback will handle it.
+                    with col_no:
+                        if st.button("No, Cancel", key="confirm_forget_me_no", use_container_width=True):
+                            st.info("Deletion cancelled.")
+                            # Popover will close automatically
+            else:
+                st.info("Long-term memory is disabled. No chat history is being saved.")
+                st.markdown("*(Enable long-term memory to see data management options.)*")
+
 
         with st.expander("**About ESI**", expanded=False, icon = ":material/info:"):
             st.info("ESI uses AI to help you navigate the dissertation process. It has access to some of the literature in your reading lists and also uses search tools for web lookups.")

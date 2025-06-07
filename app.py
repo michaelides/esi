@@ -90,7 +90,7 @@ def analyze_dataframe_tool_fn(filename: str, head_rows: int = 5) -> str:
 @st.cache_resource
 def setup_agent():
     """Initializes the orchestrator agent using st.cache_resource to run only once."""
-    print("Initializing orchestrator agent (cached)...")
+    print("Agent not in session state. Initializing agent...") # Moved here
     try:
         # Create dynamic tools here, passing the functions defined above
         uploaded_doc_reader_tool = FunctionTool.from_defaults(
@@ -109,7 +109,7 @@ def setup_agent():
         agent_instance = create_orchestrator_agent(
             dynamic_tools=[uploaded_doc_reader_tool, dataframe_analyzer_tool]
         )
-        print("Orchestrator agent object initialized (cached) successfully.")
+        print("Orchestrator agent object initialized (cached) successfully.") # Moved here
         return agent_instance
     except Exception as e:
         print(f"Error initializing orchestrator agent (cached): {e}")
@@ -119,6 +119,7 @@ def setup_agent():
 @st.cache_resource
 def _get_user_id_from_cookie_cached():
     """Retrieves user ID from cookies, cached to run only once per session."""
+    print("Attempting User ID setup...") # Moved here
     user_id = cookies.get(cookie="user_id")
     if not user_id:
         user_id = str(uuid.uuid4())
@@ -127,6 +128,7 @@ def _get_user_id_from_cookie_cached():
         print(f"New user ID created and set in cookie: {user_id}")
     else:
         print(f"Existing user ID retrieved from cookie: {user_id}")
+    print("User ID setup complete.") # Moved here
     return user_id
 
 def _load_user_data_from_disk(user_id: str) -> Dict[str, Any]:
@@ -234,7 +236,7 @@ def get_agent_response(query: str, chat_history: List[ChatMessage]) -> str:
 
         with st.spinner("ESI is thinking..."):
             # Corrected to use the passed chat_history parameter
-            response = agent.chat(modified_query, chat_history=chat_history) 
+            response = agent.chat(modified_query, chat_history=formatted_history) 
 
         response_text = response.response if hasattr(response, 'response') else str(response)
 
@@ -556,6 +558,7 @@ def forget_me_and_reset():
     # so the app starts in a "no memory" mode after "forget me".
     st.session_state.long_term_memory_enabled = False
     st.session_state._last_memory_state_was_enabled = False # Ensure this is updated
+    st.session_state._greeting_logic_log_shown_for_current_state = False # Reset for fresh log on next run
     
     # Delete user_id from session state to force re-generation of a temporary one
     if "user_id" in st.session_state:
@@ -582,6 +585,7 @@ def main():
         st.session_state._last_memory_state_was_enabled = True
         st.session_state.initial_data_load_attempted = False
         st.session_state.initial_greeting_shown_for_session = False
+        st.session_state._greeting_logic_log_shown_for_current_state = False # New flag for greeting prints
 
         # Core data structures
         st.session_state.chat_metadata = {}
@@ -595,8 +599,7 @@ def main():
         st.session_state.uploaded_dataframes = {} # Initialize here for consistency
 
         st.session_state.session_control_flags_initialized = True
-    else:
-        print("Session control flags already initialized.")
+    # No else print here, as it's redundant with the specific prints below.
 
     # --- Handle Memory State Change ---
     memory_state_changed = st.session_state._last_memory_state_was_enabled != st.session_state.long_term_memory_enabled
@@ -605,6 +608,7 @@ def main():
         # Reset control flags
         st.session_state.initial_data_load_attempted = False
         st.session_state.initial_greeting_shown_for_session = False # Reset greeting flag
+        st.session_state._greeting_logic_log_shown_for_current_state = False # Reset this flag too
 
         # Clear data structures that depend on memory state
         st.session_state.chat_metadata = {}
@@ -629,23 +633,17 @@ def main():
     # This block now only determines if long-term memory is enabled and assigns the user_id
     # The actual retrieval/creation of the user_id is handled by the cached function or direct UUID generation.
     if "user_id" not in st.session_state: # Check if user_id is already set in session state
-        print("Attempting User ID setup...")
         if st.session_state.long_term_memory_enabled:
             st.session_state.user_id = _get_user_id_from_cookie_cached() # Call the cached function
-            print(f"User ID for long-term memory: {st.session_state.user_id}")
         else:
             st.session_state.user_id = str(uuid.uuid4()) # Temporary ID for non-persistent session
             print(f"User ID for non-persistent session: {st.session_state.user_id}")
-        print("User ID setup complete.")
-    else:
-        print(f"User ID already set in session state: {st.session_state.user_id}")
+    # No else print here, as the cached function already logs if an existing ID is found.
 
 
     # --- Agent Initialization ---
     if AGENT_SESSION_KEY not in st.session_state:
-        print("Agent not in session state. Initializing agent...")
-        st.session_state[AGENT_SESSION_KEY] = setup_agent()
-        print("Agent initialized and stored in session state.")
+        st.session_state[AGENT_SESSION_KEY] = setup_agent() # setup_agent now contains its own prints
 
     # --- Initial Data Loading (from disk) ---
     if st.session_state.long_term_memory_enabled and not st.session_state.initial_data_load_attempted:
@@ -655,19 +653,23 @@ def main():
         st.session_state.all_chat_messages = user_data["messages"]
         st.session_state.initial_data_load_attempted = True
         print(f"Initial data load attempt complete. Found {len(st.session_state.chat_metadata)} chats.")
-    elif not st.session_state.long_term_memory_enabled:
-        print("Long-term memory disabled. Skipping disk load. Ensuring initial_data_load_attempted is False.")
-        # Ensure this is False if memory is off, so if it's turned on later, loading can occur.
+    elif not st.session_state.long_term_memory_enabled and st.session_state.initial_data_load_attempted:
+        # This case means memory was enabled, data was loaded, then turned off.
+        # We need to reset initial_data_load_attempted to False so it can reload if memory is re-enabled.
         st.session_state.initial_data_load_attempted = False
+        print("Long-term memory disabled. Skipping disk load. Resetting initial_data_load_attempted.")
+    # No else print for the case where memory is disabled and initial_data_load_attempted is already False.
 
 
     # --- Active Chat and Initial Greeting Logic ---
-    print(f"Processing active chat and greeting. Current chat ID: {st.session_state.current_chat_id}, Memory enabled: {st.session_state.long_term_memory_enabled}, Initial greeting shown: {st.session_state.initial_greeting_shown_for_session}")
+    # Only print the "Processing active chat and greeting" message once per state change
+    if not st.session_state._greeting_logic_log_shown_for_current_state:
+        print(f"Processing active chat and greeting. Current chat ID: {st.session_state.current_chat_id}, Memory enabled: {st.session_state.long_term_memory_enabled}, Initial greeting shown: {st.session_state.initial_greeting_shown_for_session}")
+        st.session_state._greeting_logic_log_shown_for_current_state = True # Mark as shown
 
     if st.session_state.long_term_memory_enabled:
         # Case 1: Current chat ID is valid and points to existing metadata
         if st.session_state.current_chat_id and st.session_state.current_chat_id in st.session_state.chat_metadata:
-            print(f"Current chat ID '{st.session_state.current_chat_id}' is set and valid.")
             # Lazy load messages if not already loaded
             if st.session_state.all_chat_messages.get(st.session_state.current_chat_id) is None:
                 print(f"Lazy loading messages for chat '{st.session_state.current_chat_id}'.")
@@ -711,28 +713,21 @@ def main():
             st.session_state.chat_modified = True
         # Case 3: No chats exist in metadata (e.g., new user, or all chats deleted)
         else: # This also covers if current_chat_id was None and chat_metadata was empty
-            print("No existing chats found in metadata for long-term memory user.")
             if not st.session_state.initial_greeting_shown_for_session:
-                print("Initial greeting for this session not shown. Generating and displaying.")
+                print("No existing chats found in metadata for long-term memory user. Initial greeting for this session not shown. Generating and displaying.")
                 # Use the cached greeting for initial startup
                 st.session_state.messages = [{"role": "assistant", "content": _get_initial_greeting_text()}]
                 st.session_state.initial_greeting_shown_for_session = True
                 st.session_state.current_chat_id = None # No active chat yet
                 st.session_state.chat_modified = False # Greeting is not a modification
-            else:
-                # Greeting already shown, but still no chats. messages should be empty or as is.
-                # The greeting should persist in st.session_state.messages from the first run
-                # if initial_greeting_shown_for_session is True and current_chat_id is None.
-                # Removed the line: if not st.session_state.current_chat_id: st.session_state.messages = []
-                print("Initial greeting already shown for session, no new greeting needed. Messages remain as is or empty.")
+            # No else print here, as the greeting should persist and no further logging is needed.
     else: # Long-term memory is DISABLED
-        print("Long-term memory is disabled.")
         # If current_chat_id is None (no temporary session exists yet for this disabled-memory run)
         # or if the current_chat_id (which would be a temp one) is somehow not in all_chat_messages
         # (e.g., after memory state change from enabled to disabled, current_chat_id might have been cleared)
         if st.session_state.current_chat_id is None or \
            st.session_state.current_chat_id not in st.session_state.all_chat_messages:
-            print("No active temporary session. Creating one with greeting.")
+            print("Long-term memory is disabled. No active temporary session. Creating one with greeting.")
             new_temp_chat_id = str(uuid.uuid4())
             st.session_state.current_chat_id = new_temp_chat_id
             # Use the cached greeting for initial startup
@@ -742,11 +737,7 @@ def main():
             st.session_state.chat_modified = False # Not saved to disk
             st.session_state.initial_greeting_shown_for_session = True
             print(f"Created new temporary chat {new_temp_chat_id}")
-        else:
-            # Temporary session already exists, messages should be populated from it.
-            # This path is taken on reruns when memory is disabled and a temp chat is active.
-            st.session_state.messages = st.session_state.all_chat_messages.get(st.session_state.current_chat_id, [])
-            print(f"Continuing with existing temporary chat {st.session_state.current_chat_id}.")
+        # No else print here, as the state is already established.
 
     # Final check: if messages is still uninitialized (should not happen with above logic), set to empty list
     if not isinstance(st.session_state.messages, list):

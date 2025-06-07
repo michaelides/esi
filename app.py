@@ -116,13 +116,13 @@ def setup_agent():
         st.error(f"Failed to initialize the AI agent. Please check configurations. Error: {e}")
         st.stop()
 
-# Removed @st.cache_resource from get_cached_user_id as its logic is now inlined in main()
-# and needs to be dynamic based on session state.
-def get_user_id_from_cookie():
-    """Retrieves user ID from cookies."""
+@st.cache_resource
+def _get_user_id_from_cookie_cached():
+    """Retrieves user ID from cookies, cached to run only once per session."""
     user_id = cookies.get(cookie="user_id")
     if not user_id:
         user_id = str(uuid.uuid4())
+        # Setting a cookie might trigger a rerun, but the function itself won't re-execute
         cookies.set(cookie="user_id", val=user_id)
         print(f"New user ID created and set in cookie: {user_id}")
     else:
@@ -556,10 +556,14 @@ def forget_me_and_reset():
     # so the app starts in a "no memory" mode after "forget me".
     st.session_state.long_term_memory_enabled = False
     st.session_state._last_memory_state_was_enabled = False # Ensure this is updated
+    
+    # Delete user_id from session state to force re-generation of a temporary one
+    if "user_id" in st.session_state:
+        del st.session_state.user_id
 
     # Generate a new temporary user ID for the fresh session
-    st.session_state.user_id = str(uuid.uuid4())
-    print(f"Session reset. New temporary user ID: {st.session_state.user_id}")
+    # This will be handled by the main loop's user ID setup now.
+    print(f"Session reset. New temporary user ID will be generated on next run.")
 
     st.rerun()
 
@@ -576,7 +580,7 @@ def main():
         print("First run in session: Initializing session control flags and core variables.")
         st.session_state.long_term_memory_enabled = True  # Default
         st.session_state._last_memory_state_was_enabled = True
-        st.session_state.user_id_setup_done = False
+        # st.session_state.user_id_setup_done = False # Removed
         st.session_state.initial_data_load_attempted = False
         st.session_state.initial_greeting_shown_for_session = False
 
@@ -600,7 +604,7 @@ def main():
     if memory_state_changed:
         print(f"Memory state changed from {st.session_state._last_memory_state_was_enabled} to {st.session_state.long_term_memory_enabled}. Resetting relevant state.")
         # Reset control flags
-        st.session_state.user_id_setup_done = False
+        # st.session_state.user_id_setup_done = False # Removed
         st.session_state.initial_data_load_attempted = False
         st.session_state.initial_greeting_shown_for_session = False # Reset greeting flag
 
@@ -613,21 +617,31 @@ def main():
         st.session_state.suggested_prompts = DEFAULT_PROMPTS
         # Keep uploaded_documents and uploaded_dataframes as they are independent of this memory toggle
 
+        # Crucially, if memory is turned OFF, we need to clear the user_id
+        # so a new temporary one is generated.
+        if not st.session_state.long_term_memory_enabled:
+            if "user_id" in st.session_state:
+                del st.session_state.user_id # Force new temporary ID generation
+
         # Update the tracking flag AFTER processing changes
         st.session_state._last_memory_state_was_enabled = st.session_state.long_term_memory_enabled
         print("Finished resetting state due to memory change.")
 
     # --- User ID Setup ---
-    if not st.session_state.user_id_setup_done:
+    # This block now only determines if long-term memory is enabled and assigns the user_id
+    # The actual retrieval/creation of the user_id is handled by the cached function or direct UUID generation.
+    if "user_id" not in st.session_state: # Check if user_id is already set in session state
         print("Attempting User ID setup...")
         if st.session_state.long_term_memory_enabled:
-            st.session_state.user_id = get_user_id_from_cookie()
+            st.session_state.user_id = _get_user_id_from_cookie_cached() # Call the cached function
             print(f"User ID for long-term memory: {st.session_state.user_id}")
         else:
             st.session_state.user_id = str(uuid.uuid4()) # Temporary ID for non-persistent session
             print(f"User ID for non-persistent session: {st.session_state.user_id}")
-        st.session_state.user_id_setup_done = True
         print("User ID setup complete.")
+    else:
+        print(f"User ID already set in session state: {st.session_state.user_id}")
+
 
     # --- Agent Initialization ---
     if AGENT_SESSION_KEY not in st.session_state:

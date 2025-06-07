@@ -54,6 +54,16 @@ def _get_initial_greeting_text():
     """Generates and caches the initial LLM greeting text for startup."""
     return generate_llm_greeting()
 
+# New cached wrapper for suggested prompts
+@st.cache_data(show_spinner=False)
+def _cached_generate_suggested_prompts(chat_history: List[Dict[str, Any]]) -> List[str]:
+    """
+    Generates suggested prompts based on chat history, cached to avoid redundant LLM calls.
+    The cache key is based on the content of chat_history.
+    """
+    print("Generating suggested prompts using LLM (cached call)...") # Log when LLM is actually called
+    return generate_suggested_prompts(chat_history)
+
 # Define dynamic tool functions that can access st.session_state
 def read_uploaded_document_tool_fn(filename: str) -> str:
     """Reads the full text content of a document previously uploaded by the user.
@@ -275,6 +285,9 @@ def create_new_chat_session_in_memory():
     st.session_state.messages = st.session_state.all_chat_messages[new_chat_id]
     st.session_state.chat_modified = False # New chats are initially unsaved
     
+    # Generate initial prompts for the new chat
+    st.session_state.suggested_prompts = _cached_generate_suggested_prompts(st.session_state.messages)
+
     print(f"Created new chat in memory: ID={new_chat_id}, Name='{new_chat_name}' (not yet saved to disk)")
     return new_chat_id # Return the new chat ID
 
@@ -323,7 +336,7 @@ def switch_chat(chat_id: str):
         st.session_state.all_chat_messages[chat_id] = []
 
 
-    st.session_state.suggested_prompts = generate_suggested_prompts(st.session_state.messages)
+    st.session_state.suggested_prompts = _cached_generate_suggested_prompts(st.session_state.messages) # Use cached version
     st.session_state.chat_modified = True # Assume existing chat is modified if switched to (will be saved on next AI response)
     print(f"Switched to chat: ID={chat_id}, Name='{st.session_state.chat_metadata.get(chat_id, 'Unknown')}'")
     st.rerun()
@@ -371,6 +384,7 @@ def delete_chat_session(chat_id: str):
                 # Keep generate_llm_greeting here for new session after deletion
                 st.session_state.messages = [{"role": "assistant", "content": generate_llm_greeting()}]
                 st.session_state.chat_modified = False
+                st.session_state.suggested_prompts = _cached_generate_suggested_prompts(st.session_state.messages) # Generate prompts for new empty chat
                 st.rerun() # Rerun to display the new state
         else:
             # If a non-current chat was deleted, just rerun to update the sidebar
@@ -472,7 +486,7 @@ def handle_user_input(chat_input_value: str | None):
         if st.session_state.chat_modified and st.session_state.long_term_memory_enabled:
             save_chat_history(st.session_state.user_id, st.session_state.current_chat_id, st.session_state.messages)
 
-        st.session_state.suggested_prompts = generate_suggested_prompts(st.session_state.messages)
+        st.session_state.suggested_prompts = _cached_generate_suggested_prompts(st.session_state.messages) # Use cached version
         st.rerun()
 
 def reset_chat_callback():
@@ -500,6 +514,7 @@ def handle_regeneration_request():
         st.session_state.messages[0]['content'] = new_greeting
         if st.session_state.long_term_memory_enabled: # Only save if memory is enabled
             save_chat_history(st.session_state.user_id, st.session_state.current_chat_id, st.session_state.messages)
+        st.session_state.suggested_prompts = _cached_generate_suggested_prompts(st.session_state.messages) # Generate prompts for regenerated greeting
         st.rerun()
         return
 
@@ -518,7 +533,7 @@ def handle_regeneration_request():
     st.session_state.messages.append({"role": "assistant", "content": response_text})
     if st.session_state.long_term_memory_enabled: # Only save if memory is enabled
         save_chat_history(st.session_state.user_id, st.session_state.current_chat_id, st.session_state.messages)
-    st.session_state.suggested_prompts = generate_suggested_prompts(st.session_state.messages)
+    st.session_state.suggested_prompts = _cached_generate_suggested_prompts(st.session_state.messages) # Use cached version
     st.rerun()
 
 def forget_me_and_reset():
@@ -549,7 +564,7 @@ def forget_me_and_reset():
     # Keep generate_llm_greeting here for new session after full reset
     st.session_state.messages = [{"role": "assistant", "content": generate_llm_greeting()}] # New greeting
     st.session_state.chat_modified = False
-    st.session_state.suggested_prompts = DEFAULT_PROMPTS
+    st.session_state.suggested_prompts = _cached_generate_suggested_prompts(st.session_state.messages) # Generate prompts for the reset state
     st.session_state.renaming_chat_id = None
     st.session_state.uploaded_documents = {}
     st.session_state.uploaded_dataframes = {}
@@ -593,7 +608,7 @@ def main():
         st.session_state.current_chat_id = None
         st.session_state.messages = []  # Start empty, will be populated
         st.session_state.chat_modified = False
-        st.session_state.suggested_prompts = DEFAULT_PROMPTS
+        st.session_state.suggested_prompts = DEFAULT_PROMPTS # Initial default prompts
         st.session_state.renaming_chat_id = None
         st.session_state.uploaded_documents = {} # Initialize here for consistency
         st.session_state.uploaded_dataframes = {} # Initialize here for consistency
@@ -616,7 +631,7 @@ def main():
         st.session_state.current_chat_id = None
         st.session_state.messages = [] # Clear messages
         st.session_state.chat_modified = False
-        st.session_state.suggested_prompts = DEFAULT_PROMPTS
+        st.session_state.suggested_prompts = DEFAULT_PROMPTS # Reset to default prompts
         # Keep uploaded_documents and uploaded_dataframes as they are independent of this memory toggle
 
         # Crucially, if memory is turned OFF, we need to clear the user_id
@@ -687,6 +702,7 @@ def main():
                     print(f"Chat file not found for {st.session_state.current_chat_id}. Setting to empty list.")
                     st.session_state.all_chat_messages[st.session_state.current_chat_id] = []
             st.session_state.messages = st.session_state.all_chat_messages.get(st.session_state.current_chat_id, [])
+            st.session_state.suggested_prompts = _cached_generate_suggested_prompts(st.session_state.messages) # Ensure prompts are generated for loaded chat
             st.session_state.chat_modified = True # Assume modification if loaded
         # Case 2: No current chat ID, but other chats exist in metadata -> select first one
         elif not st.session_state.current_chat_id and st.session_state.chat_metadata:
@@ -709,7 +725,7 @@ def main():
                     print(f"Chat file not found for {st.session_state.current_chat_id}. Setting to empty list.")
                     st.session_state.all_chat_messages[st.session_state.current_chat_id] = []
             st.session_state.messages = st.session_state.all_chat_messages.get(st.session_state.current_chat_id, [])
-            st.session_state.suggested_prompts = generate_suggested_prompts(st.session_state.messages)
+            st.session_state.suggested_prompts = _cached_generate_suggested_prompts(st.session_state.messages)
             st.session_state.chat_modified = True
         # Case 3: No chats exist in metadata (e.g., new user, or all chats deleted)
         else: # This also covers if current_chat_id was None and chat_metadata was empty
@@ -720,6 +736,7 @@ def main():
                 st.session_state.initial_greeting_shown_for_session = True
                 st.session_state.current_chat_id = None # No active chat yet
                 st.session_state.chat_modified = False # Greeting is not a modification
+                st.session_state.suggested_prompts = _cached_generate_suggested_prompts(st.session_state.messages) # Generate prompts for initial greeting
             # No else print here, as the greeting should persist and no further logging is needed.
     else: # Long-term memory is DISABLED
         # If current_chat_id is None (no temporary session exists yet for this disabled-memory run)
@@ -736,6 +753,7 @@ def main():
             st.session_state.all_chat_messages = {new_temp_chat_id: st.session_state.messages}
             st.session_state.chat_modified = False # Not saved to disk
             st.session_state.initial_greeting_shown_for_session = True
+            st.session_state.suggested_prompts = _cached_generate_suggested_prompts(st.session_state.messages) # Generate prompts for new temporary chat
             print(f"Created new temporary chat {new_temp_chat_id}")
         # No else print here, as the state is already established.
 
@@ -743,6 +761,8 @@ def main():
     if not isinstance(st.session_state.messages, list):
         print("Warning: st.session_state.messages was not a list. Resetting to empty list.")
         st.session_state.messages = []
+        # If messages was reset, prompts should also be reset
+        st.session_state.suggested_prompts = DEFAULT_PROMPTS # Or _cached_generate_suggested_prompts([])
 
 
     if st.session_state.get("do_regenerate", False):

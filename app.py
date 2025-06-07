@@ -48,6 +48,12 @@ def setup_global_llm_settings():
         st.error(f"Fatal Error: Could not initialize LLM settings. {e}")
         st.stop()
 
+# New cached function for initial greeting
+@st.cache_data(show_spinner=False)
+def _get_initial_greeting_text():
+    """Generates and caches the initial LLM greeting text for startup."""
+    return generate_llm_greeting()
+
 # Define dynamic tool functions that can access st.session_state
 def read_uploaded_document_tool_fn(filename: str) -> str:
     """Reads the full text content of a document previously uploaded by the user.
@@ -261,6 +267,7 @@ def create_new_chat_session_in_memory():
         new_chat_name = f"Idea {next_idea_num}"
 
     st.session_state.chat_metadata[new_chat_id] = new_chat_name
+    # Keep generate_llm_greeting here for new chat creation
     st.session_state.all_chat_messages[new_chat_id] = [{"role": "assistant", "content": generate_llm_greeting()}]
     st.session_state.current_chat_id = new_chat_id
     st.session_state.messages = st.session_state.all_chat_messages[new_chat_id]
@@ -359,6 +366,7 @@ def delete_chat_session(chat_id: str):
                 # No other chats left, set to a "no chat" state
                 print("Deleted last chat. Setting to no active chat state.")
                 st.session_state.current_chat_id = None
+                # Keep generate_llm_greeting here for new session after deletion
                 st.session_state.messages = [{"role": "assistant", "content": generate_llm_greeting()}]
                 st.session_state.chat_modified = False
                 st.rerun() # Rerun to display the new state
@@ -485,7 +493,8 @@ def handle_regeneration_request():
 
     if len(st.session_state.messages) == 1:
         print("Regenerating initial greeting...")
-        new_greeting = generate_llm_greeting()
+        # Keep generate_llm_greeting here as it's an explicit regeneration request
+        new_greeting = generate_llm_greeting() 
         st.session_state.messages[0]['content'] = new_greeting
         if st.session_state.long_term_memory_enabled: # Only save if memory is enabled
             save_chat_history(st.session_state.user_id, st.session_state.current_chat_id, st.session_state.messages)
@@ -535,6 +544,7 @@ def forget_me_and_reset():
     st.session_state.chat_metadata = {}
     st.session_state.all_chat_messages = {}
     st.session_state.current_chat_id = None
+    # Keep generate_llm_greeting here for new session after full reset
     st.session_state.messages = [{"role": "assistant", "content": generate_llm_greeting()}] # New greeting
     st.session_state.chat_modified = False
     st.session_state.suggested_prompts = DEFAULT_PROMPTS
@@ -692,7 +702,8 @@ def main():
             print("No existing chats found in metadata for long-term memory user.")
             if not st.session_state.initial_greeting_shown_for_session:
                 print("Initial greeting for this session not shown. Generating and displaying.")
-                st.session_state.messages = [{"role": "assistant", "content": generate_llm_greeting()}]
+                # Use the cached greeting for initial startup
+                st.session_state.messages = [{"role": "assistant", "content": _get_initial_greeting_text()}]
                 st.session_state.initial_greeting_shown_for_session = True
                 st.session_state.current_chat_id = None # No active chat yet
                 st.session_state.chat_modified = False # Greeting is not a modification
@@ -713,13 +724,11 @@ def main():
             print("No active temporary session. Creating one with greeting.")
             new_temp_chat_id = str(uuid.uuid4())
             st.session_state.current_chat_id = new_temp_chat_id
-            st.session_state.messages = [{"role": "assistant", "content": generate_llm_greeting()}]
+            # Use the cached greeting for initial startup
+            st.session_state.messages = [{"role": "assistant", "content": _get_initial_greeting_text()}]
             st.session_state.chat_metadata = {new_temp_chat_id: "Current Session"}
             st.session_state.all_chat_messages = {new_temp_chat_id: st.session_state.messages}
             st.session_state.chat_modified = False # Not saved to disk
-            # For disabled memory, the greeting is part of this temporary session's creation.
-            # We can use initial_greeting_shown_for_session to track this too,
-            # though its primary role is for LTM enabled state.
             st.session_state.initial_greeting_shown_for_session = True
             print(f"Created new temporary chat {new_temp_chat_id}")
         else:

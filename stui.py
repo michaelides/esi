@@ -249,6 +249,30 @@ def display_chat():
                         st.session_state.do_regenerate = True
                         st.rerun()
 
+def remove_uploaded_file(file_name: str, file_type: str):
+    """Removes an uploaded file from session state and from the workspace."""
+    if file_type == "document":
+        if file_name in st.session_state.uploaded_documents:
+            del st.session_state.uploaded_documents[file_name]
+            st.toast(f"Document '{file_name}' removed.", icon="🗑️")
+    elif file_type == "dataframe":
+        if file_name in st.session_state.uploaded_dataframes:
+            del st.session_state.uploaded_dataframes[file_name]
+            st.toast(f"Dataset '{file_name}' removed.", icon="🗑️")
+    
+    # Attempt to delete the physical file from the workspace
+    file_path_in_workspace = os.path.join(UI_ACCESSIBLE_WORKSPACE, file_name)
+    if os.path.exists(file_path_in_workspace):
+        try:
+            os.remove(file_path_in_workspace)
+            print(f"Successfully deleted physical file: {file_path_in_workspace}")
+        except Exception as e:
+            print(f"Error deleting physical file '{file_path_in_workspace}': {e}")
+            st.error(f"Error deleting physical file '{file_name}': {e}")
+    
+    st.rerun()
+
+
 def process_uploaded_file(uploaded_file):
     file_name = uploaded_file.name
     file_extension = os.path.splitext(file_name)[1].lower()
@@ -263,6 +287,16 @@ def process_uploaded_file(uploaded_file):
     except Exception as e:
         st.error(f"Error saving file '{file_name}' to workspace: {e}")
         return None, None # Indicate failure
+
+    # --- ADDED: Warning for research data files ---
+    data_file_extensions = [".csv", ".xlsx", ".sav", ".rdata", ".rds"]
+    if file_extension in data_file_extensions:
+        st.warning(
+            "**Important:** If this file contains research data, please ensure you have "
+            "obtained all necessary ethical approvals for its use and upload. "
+            "Do not upload sensitive or confidential data without proper authorization."
+        )
+    # --- END ADDED SECTION ---
 
     # Now, process the file content and store in session state for agent tools
     if file_extension in [".pdf", ".docx", ".md", ".txt"]: # Added .txt
@@ -455,11 +489,31 @@ def create_interface(
                 if st.session_state.uploaded_documents:
                     st.markdown("##### Documents:")
                     for doc_name in st.session_state.uploaded_documents.keys():
-                        st.write(f"- 📄 {doc_name}")
+                        col1, col2 = st.columns([0.8, 0.2])
+                        with col1:
+                            st.write(f"- 📄 {doc_name}")
+                        with col2:
+                            st.button(
+                                "🗑️",
+                                key=f"remove_doc_{doc_name}",
+                                help=f"Remove {doc_name}",
+                                on_click=remove_uploaded_file,
+                                args=(doc_name, "document")
+                            )
                 if st.session_state.uploaded_dataframes:
                     st.markdown("##### Datasets:")
                     for df_name in st.session_state.uploaded_dataframes.keys():
-                        st.write(f"- 📊 {df_name}")
+                        col1, col2 = st.columns([0.8, 0.2])
+                        with col1:
+                            st.write(f"- 📊 {df_name}")
+                        with col2:
+                            st.button(
+                                "🗑️",
+                                key=f"remove_df_{df_name}",
+                                help=f"Remove {df_name}",
+                                on_click=remove_uploaded_file,
+                                args=(df_name, "dataframe")
+                            )
                 st.markdown("---")
             else:
                 st.info("No files uploaded yet.")

@@ -580,7 +580,6 @@ def main():
         print("First run in session: Initializing session control flags and core variables.")
         st.session_state.long_term_memory_enabled = True  # Default
         st.session_state._last_memory_state_was_enabled = True
-        # st.session_state.user_id_setup_done = False # Removed
         st.session_state.initial_data_load_attempted = False
         st.session_state.initial_greeting_shown_for_session = False
 
@@ -604,7 +603,6 @@ def main():
     if memory_state_changed:
         print(f"Memory state changed from {st.session_state._last_memory_state_was_enabled} to {st.session_state.long_term_memory_enabled}. Resetting relevant state.")
         # Reset control flags
-        # st.session_state.user_id_setup_done = False # Removed
         st.session_state.initial_data_load_attempted = False
         st.session_state.initial_greeting_shown_for_session = False # Reset greeting flag
 
@@ -723,10 +721,9 @@ def main():
                 st.session_state.chat_modified = False # Greeting is not a modification
             else:
                 # Greeting already shown, but still no chats. messages should be empty or as is.
-                # This path might be taken if user clears all chats then reloads.
-                # Ensure messages is empty if no current_chat_id.
-                if not st.session_state.current_chat_id:
-                    st.session_state.messages = []
+                # The greeting should persist in st.session_state.messages from the first run
+                # if initial_greeting_shown_for_session is True and current_chat_id is None.
+                # Removed the line: if not st.session_state.current_chat_id: st.session_state.messages = []
                 print("Initial greeting already shown for session, no new greeting needed. Messages remain as is or empty.")
     else: # Long-term memory is DISABLED
         print("Long-term memory is disabled.")

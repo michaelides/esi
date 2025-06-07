@@ -483,40 +483,41 @@ def create_interface(
                 else:
                     st.info(f"File '{uploaded_file.name}' has already been uploaded and processed.")
             
-            st.subheader("Uploaded Files")
-            if st.session_state.uploaded_documents or st.session_state.uploaded_dataframes:
-                st.markdown("---")
-                if st.session_state.uploaded_documents:
-                    st.markdown("##### Documents:")
-                    for doc_name in st.session_state.uploaded_documents.keys():
-                        col1, col2 = st.columns([0.8, 0.2])
-                        with col1:
-                            st.write(f"- 📄 {doc_name}")
-                        with col2:
-                            st.button(
-                                "🗑️",
-                                key=f"remove_doc_{doc_name}",
-                                help=f"Remove {doc_name}",
-                                on_click=remove_uploaded_file,
-                                args=(doc_name, "document")
-                            )
-                if st.session_state.uploaded_dataframes:
-                    st.markdown("##### Datasets:")
-                    for df_name in st.session_state.uploaded_dataframes.keys():
-                        col1, col2 = st.columns([0.8, 0.2])
-                        with col1:
-                            st.write(f"- 📊 {df_name}")
-                        with col2:
-                            st.button(
-                                "🗑️",
-                                key=f"remove_df_{df_name}",
-                                help=f"Remove {df_name}",
-                                on_click=remove_uploaded_file,
-                                args=(df_name, "dataframe")
-                            )
-                st.markdown("---")
-            else:
-                st.info("No files uploaded yet.")
+            # Removed the "Uploaded Files" subsection to avoid duplication
+            # st.subheader("Uploaded Files")
+            # if st.session_state.uploaded_documents or st.session_state.uploaded_dataframes:
+            #     st.markdown("---")
+            #     if st.session_state.uploaded_documents:
+            #         st.markdown("##### Documents:")
+            #         for doc_name in st.session_state.uploaded_documents.keys():
+            #             col1, col2 = st.columns([0.8, 0.2])
+            #             with col1:
+            #                 st.write(f"- 📄 {doc_name}")
+            #             with col2:
+            #                 st.button(
+            #                     "🗑️",
+            #                     key=f"remove_doc_{doc_name}",
+            #                     help=f"Remove {doc_name}",
+            #                     on_click=remove_uploaded_file,
+            #                     args=(doc_name, "document")
+            #                 )
+            #     if st.session_state.uploaded_dataframes:
+            #         st.markdown("##### Datasets:")
+            #         for df_name in st.session_state.uploaded_dataframes.keys():
+            #             col1, col2 = st.columns([0.8, 0.2])
+            #             with col1:
+            #                 st.write(f"- 📊 {df_name}")
+            #             with col2:
+            #                 st.button(
+            #                     "🗑️",
+            #                     key=f"remove_df_{df_name}",
+            #                     help=f"Remove {df_name}",
+            #                     on_click=remove_uploaded_file,
+            #                     args=(df_name, "dataframe")
+            #                 )
+            #     st.markdown("---")
+            # else:
+            #     st.info("No files uploaded yet.")
 
         with st.expander("**LLM Settings**", expanded=False, icon = ":material/tune:"):
             st.slider(

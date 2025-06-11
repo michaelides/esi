@@ -3,7 +3,6 @@ import os
 import json
 import re
 import uuid
-import datetime # Added import
 import extra_streamlit_components as esc
 from typing import List, Dict, Any
 from llama_index.core.llms import ChatMessage, MessageRole
@@ -647,18 +646,12 @@ def forget_me_and_reset():
 def _set_long_term_memory_preference():
     """Callback to save the long_term_memory_enabled state to a cookie."""
     current_value = st.session_state.long_term_memory_enabled
-<<<<<<< HEAD
-    expires_at = datetime.datetime.now() + datetime.timedelta(days=365)
-    cookies.set(cookie="long_term_memory_pref", val=str(current_value), expires_at=expires_at)
-    print(f"Long-term memory preference saved to persistent cookie (expires {expires_at}): {current_value}")
-=======
     try:
         cookies.set(cookie="long_term_memory_pref", val=str(current_value))
         print(f"Long-term memory preference saved to cookie: {current_value}")
     except Exception as e:
         print(f"ERROR: Failed to save long-term memory preference to cookie: {e}")
         st.error(f"Failed to save preference: {e}")
->>>>>>> 31dbdc1 (new attempt)
     # No st.rerun() here, as the toggle itself triggers a rerun.
     # The main loop's memory state change detection will handle the rest.
     st.session_state._last_memory_state_changed_by_toggle = True

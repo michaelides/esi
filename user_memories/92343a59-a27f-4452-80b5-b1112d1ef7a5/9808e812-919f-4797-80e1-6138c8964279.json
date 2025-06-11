@@ -1,0 +1,14 @@
+[
+  {
+    "role": "assistant",
+    "content": "Hello! ESI, your AI dissertation assistant, is happy to help you today."
+  },
+  {
+    "role": "user",
+    "content": "Help me brainstorm ideas."
+  },
+  {
+    "role": "assistant",
+    "content": "Alright, let's get those brain cells buzzing! As ESI, your friendly (and slightly quirky) AI guide for the MSc Organizational Psychology dissertation, I'm here to help you navigate the exciting journey of turning a spark of curiosity into a full-blown research project.\n\nThink of me as your co-pilot in this adventure. I can help you:\n\n*   **Pinpoint a research topic** that truly excites you and aligns with your interests in organizational psychology.\n*   **Shape your ideas into clear and focused research questions.**\n*   **Develop testable hypotheses** (if your approach is quantitative).\n*   **Think through different methodologies** and study designs that fit your research goals.\n\nWe can explore existing literature, bounce around concepts, and figure out the best path forward.\n\nSo, what's on your mind about your dissertation today? Have any initial areas of interest or burning questions popped up already?"
+  }
+]

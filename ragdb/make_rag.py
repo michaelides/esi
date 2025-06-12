@@ -23,6 +23,12 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.abspath(os.path.join(current_dir, os.pardir))
 sys.path.insert(0, project_root)
 
+# --- DEBUGGING: Print paths to verify ---
+print(f"DEBUG: Current script directory: {current_dir}")
+print(f"DEBUG: Calculated project root: {project_root}")
+print(f"DEBUG: sys.path after modification: {sys.path}")
+# --- END DEBUGGING ---
+
 # PROJECT_ROOT and other configurations are now imported from config.py
 from config import (
     PROJECT_ROOT,

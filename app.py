@@ -800,28 +800,6 @@ def main():
     st.session_state.chat_metadata = chat_metadata_val
     st.session_state.all_chat_messages = all_chat_messages_val
 
-    print(f"LOG: Main: User ID from _initialize_user_session_data: {st.session_state.user_id}")
-    print(f"LOG: Main: Cookie action flag from _initialize_user_session_data: {cookie_action}")
-
-    # --- Perform Cookie Operations Based on Flag ---
-    if cookie_action == "SET_COOKIE":
-        try:
-            cookies.set(cookie="user_id", val=st.session_state.user_id)
-            print(f"LOG: Main: SET_COOKIE action. Set user_id cookie to: {st.session_state.user_id}")
-        except Exception as e:
-            print(f"ERROR: Main: Failed to set user_id cookie: {e}")
-            st.error(f"Failed to set user ID cookie: {e}")
-    elif cookie_action == "DELETE_COOKIE":
-        try:
-            cookies.delete(cookie="user_id")
-            print("LOG: Main: DELETE_COOKIE action. Deleted user_id cookie.")
-        except Exception as e:
-            print(f"ERROR: Main: Failed to delete user_id cookie: {e}")
-            st.error(f"Failed to delete user ID cookie: {e}")
-    elif cookie_action == "DO_NOTHING":
-        print("LOG: Main: DO_NOTHING cookie action.")
-    # Log user_id only if it's newly set or changed, too verbose otherwise.
-    # print(f"User ID set to: {st.session_state.user_id}")
 
     # --- Agent Initialization (runs once per session) ---
     print(f"LOG: Main: Checking for agent in session. AGENT_SESSION_KEY exists: {AGENT_SESSION_KEY in st.session_state}")

@@ -860,6 +860,14 @@ def main():
     st.session_state.chat_metadata = chat_metadata_val
     st.session_state.all_chat_messages = all_chat_messages_val
 
+    # --- Apply cookie actions based on _initialize_user_session_data result ---
+    if cookie_action == "SET_COOKIE":
+        cookies.set(cookie="user_id", val=user_id_val)
+        print(f"LOG: Main: Set user_id cookie: {user_id_val}")
+    elif cookie_action == "DELETE_COOKIE":
+        cookies.delete(cookie="user_id")
+        print(f"LOG: Main: Deleted user_id cookie.")
+    # --- End Apply cookie actions ---
 
     # --- Agent Initialization (runs once per session) ---
     print(f"LOG: Main: Checking for agent in session. AGENT_SESSION_KEY exists: {AGENT_SESSION_KEY in st.session_state}")

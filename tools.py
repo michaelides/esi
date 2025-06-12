@@ -2,6 +2,7 @@ import os
 import json
 import subprocess
 import sys
+import urllib.parse # Added for URL encoding
 
 from llama_index.core.tools import FunctionTool, QueryEngineTool
 from llama_index.core.vector_stores import SimpleVectorStore
@@ -201,22 +202,35 @@ def get_rag_tool_for_agent():
                                  file_name = os.path.basename(file_path)
                                  
                                  # Determine the correct Hugging Face path for the source file
-                                 hf_source_subfolder = None
+                                 hf_relative_path_in_dataset = None
                                  if file_path.startswith(SOURCE_DATA_DIR):
-                                     hf_source_subfolder = "articles"
+                                     # Example: file_path = /project_root/ragdb/articles/file.pdf
+                                     # We want: articles/file.pdf
+                                     hf_relative_path_in_dataset = os.path.relpath(file_path, PROJECT_ROOT)
                                  elif file_path.startswith(WEB_MARKDOWN_PATH):
-                                     hf_source_subfolder = "web_markdown"
+                                     # Example: file_path = /project_root/ragdb/web_markdown/file.md
+                                     # We want: web_markdown/file.md
+                                     hf_relative_path_in_dataset = os.path.relpath(file_path, PROJECT_ROOT)
                                  elif file_path.startswith(ADDITIONAL_SOURCE_DATA_DIR):
-                                     hf_source_subfolder = HF_ADDITIONAL_SOURCE_DATA_UPLOAD_PATH
+                                     # Example: file_path = /project_root/ragdb/source_data/file.pdf
+                                     # We want: source_data/file.pdf (which maps to HF_ADDITIONAL_SOURCE_DATA_UPLOAD_PATH)
+                                     # This needs to be relative to PROJECT_ROOT, then map to the HF upload path
+                                     relative_to_additional_source = os.path.relpath(file_path, ADDITIONAL_SOURCE_DATA_DIR)
+                                     hf_relative_path_in_dataset = os.path.join(HF_ADDITIONAL_SOURCE_DATA_UPLOAD_PATH, relative_to_additional_source)
                                  
                                  download_url = None
-                                 if hf_source_subfolder:
-                                     download_url = f"https://huggingface.co/datasets/{HF_DATASET_ID}/resolve/main/{hf_source_subfolder}/{file_name}"
+                                 if hf_relative_path_in_dataset:
+                                     # URL-encode the entire relative path within the dataset, keeping slashes
+                                     encoded_hf_relative_path = urllib.parse.quote(hf_relative_path_in_dataset, safe='/')
+                                     download_url = f"https://huggingface.co/datasets/{HF_DATASET_ID}/resolve/main/{encoded_hf_relative_path}"
                                  else:
-                                     # Fallback if path doesn't match expected source directories
-                                     print(f"Warning: Could not map local file_path '{file_path}' to a known Hugging Face source subfolder.")
-                                     download_url = f"file://{file_path}" # Provide local path as fallback
+                                     # Fallback for local paths not mapped to HF dataset structure
+                                     print(f"Warning: Could not map local file_path '{file_path}' to a known Hugging Face source subfolder. Providing local file:// URI.")
+                                     # For local paths, ensure it's still a file:// URI and also encode it
+                                     download_url = f"file://{urllib.parse.quote(file_path)}"
 
+                                 print(f"DEBUG: Constructed download_url: {download_url}") # Added debug print
+                                 
                                  current_citation_number = None
                                  if file_path not in assigned_pdf_citations:
                                      assigned_pdf_citations[file_path] = citation_counter

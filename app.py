@@ -18,6 +18,12 @@ from PyPDF2 import PdfReader
 import io # Import io module for BytesIO
 from llama_index.core.tools import FunctionTool # Import FunctionTool
 
+# Import necessary libraries for Hugging Face integration
+from datasets import Dataset, load_dataset
+from huggingface_hub import HfApi, Repository
+import pandas as pd # Import pandas for data manipulation
+import os # Import os to access environment variables
+
 load_dotenv()
 
 PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
@@ -102,13 +108,13 @@ def analyze_dataframe_tool_fn(filename: str, head_rows: int = 5) -> str:
     return info_str
 
 @st.cache_resource
-def setup_agent() -> tuple[Any | None, str | None]:
-    """Initializes the orchestrator agent using st.cache_resource to run only once.
+def setup_agent(max_search_results: int) -> tuple[Any | None, str | None]:
+    """Initializes the orchestrator agent using st.cache_resource to run only once per max_search_results value.
     Returns a tuple (agent_instance, error_message).
     agent_instance is None if an error occurred.
     error_message is None if successful.
     """
-    print("LOG: setup_agent() CALLED (Cacheable)")
+    print(f"LOG: setup_agent() CALLED (Cacheable) with max_search_results={max_search_results}")
     print("LOG: Agent not in session state. Initializing agent...") # Moved here
     try:
         # Create dynamic tools here, passing the functions defined above
@@ -117,16 +123,17 @@ def setup_agent() -> tuple[Any | None, str | None]:
             name="read_uploaded_document",
             description="Reads the full text content of a document previously uploaded by the user. Input is the exact filename (e.g., 'my_dissertation.pdf'). Use this to answer questions about the content of uploaded documents."
         )
-        
+
         dataframe_analyzer_tool = FunctionTool.from_defaults(
             fn=analyze_dataframe_tool_fn,
             name="analyze_uploaded_dataframe",
             description="Provides summary information (shape, columns, dtypes, head, describe) about a pandas DataFrame previously uploaded by the user. Input is the exact filename (e.g., 'my_data.csv'). Use this to understand the structure and basic statistics of uploaded datasets. For more complex analysis, use the 'code_interpreter' tool."
         )
 
-        # Pass these dynamic tools to the agent creation function
+        # Pass these dynamic tools and max_search_results to the agent creation function
         agent_instance = create_orchestrator_agent(
-            dynamic_tools=[uploaded_doc_reader_tool, dataframe_analyzer_tool]
+            dynamic_tools=[uploaded_doc_reader_tool, dataframe_analyzer_tool],
+            max_search_results=max_search_results # Pass the parameter here
         )
         print("LOG: Orchestrator agent object initialized (cached) successfully.") # Moved here
         return agent_instance, None
@@ -230,19 +237,69 @@ def _load_user_data_from_disk(user_id: str) -> Dict[str, Any]:
     return {"metadata": all_chat_metadata, "messages": all_chat_messages}
 
 def save_chat_history(user_id: str, chat_id: str, messages: List[Dict[str, Any]]):
-    """Saves a specific chat history for a given user ID to a JSON file."""
+    """
+    Saves a specific chat history for a given user ID to a JSON file locally
+    and uploads it to a Hugging Face dataset.
+    """
     if not st.session_state.long_term_memory_enabled:
-        print("Long-term memory disabled. Not saving chat history to disk.")
+        print("Long-term memory disabled. Not saving chat history.")
         return
+
+    # --- Local Save ---
     user_dir = os.path.join(MEMORY_DIR, user_id)
     os.makedirs(user_dir, exist_ok=True)
     memory_file = os.path.join(user_dir, f"{chat_id}.json")
     try:
         with open(memory_file, "w", encoding="utf-8") as f:
             json.dump(messages, f, indent=2)
-        print(f"Saved chat history for chat {chat_id} (user {user_id}) to {memory_file}")
+        print(f"Saved chat history for chat {chat_id} (user {user_id}) to {memory_file} locally.")
     except Exception as e:
-        print(f"Error saving chat history for chat {chat_id} (user {user_id}): {e}")
+        print(f"Error saving chat history locally for chat {chat_id} (user {user_id}): {e}")
+
+    # --- Hugging Face Upload ---
+    hf_token = os.getenv("HF_TOKEN")
+    if not hf_token:
+        print("HF_TOKEN environment variable not set. Skipping Hugging Face upload.")
+        return
+
+    repo_id = "gm42/user_memories" # Your Hugging Face dataset repository ID
+
+    try:
+        # Prepare data for the dataset
+        # Each message becomes a row, including user_id and chat_id for context
+        data_to_upload = []
+        for msg in messages:
+            data_to_upload.append({
+                "user_id": user_id,
+                "chat_id": chat_id,
+                "role": msg.get("role", "unknown"), # Default to 'unknown' if role is missing
+                "content": msg.get("content", "") # Default to empty string if content is missing
+            })
+
+        # Convert to pandas DataFrame and then to Dataset
+        df_to_upload = pd.DataFrame(data_to_upload)
+        new_dataset_part = Dataset.from_pandas(df_to_upload)
+
+        # Load existing dataset from Hugging Face
+        # Use download_mode="force_redownload" if you need to ensure the latest version is fetched
+        # Consider using a different strategy for large datasets (e.g., append to a specific file)
+        try:
+            existing_dataset = load_dataset(repo_id, split="train")
+            print(f"Loaded existing dataset from {repo_id} with {len(existing_dataset)} rows.")
+            # Concatenate existing and new data
+            combined_dataset = Dataset.from_pandas(pd.concat([existing_dataset.to_pandas(), new_dataset_part.to_pandas()], ignore_index=True))
+            print(f"Combined dataset has {len(combined_dataset)} rows.")
+        except Exception as e:
+            print(f"Could not load existing dataset from {repo_id}: {e}. Creating a new dataset.")
+            combined_dataset = new_dataset_part # Start with the new data if loading fails
+
+        # Push the combined dataset back to the Hugging Face Hub
+        combined_dataset.push_to_hub(repo_id, private=True, token=hf_token)
+        print(f"Successfully uploaded chat history for chat {chat_id} (user {user_id}) to Hugging Face dataset '{repo_id}'.")
+
+    except Exception as e:
+        print(f"Error uploading chat history to Hugging Face for chat {chat_id} (user {user_id}): {e}")
+        # Optionally, log this error more persistently or trigger an alert
 
 def save_chat_metadata(user_id: str, chat_metadata: Dict[str, str]):
     """Saves the chat metadata (ID to name mapping) for a user."""

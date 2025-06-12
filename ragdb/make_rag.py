@@ -1,127 +1,125 @@
 import os
 import asyncio
-from urllib.parse import urlparse
-from llama_index.core import SimpleDirectoryReader, VectorStoreIndex, StorageContext
+from typing import List, Tuple
+from llama_index.core import SimpleDirectoryReader, VectorStoreIndex, Settings
 from llama_index.core.node_parser import SentenceSplitter
-from llama_index.core.vector_stores import SimpleVectorStore
-from huggingface_hub import HfApi
-from llama_index.embeddings.google_genai import GoogleGenAIEmbedding
-from crawl4ai import AsyncWebCrawler, CrawlerRunConfig
-from crawl4ai.deep_crawling import BFSDeepCrawlStrategy
-from crawl4ai.content_scraping_strategy import LXMLWebScrapingStrategy
-from dotenv import load_dotenv
-import tempfile
-import shutil
+from llama_index.embeddings.huggingface import HuggingFaceEmbedding
+from llama_index.vector_stores.simple import SimpleVectorStore
+from llama_index.core.storage.storage_context import StorageContext
+from llama_index.core.schema import Document as LlamaDocument
+from llama_index.core.ingestion import IngestionPipeline
+from llama_index.readers.web import SimpleWebPageReader
+from llama_index.readers.file import PyMuPDFReader
+from llama_index.readers.markdown import MarkdownReader
+from llama_index.readers.json import JSONReader
+from llama_index.readers.csv import CSVReader
+from llama_index.readers.image import ImageReader
+from llama_index.readers.file.docs import DocxReader
+from llama_index.readers.file.epub import EpubReader
+from llama_index.readers.file.html import HTMLReader
+from llama_index.readers.file.ipynb import IPYNBReader
+from llama_index.readers.file.mbox import MboxReader
+from llama_index.readers.file.mp3 import Mp3Reader
+from llama_index.readers.file.odt import ODTReader
+from llama_index.readers.file.pdf import PDFReader
+from llama_index.readers.file.ppt import PptxReader
+from llama_index.readers.file.rtf import RtfReader
+from llama_index.readers.file.xml import XMLReader
+from llama_index.readers.file.video import VideoReader
+from llama_index.readers.file.base import DEFAULT_FILE_EXTRACTOR
+from llama_index.readers.file.image_caption import ImageCaptionReader
+from llama_index.readers.file.flat_json import FlatReader
+from llama_index.readers.file.unstructured import UnstructuredReader
+from llama_index.readers.file.slides import SlidesReader
+from llama_index.readers.file.excel import ExcelReader
 
-# Load environment variables from a .env file if it exists
+# Changed to relative imports for modules within the 'ragdb' package
+from .document_processor import load_and_process_documents, download_hf_dataset
+from .web_scraper import scrape_websites
+from dotenv import load_dotenv
+
 load_dotenv()
 
-# PROJECT_ROOT and other configurations are now imported from config.py
-from config import (
-    PROJECT_ROOT,
-    HF_DATASET_ID,
-    HF_VECTOR_STORE_SUBDIR,
-    CHUNK_SIZE,
-    CHUNK_OVERLAP,
-    SOURCE_DATA_DIR,
-    WEB_MARKDOWN_PATH,
-    WEBPAGES_FILE
-)
+# --- Configuration ---
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
+RAGDB_DIR = os.path.join(PROJECT_ROOT, "ragdb")
+WEB_MARKDOWN_DIR = os.path.join(RAGDB_DIR, "web_markdown")
+LOCAL_DATA_DIR = os.path.join(RAGDB_DIR, "local_data")
+SIMPLE_STORE_PATH_RELATIVE = os.getenv("SIMPLE_STORE_PATH", "ragdb/simple_vector_store")
+DB_PATH = os.path.join(PROJECT_ROOT, SIMPLE_STORE_PATH_RELATIVE)
+HF_DATASET_REPO_ID = os.getenv("HF_DATASET_REPO_ID", "gm42/esi_simplevector/simple_vector_store")
+WEB_PAGES_FILE = os.path.join(RAGDB_DIR, "webpages.txt")
 
-# Ensure HF_TOKEN is set for writing to Hugging Face Hub
-if not os.getenv("HF_TOKEN"):
-    print("Warning: HF_TOKEN environment variable is not set. Make sure you are logged in via `huggingface-cli login` or have set HF_TOKEN to write to the Hugging Face Dataset.")
-
-print(f"Target Hugging Face Dataset for RAG persistence: {HF_DATASET_ID}/{HF_VECTOR_STORE_SUBDIR}")
-
+# URLs to scrape (can be loaded from a file or defined here)
 URLS_TO_SCRAPE = []
-try:
-    # WEBPAGES_FILE is imported from config.py
-    with open(WEBPAGES_FILE, 'r') as file:
-        # Strip whitespace/newlines from each line
-        URLS_TO_SCRAPE = [line.strip() for line in file if line.strip()]
-    if not URLS_TO_SCRAPE:
-        print(f"Warning: {WEBPAGES_FILE} is empty. No webpages will be scraped.")
-except FileNotFoundError:
-    print(f"Warning: Could not find {WEBPAGES_FILE}. Please create this file in the project root directory and add URLs to scrape, one per line. No webpages will be scraped.")
-except Exception as e:
-    print(f"Error reading {WEBPAGES_FILE}: {e}. No webpages will be scraped.")
+# Add a print statement to help debug the path
+print(f"Attempting to read webpages from: {WEB_PAGES_FILE}")
+if os.path.exists(WEB_PAGES_FILE):
+    with open(WEB_PAGES_FILE, 'r') as f:
+        URLS_TO_SCRAPE = [line.strip() for line in f if line.strip()]
+else:
+    print(f"Warning: Could not find {WEB_PAGES_FILE}. Please create this file in the project root directory and add URLs to scrape, one per line. No webpages will be scraped.")
 
-# url_to_filename and scrape_websites functions have been moved to ragdb.web_scraper
-from ragdb.web_scraper import scrape_websites
-# Import document processing function
-from ragdb.document_processor import load_and_process_documents
-
-# --- Main Script ---
 async def main():
-    # --- Initialize Embedding Model ---
-    embedding_model = GoogleGenAIEmbedding(model_name="models/text-embedding-004")
+    print(f"Target Hugging Face Dataset for RAG persistence: {HF_DATASET_REPO_ID}")
 
-    print(f"Configuring RAG to persist to Hugging Face Dataset: {HF_DATASET_ID}, path in repo: {HF_VECTOR_STORE_SUBDIR}")
-
-    # 1. Scrape websites
-    # WEB_MARKDOWN_PATH is from config and is used by scrape_websites internally if not passed (though it is passed here)
-    # URLS_TO_SCRAPE is defined in this file (make_rag.py)
-    await scrape_websites(URLS_TO_SCRAPE, WEB_MARKDOWN_PATH)
+    # 1. Scrape websites if URLs are provided
+    if URLS_TO_SCRAPE:
+        print(f"Scraping {len(URLS_TO_SCRAPE)} URLs...")
+        await scrape_websites(URLS_TO_SCRAPE, WEB_MARKDOWN_DIR)
+        print("Web scraping complete.")
+    else:
+        print("No URLs provided for scraping. Skipping web scraping.")
 
     # 2. Load and process documents
-    # This function now encapsulates document loading and SentenceSplitter initialization
-    # It uses SOURCE_DATA_DIR, WEB_MARKDOWN_PATH, CHUNK_SIZE, CHUNK_OVERLAP from config.py
+    print("Loading and processing documents...")
     all_documents, node_parser = load_and_process_documents()
+    print(f"Loaded {len(all_documents)} documents.")
 
-    if not all_documents:
-        print("make_rag.py: No documents loaded by document_processor. Exiting RAG pipeline.")
-        return
-
-    # 3. Initialize SimpleVectorStore and Storage Context for local persistence
-    # Node parser is now returned by load_and_process_documents
-    print("make_rag.py: Initializing SimpleVectorStore for local persistence...")
-    vector_store = SimpleVectorStore.from_persist_dir(persist_dir=SOURCE_DATA_DIR)
-    
-    storage_context = StorageContext.from_defaults(vector_store=vector_store)
-
-    # 5. Create VectorStoreIndex (This performs parsing, embedding, and indexing)
-    print(f"Creating index for {len(all_documents)} documents... (This may take a while)")
-    index = VectorStoreIndex.from_documents(
-        all_documents,
-        storage_context=storage_context,
-        embed_model=embedding_model,
-        node_parser=node_parser,
-        show_progress=True,
+    # 3. Initialize embedding model
+    print("Initializing embedding model...")
+    Settings.embed_model = HuggingFaceEmbedding(
+        model_name="BAAI/bge-small-en-v1.5",
+        cache_folder=os.path.join(PROJECT_ROOT, "model_cache")
     )
+    print("Embedding model initialized.")
 
-    # 6. Persist the index locally to a temporary directory
-    local_persist_dir = tempfile.mkdtemp()
-    print(f"Persisting index locally to temporary directory: {local_persist_dir}...")
-    try:
-        index.storage_context.persist(persist_dir=local_persist_dir)
-        print("Local persistence successful.")
+    # 4. Setup ingestion pipeline
+    print("Setting up ingestion pipeline...")
+    pipeline = IngestionPipeline(
+        transformations=[node_parser, Settings.embed_model]
+    )
+    print("Ingestion pipeline set up.")
 
-        # 7. Upload the persisted data to Hugging Face Dataset
-        print(f"Uploading persisted index to Hugging Face Dataset: {HF_DATASET_ID}, path in repo: {HF_VECTOR_STORE_SUBDIR}...")
-        hf_token = os.getenv("HF_TOKEN")
-        if not hf_token:
-            print("Warning: HF_TOKEN not set. Upload to Hugging Face Hub will likely fail or use cached credentials.")
-            
-        api = HfApi(token=hf_token)
-        api.upload_folder(
-            folder_path=local_persist_dir,
-            repo_id=HF_DATASET_ID,
-            path_in_repo=HF_VECTOR_STORE_SUBDIR,
-            repo_type="dataset",
+    # 5. Run ingestion and build index
+    print("Running ingestion pipeline and building index...")
+    nodes = pipeline.run(documents=all_documents, show_progress=True)
+    print(f"Processed {len(nodes)} nodes.")
+
+    vector_store = SimpleVectorStore.from_persist_dir(DB_PATH) if os.path.exists(DB_PATH) else SimpleVectorStore()
+    storage_context = StorageContext.from_defaults(vector_store=vector_store)
+    index = VectorStoreIndex(nodes, storage_context=storage_context)
+    print("Index built.")
+
+    # 6. Persist the index locally
+    print(f"Persisting index to {DB_PATH}...")
+    index.storage_context.persist(persist_dir=DB_PATH)
+    print("Index persisted locally.")
+
+    # 7. Upload to Hugging Face Hub
+    hf_token = os.getenv("HF_TOKEN")
+    if hf_token:
+        print(f"Uploading vector store to Hugging Face Hub dataset: {HF_DATASET_REPO_ID}...")
+        vector_store.to_hub(
+            repo_id=HF_DATASET_REPO_ID,
+            commit_message="Update RAG vector store",
+            token=hf_token
         )
-        print(f"Successfully uploaded index to Hugging Face Dataset: {HF_DATASET_ID}/{HF_VECTOR_STORE_SUBDIR}")
+        print("Vector store uploaded to Hugging Face Hub.")
+    else:
+        print("HF_TOKEN environment variable not set. Skipping upload to Hugging Face Hub.")
 
-    except Exception as e:
-        print(f"An error occurred during local persistence or upload: {e}")
-    finally:
-        if os.path.exists(local_persist_dir):
-            print(f"Cleaning up temporary local persistence directory: {local_persist_dir}")
-            shutil.rmtree(local_persist_dir)
-
-    print("RAG database creation script finished.")
-
+    print("RAG database creation complete!")
 
 if __name__ == "__main__":
-   asyncio.run(main())
-
+    asyncio.run(main())

@@ -23,11 +23,8 @@ from config import (
     HF_VECTOR_STORE_SUBDIR,
     CHUNK_SIZE,
     CHUNK_OVERLAP,
-    SOURCE_DATA_DIR_RELATIVE, # Keep for reference if SOURCE_DATA_DIR defined here
     SOURCE_DATA_DIR,
-    WEB_MARKDOWN_PATH_RELATIVE, # Keep for reference if WEB_MARKDOWN_PATH defined here
     WEB_MARKDOWN_PATH,
-    WEBPAGES_FILE_RELATIVE, # Keep for reference if WEBPAGES_FILE defined here
     WEBPAGES_FILE
 )
 
@@ -37,19 +34,18 @@ if not os.getenv("HF_TOKEN"):
 
 print(f"Target Hugging Face Dataset for RAG persistence: {HF_DATASET_ID}/{HF_VECTOR_STORE_SUBDIR}")
 
-# CHUNK_SIZE, CHUNK_OVERLAP, SOURCE_DATA_DIR, WEB_MARKDOWN_PATH, WEBPAGES_FILE are now imported from config.py
-
 URLS_TO_SCRAPE = []
 try:
+    # WEBPAGES_FILE is imported from config.py
     with open(WEBPAGES_FILE, 'r') as file:
         # Strip whitespace/newlines from each line
         URLS_TO_SCRAPE = [line.strip() for line in file if line.strip()]
     if not URLS_TO_SCRAPE:
-        print(f"Warning: {WEBPAGES_FILE_RELATIVE} is empty. No webpages will be scraped.")
+        print(f"Warning: {WEBPAGES_FILE} is empty. No webpages will be scraped.")
 except FileNotFoundError:
-    print(f"Warning: Could not find {WEBPAGES_FILE_RELATIVE}. Please create this file in the project root directory and add URLs to scrape, one per line. No webpages will be scraped.")
+    print(f"Warning: Could not find {WEBPAGES_FILE}. Please create this file in the project root directory and add URLs to scrape, one per line. No webpages will be scraped.")
 except Exception as e:
-    print(f"Error reading {WEBPAGES_FILE_RELATIVE}: {e}. No webpages will be scraped.")
+    print(f"Error reading {WEBPAGES_FILE}: {e}. No webpages will be scraped.")
 
 # url_to_filename and scrape_websites functions have been moved to ragdb.web_scraper
 from ragdb.web_scraper import scrape_websites
@@ -80,7 +76,7 @@ async def main():
     # 3. Initialize SimpleVectorStore and Storage Context for local persistence
     # Node parser is now returned by load_and_process_documents
     print("make_rag.py: Initializing SimpleVectorStore for local persistence...")
-    vector_store = SimpleVectorStore()
+    vector_store = SimpleVectorStore.from_persist_dir(persist_dir=SOURCE_DATA_DIR)
     
     storage_context = StorageContext.from_defaults(vector_store=vector_store)
 

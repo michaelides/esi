@@ -13,6 +13,9 @@ HF_TOKEN = os.getenv("HF_TOKEN", None)
 HF_DATASET_ID = os.getenv("HF_DATASET_ID", "gm42/rag") 
 HF_VECTOR_STORE_SUBDIR = "esi_simplevector" # Subdirectory within the HF dataset to store the vector store
 
+# New: Hugging Face Dataset ID for user memories (chat history and metadata)
+HF_USER_MEMORIES_DATASET_ID = os.getenv("HF_USER_MEMORIES_DATASET_ID", "gm42/user_memories")
+
 # --- RAG Document Processing Configuration ---
 CHUNK_SIZE = 512 # Size of text chunks for processing by the node parser
 CHUNK_OVERLAP = 20 # Overlap between text chunks to maintain context

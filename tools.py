@@ -16,8 +16,7 @@ from llama_index.tools.code_interpreter import CodeInterpreterToolSpec
 from huggingface_hub import HfFileSystem
 
 # --- Hugging Face RAG Configuration ---
-HF_DATASET_ID = "gm42/esi_simplevector"
-HF_VECTOR_STORE_SUBDIR = "vector_store_data"
+from config import HF_DATASET_ID, HF_VECTOR_STORE_SUBDIR
 
 # Determine project root based on the script's location
 PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
@@ -71,15 +70,15 @@ def safe_code_interpreter(code: str) -> str:
     except Exception as e:
         return f"Error during code execution: {str(e)}"
 
-def get_duckduckgo_tool():
+def get_duckduckgo_tool(max_results: int = 5):
     """Initializes the DuckDuckGo search tool."""
     try:
-        return DuckDuckGoSearchToolSpec().to_tool_list()[0]
+        return DuckDuckGoSearchToolSpec(max_results=max_results).to_tool_list()[0]
     except NameError:
         print("Error: DuckDuckGoSearchToolSpec not found. Trying DuckDuckGoToolSpec.")
         try:
             from llama_index.tools.duckduckgo import DuckDuckGoToolSpec
-            return DuckDuckGoToolSpec().to_tool_list()[0]
+            return DuckDuckGoToolSpec(max_results=max_results).to_tool_list()[0]
         except Exception as e_fallback:
             print(f"Error initializing DuckDuckGo Tool (fallback failed): {e_fallback}")
             return None
@@ -87,14 +86,14 @@ def get_duckduckgo_tool():
         print(f"Error initializing DuckDuckGo Tool: {e}")
         return None
 
-def get_tavily_tool():
+def get_tavily_tool(max_results: int = 5):
     """Initializes the Tavily search tool."""
     tavily_api_key = os.getenv("TAVILY_API_KEY")
     if not tavily_api_key:
         print("Warning: TAVILY_API_KEY not found in environment variables.")
         return None
     try:
-        return TavilyToolSpec(api_key=tavily_api_key).to_tool_list()[0]
+        return TavilyToolSpec(api_key=tavily_api_key, max_results=max_results).to_tool_list()[0]
     except Exception as e:
         print(f"Error initializing Tavily Tool: {e}")
         return None
@@ -102,12 +101,15 @@ def get_tavily_tool():
 def get_wikipedia_tool():
     """Initializes the Wikipedia tool."""
     try:
+        # WikipediaToolSpec does not have a direct max_results parameter in the constructor
+        # The limit is usually applied during the query execution.
+        # We will not modify this tool for the search results count setting.
         return WikipediaToolSpec().to_tool_list()[0]
     except Exception as e:
         print(f"Error initializing Wikipedia Tool: {e}")
         return None
 
-def get_semantic_scholar_tool_for_agent():
+def get_semantic_scholar_tool_for_agent(max_results: int = 5):
     """
     Initializes the Semantic Scholar tool.
     Returns a list containing the tool, suitable for an agent.
@@ -115,7 +117,7 @@ def get_semantic_scholar_tool_for_agent():
     try:
         ss_reader = SemanticScholarReader()
         tool = FunctionTool.from_defaults(
-            fn=lambda query: ss_reader.load_data(query=query, limit=5), # Load 5 papers
+            fn=lambda query: ss_reader.load_data(query=query, limit=max_results), # Use max_results as limit
             name="semantic_scholar_search",
             description="Searches Semantic Scholar for academic papers based on a query.",
         )
@@ -143,7 +145,7 @@ def get_web_scraper_tool_for_agent():
 
 def get_rag_tool_for_agent():
     """Initializes the RAG query tool by loading the SimpleVectorStore from Hugging Face Hub."""
-    
+
     hf_persist_path = f"datasets/{HF_DATASET_ID}/{HF_VECTOR_STORE_SUBDIR}"
     print(f"Attempting to load RAG index from Hugging Face Hub: {hf_persist_path}")
 
@@ -247,17 +249,17 @@ def get_rag_tool_for_agent():
 
 # --- Tool Collections for Specialized Agents ---
 
-def get_search_tools():
+def get_search_tools(max_results: int = 5):
     """Initializes and returns a list of search-related tools."""
     tools = []
-    ddg_tool = get_duckduckgo_tool()
-    tavily_tool = get_tavily_tool()
+    ddg_tool = get_duckduckgo_tool(max_results=max_results)
+    tavily_tool = get_tavily_tool(max_results=max_results)
     wiki_tool = get_wikipedia_tool()
 
     if ddg_tool: tools.append(ddg_tool)
     if tavily_tool: tools.append(tavily_tool)
     if wiki_tool: tools.append(wiki_tool)
-    
+
     print(f"Initialized {len(tools)} search tools.")
     return tools
 

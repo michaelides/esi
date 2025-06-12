@@ -539,16 +539,23 @@ def create_interface(
                 key="llm_verbosity",
                 help="Controls the detail level of the AI's responses. 1 is concise, 5 is very detailed."
             )
-            # Changed from st.checkbox to st.toggle
+            st.slider(
+                "Number of Search Results",
+                min_value=3,
+                max_value=15,
+                value=st.session_state.get("search_results_count", 5),
+                step=1,
+                key="search_results_count",
+                help="Controls the maximum number of search results returned by search tools (DuckDuckGo, Tavily, Stochasticscholar)."
+            )
             st.toggle(
                 "Enable Long-term Memory (saves chat history)",
                 value=st.session_state.get("long_term_memory_enabled", False), # Default to False
                 key="long_term_memory_enabled", # Ensure this key matches the one used in app.py
-                help="If enabled, your chat history will be saved and loaded across sessions using browser cookies. If disabled, your chats will be forgotten when you close the browser or refresh the page.",
-                on_change=set_long_term_memory_callback # Add this line
+                help="If enabled, your chat history will be saved and loaded across sessions using browser cookies. If disabled, your chats will be forgotten when you close the browser or refresh the page."
             )
 
-           # Implement the forget me button 
+           # Implement the forget me button
             if long_term_memory_enabled: # Corrected variable name from 'on' to 'long_term_memory_enabled'
                 # Use a popover for confirmation
                 with st.popover("Forget Me (Delete All Data)", use_container_width=True):
@@ -558,8 +565,7 @@ def create_interface(
                     with col_yes:
                         if st.button("Yes, Delete All Data", key="confirm_forget_me_yes", type="primary", use_container_width=True):
                             forget_me_callback() # Call the function passed from app.py
-                            st.success("All data deleted. Restarting session...")
-                            # No need for st.rerun() here, as the callback will handle it.
+                            # No need for st.success() here, as the page will immediately reload.
                     with col_no:
                         if st.button("No, Cancel", key="confirm_forget_me_no", use_container_width=True):
                             st.info("Deletion cancelled.")

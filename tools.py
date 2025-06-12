@@ -16,10 +16,19 @@ from llama_index.tools.code_interpreter import CodeInterpreterToolSpec
 from huggingface_hub import HfFileSystem
 
 # --- Hugging Face RAG Configuration ---
-from config import HF_DATASET_ID, HF_VECTOR_STORE_SUBDIR
+from config import (
+    HF_DATASET_ID, 
+    HF_VECTOR_STORE_SUBDIR,
+    PROJECT_ROOT, # Added for path mapping
+    SOURCE_DATA_DIR, # Added for path mapping
+    WEB_MARKDOWN_PATH, # Added for path mapping
+    ADDITIONAL_SOURCE_DATA_DIR, # Added for path mapping
+    HF_ADDITIONAL_SOURCE_DATA_UPLOAD_PATH # Added for path mapping
+)
 
 # Determine project root based on the script's location
-PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
+# PROJECT_ROOT is now imported from config.py, so this line is redundant if config.py is at root
+# PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 
 # Ensure API keys are set as environment variables
 # os.environ["TAVILY_API_KEY"] = "YOUR_TAVILY_API_KEY"
@@ -191,6 +200,23 @@ def get_rag_tool_for_agent():
                                  file_path = metadata['file_path']
                                  file_name = os.path.basename(file_path)
                                  
+                                 # Determine the correct Hugging Face path for the source file
+                                 hf_source_subfolder = None
+                                 if file_path.startswith(SOURCE_DATA_DIR):
+                                     hf_source_subfolder = "articles"
+                                 elif file_path.startswith(WEB_MARKDOWN_PATH):
+                                     hf_source_subfolder = "web_markdown"
+                                 elif file_path.startswith(ADDITIONAL_SOURCE_DATA_DIR):
+                                     hf_source_subfolder = HF_ADDITIONAL_SOURCE_DATA_UPLOAD_PATH
+                                 
+                                 download_url = None
+                                 if hf_source_subfolder:
+                                     download_url = f"https://huggingface.co/datasets/{HF_DATASET_ID}/resolve/main/{hf_source_subfolder}/{file_name}"
+                                 else:
+                                     # Fallback if path doesn't match expected source directories
+                                     print(f"Warning: Could not map local file_path '{file_path}' to a known Hugging Face source subfolder.")
+                                     download_url = f"file://{file_path}" # Provide local path as fallback
+
                                  current_citation_number = None
                                  if file_path not in assigned_pdf_citations:
                                      assigned_pdf_citations[file_path] = citation_counter
@@ -202,7 +228,7 @@ def get_rag_tool_for_agent():
                                  source_data = {
                                      "type": "pdf", 
                                      "name": file_name, 
-                                     "path": file_path, 
+                                     "path": download_url, # Use the constructed download URL
                                      "snippet": node_text_snippet + "...",
                                      "citation_number": current_citation_number
                                  }
@@ -227,6 +253,7 @@ def get_rag_tool_for_agent():
                  name="rag_dissertation_retriever",
                  description=(
                     f"Retrieves relevant information from the dissertation knowledge base (persisted on Hugging Face at '{HF_DATASET_ID}/{HF_VECTOR_STORE_SUBDIR}'). "
+                    f"Source documents are available in subfolders like '{HF_ADDITIONAL_SOURCE_DATA_UPLOAD_PATH}', 'articles', and 'web_markdown' within the '{HF_DATASET_ID}' dataset. "
                     "Use this for specific institutional knowledge or previously saved research. "
                     "The tool's output will include the textual answer and may be followed by structured references "
                     "(e.g., to PDF files or web URLs) using '---RAG_SOURCE---' markers. "

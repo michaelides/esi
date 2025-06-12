@@ -447,7 +447,7 @@ def switch_chat(chat_id: str):
     if not st.session_state.long_term_memory_enabled:
         print("Long-term memory disabled. Cannot switch to historical chats. Starting a new temporary session.")
         create_new_chat_session_in_memory()
-        st.rerun()
+        st.rerun() # Keep rerun here for user-initiated switch when LTM is off
         return
 
     if chat_id not in st.session_state.chat_metadata:
@@ -462,11 +462,12 @@ def switch_chat(chat_id: str):
         st.session_state.all_chat_messages[chat_id] = [] # Fallback
             
     st.session_state.messages = st.session_state.all_chat_messages.get(chat_id, [])
+    st.session_state.current_chat_id = chat_id # Ensure current_chat_id is set here
     
     st.session_state.suggested_prompts = _cached_generate_suggested_prompts(st.session_state.messages) # Use cached version
     st.session_state.chat_modified = True # Assume existing chat is modified if switched to (will be saved on next AI response)
     print(f"Switched to chat: ID={chat_id}, Name='{st.session_state.chat_metadata.get(chat_id, 'Unknown')}'")
-    st.rerun()
+    st.rerun() # Keep rerun here for user-initiated switch when LTM is on
 
 def delete_chat_session(chat_id: str):
     """Deletes a chat history and its metadata from Hugging Face."""
@@ -810,7 +811,7 @@ def main():
     memory_state_has_changed_this_run = st.session_state._last_memory_state_was_enabled != st.session_state.long_term_memory_enabled
     if memory_state_has_changed_this_run:
         print(f"LOG: Main: Memory state CHANGE DETECTED or FORCED from {st.session_state._last_memory_state_was_enabled} to {st.session_state.long_term_memory_enabled}.")
-        st.session_state._last_memory_state_was_enabled = st.session_state.long_term_memory_enabled
+        st.session_state._last_memory_state_was_enabled = st.session_state.long_term_memory_enabled # This line is crucial for preventing immediate re-trigger
         st.session_state.session_control_flags_initialized = False # Trigger re-init
 
         if "user_id" in st.session_state:
@@ -818,7 +819,7 @@ def main():
         
         _initialize_user_session_data.clear()
         print("LOG: Main: Cleared _initialize_user_session_data cache due to memory state change.")
-        # REMOVED st.rerun() from here
+        # No st.rerun() here, as the toggle itself already triggers a rerun.
 
     if "_last_memory_state_changed_by_toggle" not in st.session_state: # Initialize if not present
         st.session_state._last_memory_state_changed_by_toggle = False
@@ -828,11 +829,12 @@ def main():
 
 
     # --- Core Session Variable Initialization (runs once per session OR after memory state change) ---
+    # This block resets core session variables if a memory state change occurred or it's the first run.
     if not st.session_state.get("session_control_flags_initialized", False):
         print("LOG: SESSION INIT: Initializing core session variables (first run or after memory state change).")
 
         st.session_state.initial_greeting_shown_for_session = False # Reset for new session/memory config
-        st.session_state.current_chat_id = None
+        st.session_state.current_chat_id = None # This is reset here
         st.session_state.messages = [] # Will be populated by chat logic below
         st.session_state.chat_modified = False
         st.session_state.suggested_prompts = DEFAULT_PROMPTS
@@ -840,18 +842,10 @@ def main():
         st.session_state.uploaded_documents = {}
         st.session_state.uploaded_dataframes = {}
 
-        # chat_metadata and all_chat_messages are populated by _initialize_user_session_data.
-        # user_id is also populated by _initialize_user_session_data.
-
         st.session_state.session_control_flags_initialized = True
         print("LOG: SESSION INIT: Core session variables initialized.")
-    # else: # This else is too verbose for every run.
-        # print("SESSION INFO: Core session variables confirmed initialized.")
 
     # --- User ID and Chat Data Load (cached, sensitive to memory state) ---
-    # This call is critical. It runs if:
-    # 1. Not run before in the session (cache miss).
-    # 2. `long_term_memory_enabled` parameter to it changes (cache invalidation, forced by .clear() above).
     print(f"LOG: Main: Calling _initialize_user_session_data with LTM_enabled={st.session_state.long_term_memory_enabled}")
     user_id_val, chat_metadata_val, all_chat_messages_val, cookie_action = \
         _initialize_user_session_data(st.session_state.long_term_memory_enabled)
@@ -873,41 +867,38 @@ def main():
     print(f"LOG: Main: Checking for agent in session. AGENT_SESSION_KEY exists: {AGENT_SESSION_KEY in st.session_state}")
     if AGENT_SESSION_KEY not in st.session_state:
         print(f"LOG: Main: Agent not found. Calling setup_agent().")
-        # Pass a default value for max_search_results
         agent_instance, error_message = setup_agent(max_search_results=10) 
         if agent_instance is None:
             st.error(error_message)
             st.stop()
         st.session_state[AGENT_SESSION_KEY] = agent_instance
-    # else: # Too verbose
-        # print("Agent already initialized.")
 
     # --- Active Chat and Initial Greeting Logic ---
     # This section determines which chat is active and whether to show an initial greeting.
-    # print(f"CHAT LOGIC: Processing. Current chat ID: {st.session_state.current_chat_id}, Memory: {st.session_state.long_term_memory_enabled}, Greeting Shown: {st.session_state.initial_greeting_shown_for_session}, Messages Count: {len(st.session_state.messages)}")
-
-    chat_state_resolved = False
+    # It also determines if a rerun is needed after initial setup.
+    
+    should_rerun_after_init = False
 
     if st.session_state.long_term_memory_enabled:
         # LTM is ON
         if st.session_state.current_chat_id and st.session_state.current_chat_id in st.session_state.chat_metadata:
-            # Valid current_chat_id exists, ensure messages are loaded (they should be by _initialize_user_session_data)
+            # Valid current_chat_id exists, ensure messages are loaded
             if st.session_state.all_chat_messages.get(st.session_state.current_chat_id) is None:
                 print(f"WARNING: Messages for current chat ID '{st.session_state.current_chat_id}' were not loaded by _initialize_user_session_data. This indicates an issue. Setting to empty list.")
                 st.session_state.all_chat_messages[st.session_state.current_chat_id] = [] # Fallback
             
             st.session_state.messages = st.session_state.all_chat_messages.get(st.session_state.current_chat_id, [])
             st.session_state.chat_modified = True # Existing chat is considered modifiable
-            chat_state_resolved = True
             print(f"CHAT LOGIC (LTM ON): Active chat is '{st.session_state.current_chat_id}'. Messages: {len(st.session_state.messages)}")
 
         elif st.session_state.chat_metadata: # No current_chat_id, but other chats exist in metadata
             first_available_chat_id = next(iter(st.session_state.chat_metadata))
-            print(f"CHAT LOGIC (LTM ON): No current chat ID. Selecting first available: '{first_available_chat_id}'. Rerunning via switch_chat.")
-            # switch_chat handles setting current_chat_id and messages, then reruns.
-            # This rerun is acceptable here as it's a one-time setup for the session or view.
-            switch_chat(first_available_chat_id)
-            # Execution stops here due to rerun in switch_chat
+            print(f"CHAT LOGIC (LTM ON): No current chat ID. Selecting first available: '{first_available_chat_id}'.")
+            # Directly set session state variables, do NOT call switch_chat here
+            st.session_state.current_chat_id = first_available_chat_id
+            st.session_state.messages = st.session_state.all_chat_messages.get(first_available_chat_id, [])
+            st.session_state.chat_modified = True
+            should_rerun_after_init = True # A rerun is needed to update the UI with the new active chat
         else: # No current_chat_id and no chats in metadata (e.g., new LTM user)
             if not st.session_state.initial_greeting_shown_for_session:
                 print("CHAT LOGIC (LTM ON): No chats exist. Displaying initial greeting.")
@@ -915,33 +906,27 @@ def main():
                 st.session_state.initial_greeting_shown_for_session = True
                 st.session_state.current_chat_id = None
                 st.session_state.chat_modified = False
-            chat_state_resolved = True
+                should_rerun_after_init = True # A rerun might be needed if this is the first time greeting is shown
     else:
         # LTM is OFF - manage a single, temporary chat session
-        # If no current_chat_id, or if current_chat_id points to something not in all_chat_messages (e.g. after toggling LTM OFF)
         if not st.session_state.current_chat_id or \
            st.session_state.current_chat_id not in st.session_state.all_chat_messages or \
-           not st.session_state.messages: # Also check if messages list is empty, implying a need for greeting
-
-            # Only print creation message if greeting hasn't been shown for this "session" (meaning since LTM was turned off or app start)
+           not st.session_state.messages:
             if not st.session_state.initial_greeting_shown_for_session:
                 print("CHAT LOGIC (LTM OFF): Creating new temporary session with greeting.")
                 create_new_chat_session_in_memory() # This sets up a new chat with greeting
                 st.session_state.initial_greeting_shown_for_session = True
-            elif not st.session_state.messages: # Greeting was shown, but messages are empty (e.g. user cleared chat)
+                should_rerun_after_init = True # Rerun to display the new temporary chat
+            elif not st.session_state.messages:
                  print("CHAT LOGIC (LTM OFF): Messages empty, recreating greeting for temporary session.")
-                 create_new_chat_session_in_memory() # This sets up a new chat with greeting
+                 create_new_chat_session_in_memory()
+                 should_rerun_after_init = True # Rerun to display the new temporary chat
             else:
-                # This case means a temporary chat exists (current_chat_id is valid and in all_chat_messages)
-                # and messages are already populated. We just ensure st.session_state.messages points to it.
                  st.session_state.messages = st.session_state.all_chat_messages[st.session_state.current_chat_id]
                  print(f"CHAT LOGIC (LTM OFF): Using existing temporary chat '{st.session_state.current_chat_id}'. Messages: {len(st.session_state.messages)}")
-
         else:
-            # Valid temporary chat already exists, ensure messages are correctly assigned
             st.session_state.messages = st.session_state.all_chat_messages[st.session_state.current_chat_id]
             print(f"CHAT LOGIC (LTM OFF): Confirmed existing temporary chat '{st.session_state.current_chat_id}'. Messages: {len(st.session_state.messages)}")
-        chat_state_resolved = True
 
     # Fallback: If messages list is somehow still not a list (should be extremely rare)
     if not isinstance(st.session_state.messages, list):
@@ -950,22 +935,30 @@ def main():
         st.session_state.suggested_prompts = DEFAULT_PROMPTS
         st.session_state.current_chat_id = None
         st.session_state.chat_modified = False
+        should_rerun_after_init = True # Rerun if this fallback is hit
     elif not st.session_state.messages and not st.session_state.initial_greeting_shown_for_session:
-        # If after all logic, messages are still empty AND no greeting has been shown (e.g. a state was missed)
         print("FALLBACK: No messages and no greeting shown. Displaying initial greeting.")
         st.session_state.messages = [{"role": "assistant", "content": _get_initial_greeting_text()}]
         st.session_state.initial_greeting_shown_for_session = True
-        st.session_state.current_chat_id = None # No active chat context for this
+        st.session_state.current_chat_id = None
         st.session_state.chat_modified = False
+        should_rerun_after_init = True # Rerun if this fallback is hit
 
     # Update suggested prompts based on the final state of messages
-    # This ensures prompts are relevant to the current view, whether it's a loaded chat or a new greeting.
     if 'suggested_prompts' not in st.session_state or \
        (st.session_state.messages and st.session_state.suggested_prompts == DEFAULT_PROMPTS and len(st.session_state.messages) > 1) or \
-       (not st.session_state.messages and st.session_state.suggested_prompts != DEFAULT_PROMPTS): # Update if messages are empty but prompts are not default
+       (not st.session_state.messages and st.session_state.suggested_prompts != DEFAULT_PROMPTS):
         print("Updating suggested prompts based on current messages state.")
         st.session_state.suggested_prompts = _cached_generate_suggested_prompts(st.session_state.messages if st.session_state.messages else [])
+        # If prompts were just generated for a new chat, a rerun might be needed if not already triggered
+        if not should_rerun_after_init and len(st.session_state.messages) == 1 and st.session_state.messages[0]["role"] == "assistant":
+             should_rerun_after_init = True
 
+
+    # Final check for rerun after initial chat setup
+    if should_rerun_after_init:
+        print("LOG: Main: Rerunning after initial chat setup to ensure UI consistency.")
+        st.rerun()
 
     if st.session_state.get("do_regenerate", False):
         handle_regeneration_request()

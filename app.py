@@ -397,7 +397,7 @@ def get_agent_response(query: str, chat_history: List[ChatMessage]) -> str:
 
         with st.spinner("ESI is thinking..."):
             # Corrected to use the passed chat_history parameter
-            response = agent.chat(modified_query, chat_history=formatted_history) 
+            response = agent.chat(modified_query, chat_history=chat_history) 
 
         response_text = response.response if hasattr(response, 'response') else str(response)
 

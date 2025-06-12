@@ -687,18 +687,34 @@ def forget_me_and_reset():
     
     # Crucially, reset the session_control_flags_initialized to force full re-initialization
     # in the main function on the next rerun.
-    st.session_state.session_control_flags_initialized = False 
+    st.session_state.session_control_flags_initialized = False
     st.session_state._greeting_logic_log_shown_for_current_state = False # Reset for fresh log on next run
     
     # Delete user_id from session state to force re-generation of a temporary one
     if "user_id" in st.session_state:
         del st.session_state.user_id
 
-    # Generate a new temporary user ID for the fresh session
-    # This will be handled by the main loop's user ID setup now.
-    print(f"Session reset. New temporary user ID will be generated on next run.")
+    # Use JavaScript to clear cookies and force a full page reload
+    # This ensures a complete reset from the browser's perspective.
+    js_code = """
+    <script>
+        function deleteAllCookies() {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i];
+                const eqPos = cookie.indexOf('=');
+                const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+                document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/';
+            }
+        }
+        deleteAllCookies();
+        window.location.reload(true); // Force a hard reload from the server
+    </script>
+    """
+    st.components.v1.html(js_code, height=0, width=0)
 
-    st.rerun()
+    print(f"Session reset. New temporary user ID will be generated on next run.")
+    # No st.rerun() here, as the JavaScript reload will handle it.
 
 def _set_long_term_memory_preference():
     """Callback to save the long_term_memory_enabled state to a cookie."""

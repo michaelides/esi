@@ -156,8 +156,7 @@ def get_web_scraper_tool_for_agent():
 def get_rag_tool_for_agent():
     """Initializes the RAG query tool by loading the SimpleVectorStore from Hugging Face Hub."""
 
-    hf_persist_path = f"datasets/{HF_DATASET_ID}/{HF_VECTOR_STORE_SUBDIR}"
-    print(f"Attempting to load RAG index from Hugging Face Hub: {hf_persist_path}")
+    print(f"Attempting to load RAG index from Hugging Face Hub: datasets/{HF_DATASET_ID}/{HF_VECTOR_STORE_SUBDIR}")
 
     try:
         hf_token = os.getenv("HF_TOKEN")
@@ -173,11 +172,11 @@ def get_rag_tool_for_agent():
             print("Error: Settings.llm not configured. Cannot create RAG query engine.")
             raise ValueError("Settings.llm is not set.")
 
-        print("Loading index from Hugging Face storage...")
-        storage_context = StorageContext.from_defaults(persist_dir=hf_persist_path, fs=hf_fs)
+        print("Loading RAG index from Hugging Face storage...")
+        storage_context = StorageContext.from_defaults(persist_dir=f"datasets/{HF_DATASET_ID}/{HF_VECTOR_STORE_SUBDIR}", fs=hf_fs)
         
         index = load_index_from_storage(storage_context, embed_model=Settings.embed_model)
-        print(f"Successfully loaded index from Hugging Face Hub: {hf_persist_path}")
+        print(f"RAG index loaded successfully from Hugging Face Hub.")
 
         query_engine = index.as_query_engine(llm=Settings.llm)
         print("RAG query engine created.")
@@ -229,7 +228,7 @@ def get_rag_tool_for_agent():
                                      # For local paths, ensure it's still a file:// URI and also encode it
                                      download_url = f"file://{urllib.parse.quote(file_path)}"
 
-                                 print(f"DEBUG: Constructed download_url: {download_url}") # Added debug print
+                                 # print(f"DEBUG: Constructed download_url: {download_url}") # Removed debug print
                                  
                                  current_citation_number = None
                                  if file_path not in assigned_pdf_citations:
@@ -332,7 +331,7 @@ def get_coder_tools():
         if code_interpreter_tool is None:
             print("CRITICAL_TOOLS: FunctionTool.from_defaults returned None for code_interpreter!")
             return []
-        print(f"DEBUG_TOOLS: Successfully created code_interpreter tool using FunctionTool: {code_interpreter_tool.metadata.name}")
+        print(f"Code interpreter tool created.")
         return [code_interpreter_tool]
     except Exception as e:
         print(f"CRITICAL_TOOLS: Exception during FunctionTool creation for code_interpreter: {e}")

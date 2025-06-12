@@ -62,7 +62,7 @@ def display_chat():
                     try:
                         rag_data = json.loads(json_str)
                         rag_sources_data.append(rag_data)
-                        print(f"Extracted RAG source: {rag_data.get('name') or rag_data.get('title')}")
+                        # print(f"Extracted RAG source: {rag_data.get('name') or rag_data.get('title')}") # Removed verbose log
                     except json.JSONDecodeError as e:
                         print(f"Warning: Could not decode RAG source JSON: '{json_str}'. Error: {e}")
                     
@@ -77,7 +77,7 @@ def display_chat():
                     extracted_filename = code_marker_match.group(1).strip()
                     text_to_display = text_to_display[:code_marker_match.start()].strip() + text_to_display[code_marker_match.end():].strip()
                     
-                    print(f"Found code download marker. Filename: {extracted_filename}")
+                    # print(f"Found code download marker. Filename: {extracted_filename}") # Removed verbose log
                     code_download_filename = extracted_filename
                     # Use UI_ACCESSIBLE_WORKSPACE for relative path construction
                     code_download_filepath_relative = os.path.relpath(os.path.join(UI_ACCESSIBLE_WORKSPACE, extracted_filename), PROJECT_ROOT)
@@ -85,11 +85,11 @@ def display_chat():
                     code_download_filepath_absolute = os.path.join(PROJECT_ROOT, code_download_filepath_relative)
 
                     if extracted_filename and os.path.exists(code_download_filepath_absolute):
-                        print(f"Code download file exists at: {code_download_filepath_absolute}")
+                        # print(f"Code download file exists at: {code_download_filepath_absolute}") # Removed verbose log
                         image_extensions = ['.png', '.jpg', '.jpeg', '.gif', '.bmp', '.tiff']
                         if os.path.splitext(code_download_filename)[1].lower() in image_extensions:
                             code_is_image = True
-                            print(f"Detected image file from code interpreter: {code_download_filename}")
+                            # print(f"Detected image file from code interpreter: {code_download_filename}") # Removed verbose log
                     else:
                         print(f"Code download file '{extracted_filename}' NOT found at '{code_download_filepath_absolute}'.")
                         text_to_display += f"\n\n*(Warning: The file '{extracted_filename}' mentioned for download could not be found.)*"
@@ -120,8 +120,7 @@ def display_chat():
                         if pdf_source_path and pdf_source_path.startswith("http"):
                             # It's a Hugging Face URL, display as a link
                             st.markdown(f"Source: {citation_prefix}[{pdf_name}]({pdf_source_path})")
-                            # Modified print statement to not show the full URL
-                            print(f"Added link for RAG PDF (URL): {citation_prefix}{pdf_name}")
+                            # print(f"Added link for RAG PDF (URL): {citation_prefix}{pdf_name}") # Removed verbose log
                             display_item = True
                         elif pdf_source_path and pdf_source_path.startswith("file://"):
                             # It's a local file path with 'file://' prefix
@@ -140,7 +139,7 @@ def display_chat():
                                             mime="application/pdf",
                                             key=f"rag_pdf_{msg_idx}_{rag_idx}_{pdf_name}"
                                         )
-                                    print(f"Added download button for RAG PDF (local file://): {button_label} (Path: {pdf_absolute_path})")
+                                    # print(f"Added download button for RAG PDF (local file://): {button_label} (Path: {pdf_absolute_path})") # Removed verbose log
                                     display_item = True
                                 except Exception as e:
                                     st.error(f"Error creating download button for {pdf_name}: {e}")
@@ -160,7 +159,7 @@ def display_chat():
                     if identifier and identifier not in displayed_rag_identifiers:
                         if url:
                             st.markdown(f"Source: [{title}]({url})")
-                            print(f"Added link for RAG web source: {title} (URL: {url})")
+                            # print(f"Added link for RAG web source: {title} (URL: {url})") # Removed verbose log
                             display_item = True
                 
                 if display_item and identifier:
@@ -173,7 +172,7 @@ def display_chat():
             if code_is_image and code_download_absolute_filepath and os.path.exists(code_download_absolute_filepath):
                 try:
                     st.image(code_download_absolute_filepath, caption=code_download_filename, use_container_width=True)
-                    print(f"Successfully displayed image from code interpreter: {code_download_filename}")
+                    # print(f"Successfully displayed image from code interpreter: {code_download_filename}") # Removed verbose log
                 except Exception as e:
                     st.error(f"Error displaying image {code_download_filename}: {e}")
                     code_is_image = False
@@ -188,7 +187,7 @@ def display_chat():
                             mime="application/octet-stream",
                             key=f"code_dl_{msg_idx}_{code_download_filename}"
                         )
-                    print(f"Successfully added download button for code interpreter file: {code_download_filename}")
+                    # print(f"Successfully added download button for code interpreter file: {code_download_filename}") # Removed verbose log
                 except Exception as e:
                     st.error(f"Error creating download button for {code_download_filename}: {e}")
 
@@ -213,8 +212,7 @@ def display_chat():
             def _copy_button_callback(text_payload, message_id):
                 st.session_state.text_to_copy_payload = text_payload
                 st.session_state.clipboard_triggered_for_id = message_id
-                # Optional: log to server console for debugging
-                print(f"Copy button clicked for msg {message_id}. Payload set in session state.")
+                # print(f"Copy button clicked for msg {message_id}. Payload set in session state.") # Removed verbose log
 
             with col_copy:
                 # Replace markdown button with st.button
@@ -231,7 +229,7 @@ def display_chat():
             if st.session_state.get('clipboard_triggered_for_id') == msg_idx:
                 text_to_copy_js = st.session_state.get('text_to_copy_payload', "")
                 # Using json.dumps to safely escape the text for JavaScript
-                escaped_text_for_js = json.dumps(text_to_copy_js)
+                escaped_text_for_js = json.dumps(escaped_text_for_js)
 
                 javascript_to_run = f"""
                 <script>
@@ -279,7 +277,7 @@ def remove_uploaded_file(file_name: str, file_type: str):
     if os.path.exists(file_path_in_workspace):
         try:
             os.remove(file_path_in_workspace)
-            print(f"Successfully deleted physical file: {file_path_in_workspace}")
+            # print(f"Successfully deleted physical file: {file_path_in_workspace}") # Removed verbose log
         except Exception as e:
             print(f"Error deleting physical file '{file_path_in_workspace}': {e}")
             st.error(f"Error deleting physical file '{file_name}': {e}")

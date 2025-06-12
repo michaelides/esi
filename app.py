@@ -39,9 +39,6 @@ AGENT_SESSION_KEY = "esi_orchestrator_agent"
 DOWNLOAD_MARKER = "---DOWNLOAD_FILE---"
 RAG_SOURCE_MARKER_PREFIX = "---RAG_SOURCE---"
 
-# MEMORY_DIR is no longer used for chat history/metadata storage, as it's now on Hugging Face.
-# MEMORY_DIR = os.path.join(PROJECT_ROOT, "user_memories") # REMOVED THIS LINE
-
 # Import UI_ACCESSIBLE_WORKSPACE from tools.py
 from tools import UI_ACCESSIBLE_WORKSPACE
 
@@ -51,15 +48,14 @@ MAX_CHAT_HISTORY_MESSAGES = 15 # Keep the last N messages to manage context leng
 @st.cache_resource
 def setup_global_llm_settings() -> tuple[bool, str | None]:
     """Initializes global LLM settings using st.cache_resource to run only once."""
-    print("LOG: setup_global_llm_settings() CALLED")
-    print("Initializing LLM settings (cached)...")
+    print("Initializing LLM settings...")
     try:
         initialize_agent_settings()
-        print("LLM settings initialized (cached).")
+        print("LLM settings initialized successfully.")
         return True, None
     except Exception as e:
         error_message = f"Fatal Error: Could not initialize LLM settings. {e}"
-        print(error_message) # Keep the log
+        print(error_message)
         return False, error_message
 
 # New cached function for initial greeting
@@ -75,7 +71,7 @@ def _cached_generate_suggested_prompts(chat_history: List[Dict[str, Any]]) -> Li
     Generates suggested prompts based on chat history, cached to avoid redundant LLM calls.
     The cache key is based on the content of chat_history.
     """
-    print("Generating suggested prompts using LLM (cached call)...") # Log when LLM is actually called
+    print("Generating suggested prompts...")
     return generate_suggested_prompts(chat_history)
 
 # Define dynamic tool functions that can access st.session_state
@@ -118,8 +114,7 @@ def setup_agent(max_search_results: int) -> tuple[Any | None, str | None]:
     agent_instance is None if an error occurred.
     error_message is None if successful.
     """
-    print(f"LOG: setup_agent() CALLED (Cacheable) with max_search_results={max_search_results}")
-    print("LOG: Agent not in session state. Initializing agent...") # Moved here
+    print("Initializing AI agent...")
     try:
         # Create dynamic tools here, passing the functions defined above
         uploaded_doc_reader_tool = FunctionTool.from_defaults(
@@ -139,11 +134,11 @@ def setup_agent(max_search_results: int) -> tuple[Any | None, str | None]:
             dynamic_tools=[uploaded_doc_reader_tool, dataframe_analyzer_tool],
             max_search_results=max_search_results # Pass the parameter here
         )
-        print("LOG: Orchestrator agent object initialized (cached) successfully.") # Moved here
+        print("AI agent initialized successfully.")
         return agent_instance, None
     except Exception as e:
         error_message = f"Failed to initialize the AI agent. Please check configurations. Error: {e}"
-        print(f"Error initializing orchestrator agent (cached): {e}") # Keep the log
+        print(f"Error initializing AI agent: {e}")
         return None, error_message
 
 def _get_or_create_user_id(long_term_memory_enabled_param: bool) -> tuple[str, str]:
@@ -153,24 +148,19 @@ def _get_or_create_user_id(long_term_memory_enabled_param: bool) -> tuple[str, s
     cookie_action_flag can be "DO_NOTHING", "SET_COOKIE", or "DELETE_COOKIE".
     This function NO LONGER performs cookie operations directly.
     """
-    print(f"LOG: _get_or_create_user_id: LTM enabled: {long_term_memory_enabled_param}")
     existing_user_id = cookies.get(cookie="user_id")
 
     if long_term_memory_enabled_param:
         if existing_user_id:
-            print(f"LOG: _get_or_create_user_id: LTM ON. Found existing user_id: {existing_user_id}. Action: DO_NOTHING.")
             return existing_user_id, "DO_NOTHING"
         else:
             new_user_id = str(uuid.uuid4())
-            print(f"LOG: _get_or_create_user_id: LTM ON. No existing user_id. Generated new: {new_user_id}. Action: SET_COOKIE.")
             return new_user_id, "SET_COOKIE"
     else: # Long-term memory is disabled
         temporary_user_id = str(uuid.uuid4())
         if existing_user_id:
-            print(f"LOG: _get_or_create_user_id: LTM OFF. Found and will discard existing user_id: {existing_user_id}. Generated temp_id: {temporary_user_id}. Action: DELETE_COOKIE.")
             return temporary_user_id, "DELETE_COOKIE"
         else:
-            print(f"LOG: _get_or_create_user_id: LTM OFF. No existing user_id. Generated temp_id: {temporary_user_id}. Action: DO_NOTHING.")
             return temporary_user_id, "DO_NOTHING"
 
 @st.cache_resource
@@ -181,27 +171,22 @@ def _initialize_user_session_data(long_term_memory_enabled_param: bool) -> tuple
     This function is cached to run only once per Streamlit session, or when its parameters change.
     Returns: (user_id, chat_metadata, all_chat_messages, cookie_action_flag)
     """
-    print("LOG: _initialize_user_session_data() CALLED (Cacheable)")
-    print("LOG: _initialize_user_session_data: Attempting User ID and initial data setup (cached)...")
+    print("Initializing user session data...")
 
     user_id, cookie_action_flag = _get_or_create_user_id(long_term_memory_enabled_param)
-    print(f"LOG: _initialize_user_session_data: Received user_id: {user_id}, cookie_action_flag: {cookie_action_flag}")
 
     chat_metadata = {}
     all_chat_messages = {}
 
     if long_term_memory_enabled_param:
-        # Load data from Hugging Face only if memory is enabled
-        print(f"LOG: _initialize_user_session_data: LTM ON. Loading data for user {user_id} from Hugging Face.") # Updated log
+        print(f"Loading user data for user {user_id} from Hugging Face...")
         user_data = _load_user_data_from_hf(user_id) # This function is not cached, but its call is within a cached function
         chat_metadata = user_data["metadata"]
         all_chat_messages = user_data["messages"]
-        print(f"LOG: _initialize_user_session_data: Initial data load complete. Found {len(chat_metadata)} chats for user {user_id}.")
+        print(f"Loaded {len(chat_metadata)} chats for user {user_id}.")
     else:
-        # No HF load for disabled memory, data structures remain empty/default
-        print(f"LOG: _initialize_user_session_data: LTM OFF. No HF data loaded for temporary user_id {user_id}.")
+        print(f"Long-term memory disabled. No historical data loaded for temporary user_id {user_id}.")
 
-    print(f"LOG: _initialize_user_session_data: User session data initialized (cached). Final User ID: {user_id}")
     return user_id, chat_metadata, all_chat_messages, cookie_action_flag
 
 def _load_user_data_from_hf(user_id: str) -> Dict[str, Any]:
@@ -218,15 +203,9 @@ def _load_user_data_from_hf(user_id: str) -> Dict[str, Any]:
     all_chat_messages = {}
 
     try:
-        # Load the entire dataset
         dataset = load_dataset(HF_USER_MEMORIES_DATASET_ID, split="train", token=hf_token)
-        print(f"Loaded dataset '{HF_USER_MEMORIES_DATASET_ID}' with {len(dataset)} rows.")
-
-        # Filter data for the current user
         user_data_rows = dataset.filter(lambda row: row["user_id"] == user_id)
-        print(f"Found {len(user_data_rows)} rows for user {user_id}.")
 
-        # Process rows to reconstruct chat_metadata and all_chat_messages
         for row in user_data_rows:
             chat_id = row.get("chat_id")
             role = row.get("role")
@@ -235,7 +214,6 @@ def _load_user_data_from_hf(user_id: str) -> Dict[str, Any]:
             if chat_id == "global_metadata" and role == "metadata":
                 try:
                     all_chat_metadata = json.loads(content)
-                    print(f"Reconstructed chat metadata for user {user_id}.")
                 except json.JSONDecodeError as e:
                     print(f"Error decoding metadata for user {user_id}: {e}. Metadata will be empty.")
                     all_chat_metadata = {}
@@ -244,16 +222,11 @@ def _load_user_data_from_hf(user_id: str) -> Dict[str, Any]:
                     all_chat_messages[chat_id] = []
                 all_chat_messages[chat_id].append({"role": role, "content": content})
         
-        # Ensure messages are sorted by their original order if possible (not explicitly stored, but usually appended)
-        # For now, assume the order from the dataset is sufficient.
-        
-        # Clean up metadata for chats that no longer have messages (e.g., if messages were manually deleted from HF)
         chats_to_remove_from_metadata = [cid for cid in all_chat_metadata if cid not in all_chat_messages]
         for cid in chats_to_remove_from_metadata:
             print(f"Chat {cid} found in metadata but no messages. Removing from metadata.")
             del all_chat_metadata[cid]
 
-        print(f"Reconstructed {len(all_chat_metadata)} chats and their messages for user {user_id}.")
         return {"metadata": all_chat_metadata, "messages": all_chat_messages}
 
     except Exception as e:
@@ -265,7 +238,6 @@ def save_chat_history(user_id: str, chat_id: str, messages: List[Dict[str, Any]]
     Saves a specific chat history for a given user ID to the Hugging Face dataset.
     """
     if not st.session_state.long_term_memory_enabled:
-        print("Long-term memory disabled. Not saving chat history to Hugging Face.")
         return
 
     hf_token = os.getenv("HF_TOKEN")
@@ -274,18 +246,13 @@ def save_chat_history(user_id: str, chat_id: str, messages: List[Dict[str, Any]]
         return
 
     try:
-        # Load the existing dataset
         existing_dataset = load_dataset(HF_USER_MEMORIES_DATASET_ID, split="train", token=hf_token)
         
-        # Filter out existing messages for this user_id and chat_id
-        # Also keep the metadata row for this user
         filtered_dataset = existing_dataset.filter(
             lambda row: not (row["user_id"] == user_id and row["chat_id"] == chat_id),
-            num_proc=os.cpu_count() # Use multiple processes for filtering if dataset is large
+            num_proc=os.cpu_count()
         )
-        print(f"Filtered out old messages for chat {chat_id} (user {user_id}). Remaining rows: {len(filtered_dataset)}")
 
-        # Prepare new data for the current chat
         new_chat_data = []
         for msg in messages:
             new_chat_data.append({
@@ -297,23 +264,19 @@ def save_chat_history(user_id: str, chat_id: str, messages: List[Dict[str, Any]]
         new_chat_df = pd.DataFrame(new_chat_data)
         new_chat_dataset = Dataset.from_pandas(new_chat_df)
 
-        # Concatenate the filtered existing data with the new chat data
         combined_df = pd.concat([filtered_dataset.to_pandas(), new_chat_dataset.to_pandas()], ignore_index=True)
         combined_dataset = Dataset.from_pandas(combined_df)
-        print(f"Combined dataset has {len(combined_dataset)} rows after updating chat {chat_id}.")
 
-        # Push the combined dataset back to the Hugging Face Hub
         combined_dataset.push_to_hub(HF_USER_MEMORIES_DATASET_ID, private=True, token=hf_token)
-        print(f"Successfully uploaded updated chat history for chat {chat_id} (user {user_id}) to Hugging Face dataset '{HF_USER_MEMORIES_DATASET_ID}'.") # Updated log
+        print(f"Chat history for chat {chat_id} saved to Hugging Face.")
 
     except Exception as e:
-        print(f"Error uploading chat history to Hugging Face for chat {chat_id} (user {user_id}): {e}")
+        print(f"Error saving chat history to Hugging Face for chat {chat_id} (user {user_id}): {e}")
         st.error(f"Error saving chat history to cloud: {e}")
 
 def save_chat_metadata(user_id: str, chat_metadata: Dict[str, str]):
     """Saves the chat metadata (ID to name mapping) for a user to Hugging Face."""
     if not st.session_state.long_term_memory_enabled:
-        print("Long-term memory disabled. Not saving chat metadata to Hugging Face.")
         return
 
     hf_token = os.getenv("HF_TOKEN")
@@ -322,17 +285,13 @@ def save_chat_metadata(user_id: str, chat_metadata: Dict[str, str]):
         return
 
     try:
-        # Load the existing dataset
         existing_dataset = load_dataset(HF_USER_MEMORIES_DATASET_ID, split="train", token=hf_token)
 
-        # Filter out the existing metadata row for this user
         filtered_dataset = existing_dataset.filter(
             lambda row: not (row["user_id"] == user_id and row["chat_id"] == "global_metadata" and row["role"] == "metadata"),
             num_proc=os.cpu_count()
         )
-        print(f"Filtered out old metadata for user {user_id}. Remaining rows: {len(filtered_dataset)}")
 
-        # Prepare new metadata row
         new_metadata_data = [{
             "user_id": user_id,
             "chat_id": "global_metadata", # Special chat_id for metadata
@@ -342,13 +301,11 @@ def save_chat_metadata(user_id: str, chat_metadata: Dict[str, str]):
         new_metadata_df = pd.DataFrame(new_metadata_data)
         new_metadata_dataset = Dataset.from_pandas(new_metadata_df)
 
-        # Concatenate and push
         combined_df = pd.concat([filtered_dataset.to_pandas(), new_metadata_dataset.to_pandas()], ignore_index=True)
         combined_dataset = Dataset.from_pandas(combined_df)
-        print(f"Combined dataset has {len(combined_dataset)} rows after updating metadata for user {user_id}.")
 
         combined_dataset.push_to_hub(HF_USER_MEMORIES_DATASET_ID, private=True, token=hf_token)
-        print(f"Saved chat metadata for user {user_id} to Hugging Face dataset '{HF_USER_MEMORIES_DATASET_ID}'.") # Updated log
+        print(f"Chat metadata for user {user_id} saved to Hugging Face.")
 
     except Exception as e:
         print(f"Error saving chat metadata to Hugging Face for user {user_id}: {e}")
@@ -385,7 +342,7 @@ def get_agent_response(query: str, chat_history: List[ChatMessage]) -> str:
         if Settings.llm:
             if hasattr(Settings.llm, 'temperature'):
                 Settings.llm.temperature = current_temperature
-                print(f"Successfully set Settings.llm.temperature to: {current_temperature}")
+                # print(f"Successfully set Settings.llm.temperature to: {current_temperature}") # Removed verbose log
             else:
                 print(f"Warning: Settings.llm ({type(Settings.llm)}) does not have a 'temperature' attribute.")
         else:
@@ -393,20 +350,18 @@ def get_agent_response(query: str, chat_history: List[ChatMessage]) -> str:
 
         # Prepend verbosity level to the query
         modified_query = f"Verbosity Level: {current_verbosity}. {query}"
-        print(f"Modified query with verbosity: {modified_query}")
+        # print(f"Modified query with verbosity: {modified_query}") # Removed verbose log
 
         with st.spinner("ESI is thinking..."):
-            # Corrected to use the passed chat_history parameter
             response = agent.chat(modified_query, chat_history=chat_history) 
 
         response_text = response.response if hasattr(response, 'response') else str(response)
 
-        print(f"Orchestrator final response text for UI: \n{response_text[:500]}...")
+        # print(f"Orchestrator final response text for UI: \n{response_text[:500]}...") # Removed verbose log
         return response_text
 
     except Exception as e:
         print(f"Error getting orchestrator agent response: {type(e).__name__} - {e}")
-        print(f"Error getting agent response: {type(e).__name__} - {e}")
         return f"I apologize, but I encountered an error while processing your request. Please try again or rephrase your question. Technical details: {str(e)}"
 
 def create_new_chat_session_in_memory():
@@ -439,7 +394,7 @@ def create_new_chat_session_in_memory():
     # Generate initial prompts for the new chat
     st.session_state.suggested_prompts = _cached_generate_suggested_prompts(st.session_state.messages)
 
-    print(f"Created new chat in memory: ID={new_chat_id}, Name='{new_chat_name}' (not yet saved to HF)")
+    print(f"Created new chat: '{new_chat_name}' (ID: {new_chat_id})")
     return new_chat_id # Return the new chat ID
 
 def switch_chat(chat_id: str):
@@ -458,7 +413,7 @@ def switch_chat(chat_id: str):
     # by _initialize_user_session_data or _load_user_data_from_hf.
     # If for some reason they are not, it indicates an issue with the loading logic.
     if st.session_state.all_chat_messages.get(chat_id) is None:
-        print(f"WARNING: Messages for current chat ID '{chat_id}' were not loaded by _initialize_user_session_data. This indicates an issue. Setting to empty list.")
+        print(f"WARNING: Messages for current chat ID '{chat_id}' were not loaded. Setting to empty list.")
         st.session_state.all_chat_messages[chat_id] = [] # Fallback
             
     st.session_state.messages = st.session_state.all_chat_messages.get(chat_id, [])
@@ -466,7 +421,7 @@ def switch_chat(chat_id: str):
     
     st.session_state.suggested_prompts = _cached_generate_suggested_prompts(st.session_state.messages) # Use cached version
     st.session_state.chat_modified = True # Assume existing chat is modified if switched to (will be saved on next AI response)
-    print(f"Switched to chat: ID={chat_id}, Name='{st.session_state.chat_metadata.get(chat_id, 'Unknown')}'")
+    print(f"Switched to chat: '{st.session_state.chat_metadata.get(chat_id, 'Unknown')}' (ID: {chat_id})")
     st.rerun() # Keep rerun here for user-initiated switch when LTM is on
 
 def delete_chat_session(chat_id: str):
@@ -488,20 +443,16 @@ def delete_chat_session(chat_id: str):
     is_current_chat = (chat_id == st.session_state.current_chat_id)
 
     try:
-        # Load the existing dataset
         existing_dataset = load_dataset(HF_USER_MEMORIES_DATASET_ID, split="train", token=hf_token)
 
-        # Filter out all rows belonging to the user_id and the specific chat_id
-        # Keep the metadata row for this user, unless it's the last chat being deleted
         filtered_dataset = existing_dataset.filter(
             lambda row: not (row["user_id"] == st.session_state.user_id and row["chat_id"] == chat_id),
             num_proc=os.cpu_count()
         )
-        print(f"Filtered out chat {chat_id} for user {st.session_state.user_id}. Remaining rows: {len(filtered_dataset)}")
+        print(f"Deleting chat '{chat_id}' for user '{st.session_state.user_id}' from Hugging Face.")
 
-        # Push the filtered dataset back to the Hugging Face Hub
         filtered_dataset.push_to_hub(HF_USER_MEMORIES_DATASET_ID, private=True, token=hf_token)
-        print(f"Successfully deleted chat {chat_id} (user {st.session_state.user_id}) from Hugging Face dataset '{HF_USER_MEMORIES_DATASET_ID}'.")
+        print(f"Successfully deleted chat '{chat_id}' from Hugging Face.")
 
         # Update in-memory session state
         if chat_id in st.session_state.all_chat_messages:
@@ -511,7 +462,7 @@ def delete_chat_session(chat_id: str):
         
         # Save updated metadata to Hugging Face
         save_chat_metadata(st.session_state.user_id, st.session_state.chat_metadata)
-        print(f"Deleted chat: ID={chat_id}")
+        print(f"Chat '{chat_id}' deleted.")
 
         # If the deleted chat was the current one, switch to another or create a new one
         if is_current_chat:
@@ -523,7 +474,7 @@ def delete_chat_session(chat_id: str):
                 switch_chat(first_available_chat_id)
             else:
                 # No other chats left, set to a "no chat" state
-                print("Deleted last chat. Setting to no active chat state.")
+                print("Deleted last chat. Starting a new empty chat.")
                 st.session_state.current_chat_id = None
                 st.session_state.messages = [{"role": "assistant", "content": _get_initial_greeting_text()}]
                 st.session_state.chat_modified = False
@@ -545,7 +496,7 @@ def rename_chat(chat_id: str, new_name: str): # Modified to accept chat_id
     if chat_id and new_name and new_name != st.session_state.chat_metadata.get(chat_id):
         st.session_state.chat_metadata[chat_id] = new_name
         save_chat_metadata(st.session_state.user_id, st.session_state.chat_metadata)
-        print(f"Renamed chat {chat_id} to '{new_name}'")
+        print(f"Renamed chat '{chat_id}' to '{new_name}'")
         # Removed st.rerun() from here as it causes the "no-op" warning in on_change callbacks.
         # Streamlit will automatically rerun after the on_change event completes.
 
@@ -599,24 +550,15 @@ def handle_user_input(chat_input_value: str | None):
         # If this is the first user message in a new, unsaved chat, mark it as modified
         # and save its metadata for the first time.
         if not st.session_state.chat_modified and st.session_state.current_chat_id is None:
-            # This means it's the very first message in a fresh session, or after all chats were deleted.
-            # Create a new chat session in memory and set it as current.
-            # This will also update st.session_state.chat_metadata and st.session_state.all_chat_messages
-            # with the new chat's entry.
             new_chat_id = create_new_chat_session_in_memory()
-            # Now that the chat is created and current_chat_id is set, save its metadata to Hugging Face.
-            # Only save metadata if long-term memory is enabled
             if st.session_state.long_term_memory_enabled:
                 save_chat_metadata(st.session_state.user_id, st.session_state.chat_metadata)
-            st.session_state.chat_modified = True # Mark as modified for history saving
-            print(f"Activated new chat '{st.session_state.chat_metadata.get(st.session_state.current_chat_id)}' with first user input.")
+            st.session_state.chat_modified = True
+            print(f"Activated new chat '{st.session_state.chat_metadata.get(st.session_state.current_chat_id)}'.")
         elif not st.session_state.chat_modified and len(st.session_state.messages) == 1 and st.session_state.messages[0]["role"] == "assistant":
-            # This handles the case where a new chat was created via the "New Chat" button
-            # and this is the first user message in it.
             st.session_state.chat_modified = True 
-            # Only save metadata if long-term memory is enabled
             if st.session_state.long_term_memory_enabled:
-                save_chat_metadata(st.session_state.user_id, st.session_state.chat_metadata) # Save metadata now that chat is active
+                save_chat_metadata(st.session_state.user_id, st.session_state.chat_metadata)
             print(f"Chat '{st.session_state.chat_metadata.get(st.session_state.current_chat_id)}' activated and metadata saved.")
 
 
@@ -653,7 +595,6 @@ def handle_regeneration_request():
 
     if len(st.session_state.messages) == 1:
         print("Regenerating initial greeting...")
-        # Keep generate_llm_greeting here as it's an explicit regeneration request
         new_greeting = generate_llm_greeting() 
         st.session_state.messages[0]['content'] = new_greeting
         if st.session_state.long_term_memory_enabled: # Only save if memory is enabled
@@ -662,7 +603,7 @@ def handle_regeneration_request():
         st.rerun()
         return
 
-    print("Regenerating last assistant response to user query...")
+    print("Regenerating last assistant response...")
     st.session_state.messages.pop() # Remove last assistant message
 
     if not st.session_state.messages or st.session_state.messages[-1]['role'] != 'user':
@@ -690,19 +631,16 @@ def forget_me_and_reset():
 
     if user_id_to_delete and hf_token:
         try:
-            # Load the existing dataset
             existing_dataset = load_dataset(HF_USER_MEMORIES_DATASET_ID, split="train", token=hf_token)
 
-            # Filter out all rows belonging to the user_id to be deleted
             filtered_dataset = existing_dataset.filter(
                 lambda row: row["user_id"] != user_id_to_delete,
                 num_proc=os.cpu_count()
             )
-            print(f"Filtered out all data for user {user_id_to_delete}. Remaining rows: {len(filtered_dataset)}")
+            print(f"Deleting all data for user '{user_id_to_delete}' from Hugging Face.")
 
-            # Push the filtered dataset back to the Hugging Face Hub
             filtered_dataset.push_to_hub(HF_USER_MEMORIES_DATASET_ID, private=True, token=hf_token)
-            print(f"Successfully deleted all data for user {user_id_to_delete} from Hugging Face dataset '{HF_USER_MEMORIES_DATASET_ID}'.")
+            print(f"Successfully deleted all data for user '{user_id_to_delete}' from Hugging Face.")
 
         except Exception as e:
             print(f"Error deleting user data from Hugging Face for user {user_id_to_delete}: {e}")
@@ -714,7 +652,7 @@ def forget_me_and_reset():
     # Delete the user ID cookie
     try:
         cookies.delete(cookie="user_id")
-        print(f"Deleted user ID cookie for {user_id_to_delete}")
+        print(f"Deleted user ID cookie for '{user_id_to_delete}'")
     except Exception as e:
         print(f"ERROR: Failed to delete user_id cookie for {user_id_to_delete}: {e}")
         st.error(f"Failed to delete user ID cookie: {e}")
@@ -786,7 +724,6 @@ def main():
 
     if "long_term_memory_enabled" not in st.session_state:
         if pref_from_cookie is not None:
-            # Convert the cookie value to a string first for robust handling
             pref_str = str(pref_from_cookie).lower()
             
             if pref_str == 'true' or pref_str == '1':
@@ -794,48 +731,43 @@ def main():
             elif pref_str == 'false' or pref_str == '0':
                 st.session_state.long_term_memory_enabled = False
             else:
-                # Fallback for any unexpected string/value, default to True
                 st.session_state.long_term_memory_enabled = True
                 print(f"Warning: Unexpected value for long_term_memory_pref cookie: '{pref_from_cookie}'. Defaulting to True.")
-            print(f"Loaded long_term_memory_enabled from cookie: {st.session_state.long_term_memory_enabled}")
+            print(f"Long-term memory preference loaded from cookie: {st.session_state.long_term_memory_enabled}")
         else:
             st.session_state.long_term_memory_enabled = True  # Default: enabled
             cookies.set(cookie="long_term_memory_pref", val=str(st.session_state.long_term_memory_enabled))
-            print(f"long_term_memory_enabled not in session state or cookie. Defaulting to {st.session_state.long_term_memory_enabled} and saving cookie.")
+            print(f"Long-term memory preference not found. Defaulting to {st.session_state.long_term_memory_enabled} and saving cookie.")
 
     if "_last_memory_state_was_enabled" not in st.session_state:
         st.session_state._last_memory_state_was_enabled = st.session_state.long_term_memory_enabled
-        print(f"_last_memory_state_was_enabled initialized to match long_term_memory_enabled: {st.session_state._last_memory_state_was_enabled}")
 
     # --- Handle Memory State Change ---
     memory_state_has_changed_this_run = st.session_state._last_memory_state_was_enabled != st.session_state.long_term_memory_enabled
     if memory_state_has_changed_this_run:
-        print(f"LOG: Main: Memory state CHANGE DETECTED or FORCED from {st.session_state._last_memory_state_was_enabled} to {st.session_state.long_term_memory_enabled}.")
-        st.session_state._last_memory_state_was_enabled = st.session_state.long_term_memory_enabled # This line is crucial for preventing immediate re-trigger
-        st.session_state.session_control_flags_initialized = False # Trigger re-init
+        print(f"Memory state changed from {st.session_state._last_memory_state_was_enabled} to {st.session_state.long_term_memory_enabled}. Re-initializing session.")
+        st.session_state._last_memory_state_was_enabled = st.session_state.long_term_memory_enabled
+        st.session_state.session_control_flags_initialized = False
 
         if "user_id" in st.session_state:
             del st.session_state.user_id
         
         _initialize_user_session_data.clear()
-        print("LOG: Main: Cleared _initialize_user_session_data cache due to memory state change.")
-        # No st.rerun() here, as the toggle itself already triggers a rerun.
+        print("Cleared user data cache due to memory state change.")
 
-    if "_last_memory_state_changed_by_toggle" not in st.session_state: # Initialize if not present
+    if "_last_memory_state_changed_by_toggle" not in st.session_state:
         st.session_state._last_memory_state_changed_by_toggle = False
 
-    # Reset the toggle flag after processing potential changes
     st.session_state._last_memory_state_changed_by_toggle = False
 
 
     # --- Core Session Variable Initialization (runs once per session OR after memory state change) ---
-    # This block resets core session variables if a memory state change occurred or it's the first run.
     if not st.session_state.get("session_control_flags_initialized", False):
-        print("LOG: SESSION INIT: Initializing core session variables (first run or after memory state change).")
+        print("Initializing core session variables...")
 
-        st.session_state.initial_greeting_shown_for_session = False # Reset for new session/memory config
-        st.session_state.current_chat_id = None # This is reset here
-        st.session_state.messages = [] # Will be populated by chat logic below
+        st.session_state.initial_greeting_shown_for_session = False
+        st.session_state.current_chat_id = None
+        st.session_state.messages = []
         st.session_state.chat_modified = False
         st.session_state.suggested_prompts = DEFAULT_PROMPTS
         st.session_state.renaming_chat_id = None
@@ -843,10 +775,9 @@ def main():
         st.session_state.uploaded_dataframes = {}
 
         st.session_state.session_control_flags_initialized = True
-        print("LOG: SESSION INIT: Core session variables initialized.")
+        print("Core session variables initialized.")
 
     # --- User ID and Chat Data Load (cached, sensitive to memory state) ---
-    print(f"LOG: Main: Calling _initialize_user_session_data with LTM_enabled={st.session_state.long_term_memory_enabled}")
     user_id_val, chat_metadata_val, all_chat_messages_val, cookie_action = \
         _initialize_user_session_data(st.session_state.long_term_memory_enabled)
 
@@ -857,16 +788,13 @@ def main():
     # --- Apply cookie actions based on _initialize_user_session_data result ---
     if cookie_action == "SET_COOKIE":
         cookies.set(cookie="user_id", val=user_id_val)
-        print(f"LOG: Main: Set user_id cookie: {user_id_val}")
+        print(f"Set user_id cookie: {user_id_val}")
     elif cookie_action == "DELETE_COOKIE":
         cookies.delete(cookie="user_id")
-        print(f"LOG: Main: Deleted user_id cookie.")
-    # --- End Apply cookie actions ---
+        print(f"Deleted user_id cookie.")
 
     # --- Agent Initialization (runs once per session) ---
-    print(f"LOG: Main: Checking for agent in session. AGENT_SESSION_KEY exists: {AGENT_SESSION_KEY in st.session_state}")
     if AGENT_SESSION_KEY not in st.session_state:
-        print(f"LOG: Main: Agent not found. Calling setup_agent().")
         agent_instance, error_message = setup_agent(max_search_results=10) 
         if agent_instance is None:
             st.error(error_message)
@@ -874,90 +802,81 @@ def main():
         st.session_state[AGENT_SESSION_KEY] = agent_instance
 
     # --- Active Chat and Initial Greeting Logic ---
-    # This section determines which chat is active and whether to show an initial greeting.
-    # It also determines if a rerun is needed after initial setup.
-    
     should_rerun_after_init = False
 
     if st.session_state.long_term_memory_enabled:
-        # LTM is ON
         if st.session_state.current_chat_id and st.session_state.current_chat_id in st.session_state.chat_metadata:
-            # Valid current_chat_id exists, ensure messages are loaded
             if st.session_state.all_chat_messages.get(st.session_state.current_chat_id) is None:
-                print(f"WARNING: Messages for current chat ID '{st.session_state.current_chat_id}' were not loaded by _initialize_user_session_data. This indicates an issue. Setting to empty list.")
-                st.session_state.all_chat_messages[st.session_state.current_chat_id] = [] # Fallback
+                print(f"WARNING: Messages for current chat ID '{st.session_state.current_chat_id}' were not loaded. Setting to empty list.")
+                st.session_state.all_chat_messages[st.session_state.current_chat_id] = []
             
             st.session_state.messages = st.session_state.all_chat_messages.get(st.session_state.current_chat_id, [])
-            st.session_state.chat_modified = True # Existing chat is considered modifiable
-            print(f"CHAT LOGIC (LTM ON): Active chat is '{st.session_state.current_chat_id}'. Messages: {len(st.session_state.messages)}")
+            st.session_state.chat_modified = True
+            # print(f"Active chat is '{st.session_state.current_chat_id}'. Messages: {len(st.session_state.messages)}") # Removed verbose log
 
-        elif st.session_state.chat_metadata: # No current_chat_id, but other chats exist in metadata
+        elif st.session_state.chat_metadata:
             first_available_chat_id = next(iter(st.session_state.chat_metadata))
-            print(f"CHAT LOGIC (LTM ON): No current chat ID. Selecting first available: '{first_available_chat_id}'.")
-            # Directly set session state variables, do NOT call switch_chat here
+            print(f"No current chat ID. Selecting first available: '{first_available_chat_id}'.")
             st.session_state.current_chat_id = first_available_chat_id
             st.session_state.messages = st.session_state.all_chat_messages.get(first_available_chat_id, [])
             st.session_state.chat_modified = True
-            should_rerun_after_init = True # A rerun is needed to update the UI with the new active chat
-        else: # No current_chat_id and no chats in metadata (e.g., new LTM user)
+            should_rerun_after_init = True
+        else:
             if not st.session_state.initial_greeting_shown_for_session:
-                print("CHAT LOGIC (LTM ON): No chats exist. Displaying initial greeting.")
+                print("No chats exist. Displaying initial greeting.")
                 st.session_state.messages = [{"role": "assistant", "content": _get_initial_greeting_text()}]
                 st.session_state.initial_greeting_shown_for_session = True
                 st.session_state.current_chat_id = None
                 st.session_state.chat_modified = False
-                should_rerun_after_init = True # A rerun might be needed if this is the first time greeting is shown
+                should_rerun_after_init = True
     else:
-        # LTM is OFF - manage a single, temporary chat session
         if not st.session_state.current_chat_id or \
            st.session_state.current_chat_id not in st.session_state.all_chat_messages or \
            not st.session_state.messages:
             if not st.session_state.initial_greeting_shown_for_session:
-                print("CHAT LOGIC (LTM OFF): Creating new temporary session with greeting.")
-                create_new_chat_session_in_memory() # This sets up a new chat with greeting
+                print("Creating new temporary session with greeting.")
+                create_new_chat_session_in_memory()
                 st.session_state.initial_greeting_shown_for_session = True
-                should_rerun_after_init = True # Rerun to display the new temporary chat
+                should_rerun_after_init = True
             elif not st.session_state.messages:
-                 print("CHAT LOGIC (LTM OFF): Messages empty, recreating greeting for temporary session.")
+                 print("Messages empty, recreating greeting for temporary session.")
                  create_new_chat_session_in_memory()
-                 should_rerun_after_init = True # Rerun to display the new temporary chat
+                 should_rerun_after_init = True
             else:
                  st.session_state.messages = st.session_state.all_chat_messages[st.session_state.current_chat_id]
-                 print(f"CHAT LOGIC (LTM OFF): Using existing temporary chat '{st.session_state.current_chat_id}'. Messages: {len(st.session_state.messages)}")
+                 # print(f"Using existing temporary chat '{st.session_state.current_chat_id}'. Messages: {len(st.session_state.messages)}") # Removed verbose log
         else:
             st.session_state.messages = st.session_state.all_chat_messages[st.session_state.current_chat_id]
-            print(f"CHAT LOGIC (LTM OFF): Confirmed existing temporary chat '{st.session_state.current_chat_id}'. Messages: {len(st.session_state.messages)}")
+            # print(f"Confirmed existing temporary chat '{st.session_state.current_chat_id}'. Messages: {len(st.session_state.messages)}") # Removed verbose log
 
     # Fallback: If messages list is somehow still not a list (should be extremely rare)
     if not isinstance(st.session_state.messages, list):
-        print("WARNING: st.session_state.messages was not a list after chat logic. Resetting to empty list and default prompts.")
+        print("WARNING: Session messages not a list. Resetting to empty list and default prompts.")
         st.session_state.messages = []
         st.session_state.suggested_prompts = DEFAULT_PROMPTS
         st.session_state.current_chat_id = None
         st.session_state.chat_modified = False
-        should_rerun_after_init = True # Rerun if this fallback is hit
+        should_rerun_after_init = True
     elif not st.session_state.messages and not st.session_state.initial_greeting_shown_for_session:
         print("FALLBACK: No messages and no greeting shown. Displaying initial greeting.")
         st.session_state.messages = [{"role": "assistant", "content": _get_initial_greeting_text()}]
         st.session_state.initial_greeting_shown_for_session = True
         st.session_state.current_chat_id = None
         st.session_state.chat_modified = False
-        should_rerun_after_init = True # Rerun if this fallback is hit
+        should_rerun_after_init = True
 
     # Update suggested prompts based on the final state of messages
     if 'suggested_prompts' not in st.session_state or \
        (st.session_state.messages and st.session_state.suggested_prompts == DEFAULT_PROMPTS and len(st.session_state.messages) > 1) or \
        (not st.session_state.messages and st.session_state.suggested_prompts != DEFAULT_PROMPTS):
-        print("Updating suggested prompts based on current messages state.")
+        print("Updating suggested prompts.")
         st.session_state.suggested_prompts = _cached_generate_suggested_prompts(st.session_state.messages if st.session_state.messages else [])
-        # If prompts were just generated for a new chat, a rerun might be needed if not already triggered
         if not should_rerun_after_init and len(st.session_state.messages) == 1 and st.session_state.messages[0]["role"] == "assistant":
              should_rerun_after_init = True
 
 
     # Final check for rerun after initial chat setup
     if should_rerun_after_init:
-        print("LOG: Main: Rerunning after initial chat setup to ensure UI consistency.")
         st.rerun()
 
     if st.session_state.get("do_regenerate", False):

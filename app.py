@@ -359,7 +359,7 @@ def get_agent_response(query: str, chat_history: List[ChatMessage]) -> str:
 
         with st.spinner("ESI is thinking..."):
             # Corrected to use the passed chat_history parameter
-            response = agent.chat(modified_query, chat_history=chat_history) 
+            response = agent.chat(modified_query, chat_history=formatted_history) 
 
         response_text = response.response if hasattr(response, 'response') else str(response)
 
@@ -827,7 +827,8 @@ def main():
     print(f"LOG: Main: Checking for agent in session. AGENT_SESSION_KEY exists: {AGENT_SESSION_KEY in st.session_state}")
     if AGENT_SESSION_KEY not in st.session_state:
         print(f"LOG: Main: Agent not found. Calling setup_agent().")
-        agent_instance, error_message = setup_agent()
+        # Pass a default value for max_search_results
+        agent_instance, error_message = setup_agent(max_search_results=10) 
         if agent_instance is None:
             st.error(error_message)
             st.stop()

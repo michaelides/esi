@@ -10,8 +10,8 @@ HF_TOKEN = os.getenv("HF_TOKEN", None)
 
 # IMPORTANT: Replace "your-hf-username/your-rag-dataset" with your actual Hugging Face Dataset ID.
 # This is where your RAG vector store will be uploaded and persisted.
-HF_DATASET_ID = os.getenv("HF_DATASET_ID", "your-hf-username/your-rag-dataset") 
-HF_VECTOR_STORE_SUBDIR = "simple_vector_store" # Subdirectory within the HF dataset to store the vector store
+HF_DATASET_ID = os.getenv("HF_DATASET_ID", "gm42/rag") 
+HF_VECTOR_STORE_SUBDIR = "esi_simplevector" # Subdirectory within the HF dataset to store the vector store
 
 # --- RAG Document Processing Configuration ---
 CHUNK_SIZE = 512 # Size of text chunks for processing by the node parser
@@ -19,7 +19,7 @@ CHUNK_OVERLAP = 20 # Overlap between text chunks to maintain context
 
 # Paths for source data and scraped web content
 # These paths are relative to the PROJECT_ROOT
-SOURCE_DATA_DIR_RELATIVE = "data" # Directory for local documents (e.g., PDFs, text files)
+SOURCE_DATA_DIR_RELATIVE = "ragdb/articles" # Directory for local documents (e.g., PDFs, text files)
 SOURCE_DATA_DIR = os.path.join(PROJECT_ROOT, SOURCE_DATA_DIR_RELATIVE)
 
 WEB_MARKDOWN_PATH_RELATIVE = "ragdb/web_markdown" # Directory where scraped web content (markdown) is stored

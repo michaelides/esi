@@ -5,7 +5,7 @@ from urllib.parse import urlparse
 from llama_index.core import SimpleDirectoryReader, VectorStoreIndex, StorageContext
 from llama_index.core.node_parser import SentenceSplitter
 from llama_index.core.vector_stores import SimpleVectorStore
-from huggingface_hub import HfApi
+from huggingface_hub import HfApi, create_repo # Added create_repo
 from llama_index.embeddings.google_genai import GoogleGenAIEmbedding
 from crawl4ai import AsyncWebCrawler, CrawlerRunConfig
 from crawl4ai.deep_crawling import BFSDeepCrawlStrategy
@@ -36,21 +36,25 @@ from config import (
     HF_VECTOR_STORE_SUBDIR,
     CHUNK_SIZE,
     CHUNK_OVERLAP,
-    SOURCE_DATA_DIR_RELATIVE, # Keep for reference if SOURCE_DATA_DIR defined here
+    SOURCE_DATA_DIR_RELATIVE,
     SOURCE_DATA_DIR,
-    WEB_MARKDOWN_PATH_RELATIVE, # Keep for reference if WEB_MARKDOWN_PATH defined here
+    WEB_MARKDOWN_PATH_RELATIVE,
     WEB_MARKDOWN_PATH,
-    WEBPAGES_FILE_RELATIVE, # Keep for reference if WEBPAGES_FILE defined here
+    WEBPAGES_FILE_RELATIVE,
     WEBPAGES_FILE
 )
 
 # Ensure HF_TOKEN is set for writing to Hugging Face Hub
-if not os.getenv("HF_TOKEN"):
-    print("Warning: HF_TOKEN environment variable is not set. Make sure you are logged in via `huggingface-cli login` or have set HF_TOKEN to write to the Hugging Face Dataset.")
+hf_token = os.getenv("HF_TOKEN")
+if not hf_token:
+    print("Error: HF_TOKEN environment variable is not set. Please set it to upload to Hugging Face Hub.")
+    sys.exit(1) # Exit if token is not set, as upload will fail
 
 print(f"Target Hugging Face Dataset for RAG persistence: {HF_DATASET_ID}/{HF_VECTOR_STORE_SUBDIR}")
 
-# CHUNK_SIZE, CHUNK_OVERLAP, SOURCE_DATA_DIR, WEB_MARKDOWN_PATH, WEBPAGES_FILE are now imported from config.py
+# Ensure local directories exist
+os.makedirs(SOURCE_DATA_DIR, exist_ok=True)
+os.makedirs(WEB_MARKDOWN_PATH, exist_ok=True)
 
 URLS_TO_SCRAPE = []
 try:
@@ -76,9 +80,17 @@ async def main():
 
     print(f"Configuring RAG to persist to Hugging Face Dataset: {HF_DATASET_ID}, path in repo: {HF_VECTOR_STORE_SUBDIR}")
 
+    # Create the Hugging Face repository if it doesn't exist
+    try:
+        print(f"Ensuring Hugging Face dataset '{HF_DATASET_ID}' exists...")
+        create_repo(repo_id=HF_DATASET_ID, repo_type="dataset", token=hf_token, exist_ok=True)
+        print(f"Hugging Face dataset '{HF_DATASET_ID}' is ready.")
+    except Exception as e:
+        print(f"Error creating/checking Hugging Face repository: {e}")
+        print("Please ensure your HF_TOKEN is valid and you have permissions to create datasets.")
+        return # Exit if repo cannot be created/accessed
+
     # 1. Scrape websites
-    # WEB_MARKDOWN_PATH is from config and is used by scrape_websites internally if not passed (though it is passed here)
-    # URLS_TO_SCRAPE is defined in this file (make_rag.py)
     await scrape_websites(URLS_TO_SCRAPE, WEB_MARKDOWN_PATH)
 
     # 2. Load and process documents
@@ -86,55 +98,84 @@ async def main():
     # It uses SOURCE_DATA_DIR, WEB_MARKDOWN_PATH, CHUNK_SIZE, CHUNK_OVERLAP from config.py
     all_documents, node_parser = load_and_process_documents()
 
+    # Initialize HfApi for uploads
+    api = HfApi(token=hf_token)
+
     if not all_documents:
-        print("make_rag.py: No documents loaded by document_processor. Exiting RAG pipeline.")
-        return
+        print("make_rag.py: No documents loaded by document_processor. Skipping vector store creation.")
+    else:
+        # 3. Initialize SimpleVectorStore and Storage Context for local persistence
+        # Node parser is now returned by load_and_process_documents
+        print("make_rag.py: Initializing SimpleVectorStore for local persistence...")
+        vector_store = SimpleVectorStore()
+        
+        storage_context = StorageContext.from_defaults(vector_store=vector_store)
 
-    # 3. Initialize SimpleVectorStore and Storage Context for local persistence
-    # Node parser is now returned by load_and_process_documents
-    print("make_rag.py: Initializing SimpleVectorStore for local persistence...")
-    vector_store = SimpleVectorStore()
-    
-    storage_context = StorageContext.from_defaults(vector_store=vector_store)
-
-    # 5. Create VectorStoreIndex (This performs parsing, embedding, and indexing)
-    print(f"Creating index for {len(all_documents)} documents... (This may take a while)")
-    index = VectorStoreIndex.from_documents(
-        all_documents,
-        storage_context=storage_context,
-        embed_model=embedding_model,
-        node_parser=node_parser,
-        show_progress=True,
-    )
-
-    # 6. Persist the index locally to a temporary directory
-    local_persist_dir = tempfile.mkdtemp()
-    print(f"Persisting index locally to temporary directory: {local_persist_dir}...")
-    try:
-        index.storage_context.persist(persist_dir=local_persist_dir)
-        print("Local persistence successful.")
-
-        # 7. Upload the persisted data to Hugging Face Dataset
-        print(f"Uploading persisted index to Hugging Face Dataset: {HF_DATASET_ID}, path in repo: {HF_VECTOR_STORE_SUBDIR}...")
-        hf_token = os.getenv("HF_TOKEN")
-        if not hf_token:
-            print("Warning: HF_TOKEN not set. Upload to Hugging Face Hub will likely fail or use cached credentials.")
-            
-        api = HfApi(token=hf_token)
-        api.upload_folder(
-            folder_path=local_persist_dir,
-            repo_id=HF_DATASET_ID,
-            path_in_repo=HF_VECTOR_STORE_SUBDIR,
-            repo_type="dataset",
+        # 5. Create VectorStoreIndex (This performs parsing, embedding, and indexing)
+        print(f"Creating index for {len(all_documents)} documents... (This may take a while)")
+        index = VectorStoreIndex.from_documents(
+            all_documents,
+            storage_context=storage_context,
+            embed_model=embedding_model,
+            node_parser=node_parser,
+            show_progress=True,
         )
-        print(f"Successfully uploaded index to Hugging Face Dataset: {HF_DATASET_ID}/{HF_VECTOR_STORE_SUBDIR}")
 
+        # 6. Persist the index locally to a temporary directory
+        local_persist_dir = tempfile.mkdtemp()
+        print(f"Persisting index locally to temporary directory: {local_persist_dir}...")
+        try:
+            index.storage_context.persist(persist_dir=local_persist_dir)
+            print("Local persistence successful.")
+
+            # 7. Upload the persisted vector store data to Hugging Face Dataset
+            print(f"Uploading persisted vector store to Hugging Face Dataset: {HF_DATASET_ID}, path in repo: {HF_VECTOR_STORE_SUBDIR}...")
+            api.upload_folder(
+                folder_path=local_persist_dir,
+                repo_id=HF_DATASET_ID,
+                path_in_repo=HF_VECTOR_STORE_SUBDIR,
+                repo_type="dataset",
+                commit_message="Upload RAG vector store"
+            )
+            print(f"Successfully uploaded vector store to Hugging Face Dataset: {HF_DATASET_ID}/{HF_VECTOR_STORE_SUBDIR}")
+
+        except Exception as e:
+            print(f"An error occurred during local persistence or vector store upload: {e}")
+        finally:
+            if os.path.exists(local_persist_dir):
+                print(f"Cleaning up temporary local persistence directory: {local_persist_dir}")
+                shutil.rmtree(local_persist_dir)
+
+    # Upload source data directories regardless of whether an index was created
+    # Upload ragdb/articles to rag/articles
+    print(f"Uploading local documents from '{SOURCE_DATA_DIR}' to '{HF_DATASET_ID}/articles'...")
+    try:
+        api.upload_folder(
+            folder_path=SOURCE_DATA_DIR,
+            repo_id=HF_DATASET_ID,
+            path_in_repo="articles", # User specified 'articles' subfolder
+            repo_type="dataset",
+            commit_message="Upload local articles for RAG",
+            # allow_patterns=["*.pdf", "*.txt", "*.md"] # Optional: restrict file types
+        )
+        print(f"Successfully uploaded '{SOURCE_DATA_DIR}' to '{HF_DATASET_ID}/articles'.")
     except Exception as e:
-        print(f"An error occurred during local persistence or upload: {e}")
-    finally:
-        if os.path.exists(local_persist_dir):
-            print(f"Cleaning up temporary local persistence directory: {local_persist_dir}")
-            shutil.rmtree(local_persist_dir)
+        print(f"Error uploading local articles: {e}")
+
+    # Upload ragdb/web_markdown to rag/web_markdown
+    print(f"Uploading scraped web markdown from '{WEB_MARKDOWN_PATH}' to '{HF_DATASET_ID}/web_markdown'...")
+    try:
+        api.upload_folder(
+            folder_path=WEB_MARKDOWN_PATH,
+            repo_id=HF_DATASET_ID,
+            path_in_repo="web_markdown", # User specified 'web_markdown' subfolder
+            repo_type="dataset",
+            commit_message="Upload scraped web markdown for RAG",
+            # allow_patterns=["*.md"] # Optional: restrict file types
+        )
+        print(f"Successfully uploaded '{WEB_MARKDOWN_PATH}' to '{HF_DATASET_ID}/web_markdown'.")
+    except Exception as e:
+        print(f"Error uploading web markdown: {e}")
 
     print("RAG database creation script finished.")
 

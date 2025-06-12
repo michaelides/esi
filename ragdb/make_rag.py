@@ -5,7 +5,7 @@ from urllib.parse import urlparse
 from llama_index.core import SimpleDirectoryReader, VectorStoreIndex, StorageContext
 from llama_index.core.node_parser import SentenceSplitter
 from llama_index.core.vector_stores import SimpleVectorStore
-from huggingface_hub import HfApi, create_repo # Added create_repo
+from huggingface_hub import HfApi, create_repo
 from llama_index.embeddings.google_genai import GoogleGenAIEmbedding
 from crawl4ai import AsyncWebCrawler, CrawlerRunConfig
 from crawl4ai.deep_crawling import BFSDeepCrawlStrategy
@@ -40,6 +40,9 @@ from config import (
     SOURCE_DATA_DIR,
     WEB_MARKDOWN_PATH_RELATIVE,
     WEB_MARKDOWN_PATH,
+    ADDITIONAL_SOURCE_DATA_DIR_RELATIVE, # New import
+    ADDITIONAL_SOURCE_DATA_DIR,         # New import
+    HF_ADDITIONAL_SOURCE_DATA_UPLOAD_PATH, # New import
     WEBPAGES_FILE_RELATIVE,
     WEBPAGES_FILE
 )
@@ -55,6 +58,7 @@ print(f"Target Hugging Face Dataset for RAG persistence: {HF_DATASET_ID}/{HF_VEC
 # Ensure local directories exist
 os.makedirs(SOURCE_DATA_DIR, exist_ok=True)
 os.makedirs(WEB_MARKDOWN_PATH, exist_ok=True)
+os.makedirs(ADDITIONAL_SOURCE_DATA_DIR, exist_ok=True) # Ensure new source_data directory exists
 
 URLS_TO_SCRAPE = []
 try:
@@ -93,19 +97,33 @@ async def main():
     # 1. Scrape websites
     await scrape_websites(URLS_TO_SCRAPE, WEB_MARKDOWN_PATH)
 
-    # 2. Load and process documents
-    # This function now encapsulates document loading and SentenceSplitter initialization
-    # It uses SOURCE_DATA_DIR, WEB_MARKDOWN_PATH, CHUNK_SIZE, CHUNK_OVERLAP from config.py
+    # 2. Load and process documents from existing sources (articles and web_markdown)
     all_documents, node_parser = load_and_process_documents()
+
+    # New: Load documents from the additional source_data directory
+    print(f"LOG: doc_processor.Reading from directory: {ADDITIONAL_SOURCE_DATA_DIR}")
+    try:
+        additional_documents = SimpleDirectoryReader(
+            input_dir=ADDITIONAL_SOURCE_DATA_DIR,
+            recursive=True,
+            exclude_hidden=True
+        ).load_data()
+        if additional_documents:
+            print(f"LOG: doc_processor.Loaded {len(additional_documents)} documents from {ADDITIONAL_SOURCE_DATA_DIR}")
+            all_documents.extend(additional_documents) # Add them to the main list
+        else:
+            print(f"LOG: doc_processor.Directory is empty, skipping: {ADDITIONAL_SOURCE_DATA_DIR}")
+    except Exception as e:
+        print(f"Error loading documents from {ADDITIONAL_SOURCE_DATA_DIR}: {e}")
+
 
     # Initialize HfApi for uploads
     api = HfApi(token=hf_token)
 
     if not all_documents:
-        print("make_rag.py: No documents loaded by document_processor. Skipping vector store creation.")
+        print("make_rag.py: No documents loaded for indexing. Skipping vector store creation.")
     else:
         # 3. Initialize SimpleVectorStore and Storage Context for local persistence
-        # Node parser is now returned by load_and_process_documents
         print("make_rag.py: Initializing SimpleVectorStore for local persistence...")
         vector_store = SimpleVectorStore()
         
@@ -176,6 +194,21 @@ async def main():
         print(f"Successfully uploaded '{WEB_MARKDOWN_PATH}' to '{HF_DATASET_ID}/web_markdown'.")
     except Exception as e:
         print(f"Error uploading web markdown: {e}")
+
+    # New: Upload ragdb/source_data to gm42/rag/source_data
+    print(f"Uploading additional source data from '{ADDITIONAL_SOURCE_DATA_DIR}' to '{HF_DATASET_ID}/{HF_ADDITIONAL_SOURCE_DATA_UPLOAD_PATH}'...")
+    try:
+        api.upload_folder(
+            folder_path=ADDITIONAL_SOURCE_DATA_DIR,
+            repo_id=HF_DATASET_ID,
+            path_in_repo=HF_ADDITIONAL_SOURCE_DATA_UPLOAD_PATH,
+            repo_type="dataset",
+            commit_message="Upload additional source data for RAG",
+            # allow_patterns=["*.pdf", "*.txt", "*.md"] # Optional: restrict file types
+        )
+        print(f"Successfully uploaded '{ADDITIONAL_SOURCE_DATA_DIR}' to '{HF_DATASET_ID}/{HF_ADDITIONAL_SOURCE_DATA_UPLOAD_PATH}'.")
+    except Exception as e:
+        print(f"Error uploading additional source data: {e}")
 
     print("RAG database creation script finished.")
 

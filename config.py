@@ -25,6 +25,11 @@ SOURCE_DATA_DIR = os.path.join(PROJECT_ROOT, SOURCE_DATA_DIR_RELATIVE)
 WEB_MARKDOWN_PATH_RELATIVE = "ragdb/web_markdown" # Directory where scraped web content (markdown) is stored
 WEB_MARKDOWN_PATH = os.path.join(PROJECT_ROOT, WEB_MARKDOWN_PATH_RELATIVE)
 
+# New: Path for additional source data to be indexed and uploaded
+ADDITIONAL_SOURCE_DATA_DIR_RELATIVE = "ragdb/source_data"
+ADDITIONAL_SOURCE_DATA_DIR = os.path.join(PROJECT_ROOT, ADDITIONAL_SOURCE_DATA_DIR_RELATIVE)
+HF_ADDITIONAL_SOURCE_DATA_UPLOAD_PATH = "source_data" # Target subfolder on Hugging Face
+
 WEBPAGES_FILE_RELATIVE = "ragdb/webpages.txt" # File containing URLs to scrape, one per line
 WEBPAGES_FILE = os.path.join(PROJECT_ROOT, WEBPAGES_FILE_RELATIVE)
 

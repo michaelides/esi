@@ -19,10 +19,13 @@ import io # Import io module for BytesIO
 from llama_index.core.tools import FunctionTool # Import FunctionTool
 
 # Import necessary libraries for Hugging Face integration
-from datasets import Dataset, load_dataset
+from datasets import Dataset, load_dataset, DatasetDict
 from huggingface_hub import HfApi, Repository
 import pandas as pd # Import pandas for data manipulation
 import os # Import os to access environment variables
+
+# Import HF_USER_MEMORIES_DATASET_ID from config.py
+from config import HF_USER_MEMORIES_DATASET_ID
 
 load_dotenv()
 
@@ -36,7 +39,8 @@ AGENT_SESSION_KEY = "esi_orchestrator_agent"
 DOWNLOAD_MARKER = "---DOWNLOAD_FILE---"
 RAG_SOURCE_MARKER_PREFIX = "---RAG_SOURCE---"
 
-MEMORY_DIR = os.path.join(PROJECT_ROOT, "user_memories")
+# MEMORY_DIR is no longer used for chat history/metadata storage, as it's now on Hugging Face.
+# MEMORY_DIR = os.path.join(PROJECT_ROOT, "user_memories") # REMOVED THIS LINE
 
 # Import UI_ACCESSIBLE_WORKSPACE from tools.py
 from tools import UI_ACCESSIBLE_WORKSPACE
@@ -172,7 +176,7 @@ def _get_or_create_user_id(long_term_memory_enabled_param: bool) -> tuple[str, s
 @st.cache_resource
 def _initialize_user_session_data(long_term_memory_enabled_param: bool) -> tuple[str, Dict[str, Any], Dict[str, Any], str]:
     """
-    Initializes user ID, loads chat data from disk (if long-term memory is enabled),
+    Initializes user ID, loads chat data from Hugging Face (if long-term memory is enabled),
     and returns the cookie action flag.
     This function is cached to run only once per Streamlit session, or when its parameters change.
     Returns: (user_id, chat_metadata, all_chat_messages, cookie_action_flag)
@@ -187,134 +191,168 @@ def _initialize_user_session_data(long_term_memory_enabled_param: bool) -> tuple
     all_chat_messages = {}
 
     if long_term_memory_enabled_param:
-        # Load data from disk only if memory is enabled
-        print(f"LOG: _initialize_user_session_data: LTM ON. Loading data for user {user_id} from disk.")
-        user_data = _load_user_data_from_disk(user_id) # This function is not cached, but its call is within a cached function
+        # Load data from Hugging Face only if memory is enabled
+        print(f"LOG: _initialize_user_session_data: LTM ON. Loading data for user {user_id} from Hugging Face.") # Updated log
+        user_data = _load_user_data_from_hf(user_id) # This function is not cached, but its call is within a cached function
         chat_metadata = user_data["metadata"]
         all_chat_messages = user_data["messages"]
         print(f"LOG: _initialize_user_session_data: Initial data load complete. Found {len(chat_metadata)} chats for user {user_id}.")
     else:
-        # No disk load for disabled memory, data structures remain empty/default
-        print(f"LOG: _initialize_user_session_data: LTM OFF. No disk data loaded for temporary user_id {user_id}.")
+        # No HF load for disabled memory, data structures remain empty/default
+        print(f"LOG: _initialize_user_session_data: LTM OFF. No HF data loaded for temporary user_id {user_id}.")
 
     print(f"LOG: _initialize_user_session_data: User session data initialized (cached). Final User ID: {user_id}")
     return user_id, chat_metadata, all_chat_messages, cookie_action_flag
 
-def _load_user_data_from_disk(user_id: str) -> Dict[str, Any]:
+def _load_user_data_from_hf(user_id: str) -> Dict[str, Any]:
     """
-    Loads all chat metadata and histories for a user directly from disk.
+    Loads all chat metadata and histories for a user from the Hugging Face dataset.
     This function is NOT cached by Streamlit.
     """
-    user_dir = os.path.join(MEMORY_DIR, user_id)
-    os.makedirs(user_dir, exist_ok=True)
+    hf_token = os.getenv("HF_TOKEN")
+    if not hf_token:
+        print("HF_TOKEN environment variable not set. Cannot load user data from Hugging Face.")
+        return {"metadata": {}, "messages": {}}
 
-    chat_metadata_path = os.path.join(user_dir, "chat_metadata.json")
     all_chat_metadata = {}
-    if os.path.exists(chat_metadata_path):
-        try:
-            with open(chat_metadata_path, "r", encoding="utf-8") as f:
-                all_chat_metadata = json.load(f)
-            print(f"Loaded chat metadata for user {user_id} from disk.")
-        except json.JSONDecodeError as e:
-            print(f"Error decoding chat metadata for user {user_id}: {e}. Starting fresh metadata.")
-            all_chat_metadata = {}
-    
     all_chat_messages = {}
-    # Iterate over a copy of items for safe deletion during iteration
-    for chat_id, chat_name in list(all_chat_metadata.items()): 
-        chat_file = os.path.join(user_dir, f"{chat_id}.json")
-        if os.path.exists(chat_file):
-            # Instead of loading messages, set to None for lazy loading
-            all_chat_messages[chat_id] = None 
-        else:
-            print(f"Chat file {chat_file} not found for chat ID {chat_id}. Removing from metadata.")
-            # Remove chat_id from all_chat_metadata if its message file doesn't exist
-            if chat_id in all_chat_metadata:
-                del all_chat_metadata[chat_id]
-            # Do not add to all_chat_messages if file is missing
-    
-    print(f"Processed metadata for {len(all_chat_metadata)} chats. Messages will be lazy-loaded.")
-    return {"metadata": all_chat_metadata, "messages": all_chat_messages}
+
+    try:
+        # Load the entire dataset
+        dataset = load_dataset(HF_USER_MEMORIES_DATASET_ID, split="train", token=hf_token)
+        print(f"Loaded dataset '{HF_USER_MEMORIES_DATASET_ID}' with {len(dataset)} rows.")
+
+        # Filter data for the current user
+        user_data_rows = dataset.filter(lambda row: row["user_id"] == user_id)
+        print(f"Found {len(user_data_rows)} rows for user {user_id}.")
+
+        # Process rows to reconstruct chat_metadata and all_chat_messages
+        for row in user_data_rows:
+            chat_id = row.get("chat_id")
+            role = row.get("role")
+            content = row.get("content")
+
+            if chat_id == "global_metadata" and role == "metadata":
+                try:
+                    all_chat_metadata = json.loads(content)
+                    print(f"Reconstructed chat metadata for user {user_id}.")
+                except json.JSONDecodeError as e:
+                    print(f"Error decoding metadata for user {user_id}: {e}. Metadata will be empty.")
+                    all_chat_metadata = {}
+            elif chat_id and role and content is not None:
+                if chat_id not in all_chat_messages:
+                    all_chat_messages[chat_id] = []
+                all_chat_messages[chat_id].append({"role": role, "content": content})
+        
+        # Ensure messages are sorted by their original order if possible (not explicitly stored, but usually appended)
+        # For now, assume the order from the dataset is sufficient.
+        
+        # Clean up metadata for chats that no longer have messages (e.g., if messages were manually deleted from HF)
+        chats_to_remove_from_metadata = [cid for cid in all_chat_metadata if cid not in all_chat_messages]
+        for cid in chats_to_remove_from_metadata:
+            print(f"Chat {cid} found in metadata but no messages. Removing from metadata.")
+            del all_chat_metadata[cid]
+
+        print(f"Reconstructed {len(all_chat_metadata)} chats and their messages for user {user_id}.")
+        return {"metadata": all_chat_metadata, "messages": all_chat_messages}
+
+    except Exception as e:
+        print(f"Error loading user data from Hugging Face for user {user_id}: {e}")
+        return {"metadata": {}, "messages": {}}
 
 def save_chat_history(user_id: str, chat_id: str, messages: List[Dict[str, Any]]):
     """
-    Saves a specific chat history for a given user ID to a JSON file locally
-    and uploads it to a Hugging Face dataset.
+    Saves a specific chat history for a given user ID to the Hugging Face dataset.
     """
     if not st.session_state.long_term_memory_enabled:
-        print("Long-term memory disabled. Not saving chat history.")
+        print("Long-term memory disabled. Not saving chat history to Hugging Face.")
         return
 
-    # --- Local Save ---
-    user_dir = os.path.join(MEMORY_DIR, user_id)
-    os.makedirs(user_dir, exist_ok=True)
-    memory_file = os.path.join(user_dir, f"{chat_id}.json")
-    try:
-        with open(memory_file, "w", encoding="utf-8") as f:
-            json.dump(messages, f, indent=2)
-        print(f"Saved chat history for chat {chat_id} (user {user_id}) to {memory_file} locally.")
-    except Exception as e:
-        print(f"Error saving chat history locally for chat {chat_id} (user {user_id}): {e}")
-
-    # --- Hugging Face Upload ---
     hf_token = os.getenv("HF_TOKEN")
     if not hf_token:
-        print("HF_TOKEN environment variable not set. Skipping Hugging Face upload.")
+        print("HF_TOKEN environment variable not set. Skipping Hugging Face upload for chat history.")
         return
 
-    repo_id = "gm42/user_memories" # Your Hugging Face dataset repository ID
-
     try:
-        # Prepare data for the dataset
-        # Each message becomes a row, including user_id and chat_id for context
-        data_to_upload = []
+        # Load the existing dataset
+        existing_dataset = load_dataset(HF_USER_MEMORIES_DATASET_ID, split="train", token=hf_token)
+        
+        # Filter out existing messages for this user_id and chat_id
+        # Also keep the metadata row for this user
+        filtered_dataset = existing_dataset.filter(
+            lambda row: not (row["user_id"] == user_id and row["chat_id"] == chat_id),
+            num_proc=os.cpu_count() # Use multiple processes for filtering if dataset is large
+        )
+        print(f"Filtered out old messages for chat {chat_id} (user {user_id}). Remaining rows: {len(filtered_dataset)}")
+
+        # Prepare new data for the current chat
+        new_chat_data = []
         for msg in messages:
-            data_to_upload.append({
+            new_chat_data.append({
                 "user_id": user_id,
                 "chat_id": chat_id,
-                "role": msg.get("role", "unknown"), # Default to 'unknown' if role is missing
-                "content": msg.get("content", "") # Default to empty string if content is missing
+                "role": msg.get("role", "unknown"),
+                "content": msg.get("content", "")
             })
+        new_chat_df = pd.DataFrame(new_chat_data)
+        new_chat_dataset = Dataset.from_pandas(new_chat_df)
 
-        # Convert to pandas DataFrame and then to Dataset
-        df_to_upload = pd.DataFrame(data_to_upload)
-        new_dataset_part = Dataset.from_pandas(df_to_upload)
-
-        # Load existing dataset from Hugging Face
-        # Use download_mode="force_redownload" if you need to ensure the latest version is fetched
-        # Consider using a different strategy for large datasets (e.g., append to a specific file)
-        try:
-            existing_dataset = load_dataset(repo_id, split="train")
-            print(f"Loaded existing dataset from {repo_id} with {len(existing_dataset)} rows.")
-            # Concatenate existing and new data
-            combined_dataset = Dataset.from_pandas(pd.concat([existing_dataset.to_pandas(), new_dataset_part.to_pandas()], ignore_index=True))
-            print(f"Combined dataset has {len(combined_dataset)} rows.")
-        except Exception as e:
-            print(f"Could not load existing dataset from {repo_id}: {e}. Creating a new dataset.")
-            combined_dataset = new_dataset_part # Start with the new data if loading fails
+        # Concatenate the filtered existing data with the new chat data
+        combined_df = pd.concat([filtered_dataset.to_pandas(), new_chat_dataset.to_pandas()], ignore_index=True)
+        combined_dataset = Dataset.from_pandas(combined_df)
+        print(f"Combined dataset has {len(combined_dataset)} rows after updating chat {chat_id}.")
 
         # Push the combined dataset back to the Hugging Face Hub
-        combined_dataset.push_to_hub(repo_id, private=True, token=hf_token)
-        print(f"Successfully uploaded chat history for chat {chat_id} (user {user_id}) to Hugging Face dataset '{repo_id}'.")
+        combined_dataset.push_to_hub(HF_USER_MEMORIES_DATASET_ID, private=True, token=hf_token)
+        print(f"Successfully uploaded updated chat history for chat {chat_id} (user {user_id}) to Hugging Face dataset '{HF_USER_MEMORIES_DATASET_ID}'.") # Updated log
 
     except Exception as e:
         print(f"Error uploading chat history to Hugging Face for chat {chat_id} (user {user_id}): {e}")
-        # Optionally, log this error more persistently or trigger an alert
+        st.error(f"Error saving chat history to cloud: {e}")
 
 def save_chat_metadata(user_id: str, chat_metadata: Dict[str, str]):
-    """Saves the chat metadata (ID to name mapping) for a user."""
+    """Saves the chat metadata (ID to name mapping) for a user to Hugging Face."""
     if not st.session_state.long_term_memory_enabled:
-        print("Long-term memory disabled. Not saving chat metadata to disk.")
+        print("Long-term memory disabled. Not saving chat metadata to Hugging Face.")
         return
-    user_dir = os.path.join(MEMORY_DIR, user_id)
-    os.makedirs(user_dir, exist_ok=True)
-    metadata_file = os.path.join(user_dir, "chat_metadata.json")
+
+    hf_token = os.getenv("HF_TOKEN")
+    if not hf_token:
+        print("HF_TOKEN environment variable not set. Skipping Hugging Face upload for metadata.")
+        return
+
     try:
-        with open(metadata_file, "w", encoding="utf-8") as f:
-            json.dump(chat_metadata, f, indent=2)
-        print(f"Saved chat metadata for user {user_id} to {metadata_file}")
+        # Load the existing dataset
+        existing_dataset = load_dataset(HF_USER_MEMORIES_DATASET_ID, split="train", token=hf_token)
+
+        # Filter out the existing metadata row for this user
+        filtered_dataset = existing_dataset.filter(
+            lambda row: not (row["user_id"] == user_id and row["chat_id"] == "global_metadata" and row["role"] == "metadata"),
+            num_proc=os.cpu_count()
+        )
+        print(f"Filtered out old metadata for user {user_id}. Remaining rows: {len(filtered_dataset)}")
+
+        # Prepare new metadata row
+        new_metadata_data = [{
+            "user_id": user_id,
+            "chat_id": "global_metadata", # Special chat_id for metadata
+            "role": "metadata",
+            "content": json.dumps(chat_metadata)
+        }]
+        new_metadata_df = pd.DataFrame(new_metadata_data)
+        new_metadata_dataset = Dataset.from_pandas(new_metadata_df)
+
+        # Concatenate and push
+        combined_df = pd.concat([filtered_dataset.to_pandas(), new_metadata_dataset.to_pandas()], ignore_index=True)
+        combined_dataset = Dataset.from_pandas(combined_df)
+        print(f"Combined dataset has {len(combined_dataset)} rows after updating metadata for user {user_id}.")
+
+        combined_dataset.push_to_hub(HF_USER_MEMORIES_DATASET_ID, private=True, token=hf_token)
+        print(f"Saved chat metadata for user {user_id} to Hugging Face dataset '{HF_USER_MEMORIES_DATASET_ID}'.") # Updated log
+
     except Exception as e:
-        print(f"Error saving chat metadata for user {user_id}): {e}")
+        print(f"Error saving chat metadata to Hugging Face for user {user_id}: {e}")
+        st.error(f"Error saving chat metadata to cloud: {e}")
 
 def format_chat_history(streamlit_messages: List[Dict[str, Any]]) -> List[ChatMessage]:
     """
@@ -359,7 +397,7 @@ def get_agent_response(query: str, chat_history: List[ChatMessage]) -> str:
 
         with st.spinner("ESI is thinking..."):
             # Corrected to use the passed chat_history parameter
-            response = agent.chat(modified_query, chat_history=chat_history) 
+            response = agent.chat(modified_query, chat_history=formatted_history) 
 
         response_text = response.response if hasattr(response, 'response') else str(response)
 
@@ -374,7 +412,7 @@ def get_agent_response(query: str, chat_history: List[ChatMessage]) -> str:
 def create_new_chat_session_in_memory():
     """
     Creates a new chat session (ID, name, empty messages) in memory (st.session_state)
-    and sets it as the current chat. Does NOT save to disk immediately.
+    and sets it as the current chat. Does NOT save to Hugging Face immediately.
     """
     new_chat_id = str(uuid.uuid4())
     
@@ -401,11 +439,11 @@ def create_new_chat_session_in_memory():
     # Generate initial prompts for the new chat
     st.session_state.suggested_prompts = _cached_generate_suggested_prompts(st.session_state.messages)
 
-    print(f"Created new chat in memory: ID={new_chat_id}, Name='{new_chat_name}' (not yet saved to disk)")
+    print(f"Created new chat in memory: ID={new_chat_id}, Name='{new_chat_name}' (not yet saved to HF)")
     return new_chat_id # Return the new chat ID
 
 def switch_chat(chat_id: str):
-    """Switches to an existing chat, lazy-loading messages if necessary."""
+    """Switches to an existing chat, ensuring messages are loaded."""
     if not st.session_state.long_term_memory_enabled:
         print("Long-term memory disabled. Cannot switch to historical chats. Starting a new temporary session.")
         create_new_chat_session_in_memory()
@@ -416,69 +454,61 @@ def switch_chat(chat_id: str):
         print(f"Error: Attempted to switch to chat ID '{chat_id}' not found in metadata.")
         return
 
-    # Lazy load messages if they are not already loaded
+    # Messages for the target chat_id should already be loaded in st.session_state.all_chat_messages
+    # by _initialize_user_session_data or _load_user_data_from_hf.
+    # If for some reason they are not, it indicates an issue with the loading logic.
     if st.session_state.all_chat_messages.get(chat_id) is None:
-        print(f"Messages for chat ID '{chat_id}' not loaded. Loading from disk...")
-        user_dir = os.path.join(MEMORY_DIR, st.session_state.user_id)
-        chat_file = os.path.join(user_dir, f"{chat_id}.json")
-
-        if os.path.exists(chat_file):
-            try:
-                with open(chat_file, "r", encoding="utf-8") as f:
-                    st.session_state.all_chat_messages[chat_id] = json.load(f)
-                print(f"Successfully loaded messages for chat ID '{chat_id}'.")
-            except json.JSONDecodeError as e:
-                print(f"Error decoding JSON for chat {chat_id} (file: {chat_file}): {e}.")
-                st.session_state.all_chat_messages[chat_id] = [] # Set to empty list on error
-            except Exception as e:
-                print(f"An unexpected error occurred while reading chat file {chat_file}: {e}")
-                st.session_state.all_chat_messages[chat_id] = [] # Set to empty list on error
-        else:
-            print(f"Chat file {chat_file} not found for chat ID '{chat_id}'. Setting to empty messages.")
-            st.session_state.all_chat_messages[chat_id] = [] # Set to empty list if file not found
-
-
-    st.session_state.current_chat_id = chat_id
-    st.session_state.messages = st.session_state.all_chat_messages[chat_id]
-    # Ensure messages are not None before generating prompts
-    if st.session_state.messages is None: 
-        # This case should ideally be handled by the loading logic above,
-        # setting it to [] if loading fails.
-        print(f"Warning: Messages for chat {chat_id} are None even after loading attempt. Defaulting to empty list for prompts.")
-        st.session_state.messages = []
-        st.session_state.all_chat_messages[chat_id] = []
-
-
+        print(f"WARNING: Messages for current chat ID '{chat_id}' were not loaded by _initialize_user_session_data. This indicates an issue. Setting to empty list.")
+        st.session_state.all_chat_messages[chat_id] = [] # Fallback
+            
+    st.session_state.messages = st.session_state.all_chat_messages.get(chat_id, [])
+    
     st.session_state.suggested_prompts = _cached_generate_suggested_prompts(st.session_state.messages) # Use cached version
     st.session_state.chat_modified = True # Assume existing chat is modified if switched to (will be saved on next AI response)
     print(f"Switched to chat: ID={chat_id}, Name='{st.session_state.chat_metadata.get(chat_id, 'Unknown')}'")
     st.rerun()
 
 def delete_chat_session(chat_id: str):
-    """Deletes a chat history and its metadata."""
+    """Deletes a chat history and its metadata from Hugging Face."""
     if not st.session_state.long_term_memory_enabled:
-        print("Long-term memory disabled. Cannot delete historical chats from disk. Resetting current session.")
+        print("Long-term memory disabled. Cannot delete historical chats. Resetting current session.")
         if chat_id == st.session_state.current_chat_id:
             create_new_chat_session_in_memory()
             st.rerun()
         return
 
+    hf_token = os.getenv("HF_TOKEN")
+    if not hf_token:
+        print("HF_TOKEN environment variable not set. Skipping Hugging Face deletion.")
+        st.error("Cannot delete chat: Hugging Face token not configured.")
+        return
+
     # Check if the chat to be deleted is the currently active one
     is_current_chat = (chat_id == st.session_state.current_chat_id)
 
-    if chat_id in st.session_state.all_chat_messages:
-        # Delete from in-memory session state
-        del st.session_state.all_chat_messages[chat_id]
-        del st.session_state.chat_metadata[chat_id]
+    try:
+        # Load the existing dataset
+        existing_dataset = load_dataset(HF_USER_MEMORIES_DATASET_ID, split="train", token=hf_token)
+
+        # Filter out all rows belonging to the user_id and the specific chat_id
+        # Keep the metadata row for this user, unless it's the last chat being deleted
+        filtered_dataset = existing_dataset.filter(
+            lambda row: not (row["user_id"] == st.session_state.user_id and row["chat_id"] == chat_id),
+            num_proc=os.cpu_count()
+        )
+        print(f"Filtered out chat {chat_id} for user {st.session_state.user_id}. Remaining rows: {len(filtered_dataset)}")
+
+        # Push the filtered dataset back to the Hugging Face Hub
+        filtered_dataset.push_to_hub(HF_USER_MEMORIES_DATASET_ID, private=True, token=hf_token)
+        print(f"Successfully deleted chat {chat_id} (user {st.session_state.user_id}) from Hugging Face dataset '{HF_USER_MEMORIES_DATASET_ID}'.")
+
+        # Update in-memory session state
+        if chat_id in st.session_state.all_chat_messages:
+            del st.session_state.all_chat_messages[chat_id]
+        if chat_id in st.session_state.chat_metadata:
+            del st.session_state.chat_metadata[chat_id]
         
-        # Delete the physical file
-        user_dir = os.path.join(MEMORY_DIR, st.session_state.user_id)
-        chat_file = os.path.join(user_dir, f"{chat_id}.json")
-        if os.path.exists(chat_file):
-            os.remove(chat_file)
-            print(f"Deleted chat file: {chat_file}")
-        
-        # Save updated metadata to disk
+        # Save updated metadata to Hugging Face
         save_chat_metadata(st.session_state.user_id, st.session_state.chat_metadata)
         print(f"Deleted chat: ID={chat_id}")
 
@@ -494,7 +524,6 @@ def delete_chat_session(chat_id: str):
                 # No other chats left, set to a "no chat" state
                 print("Deleted last chat. Setting to no active chat state.")
                 st.session_state.current_chat_id = None
-                # Keep generate_llm_greeting here for new session after deletion
                 st.session_state.messages = [{"role": "assistant", "content": _get_initial_greeting_text()}]
                 st.session_state.chat_modified = False
                 st.session_state.suggested_prompts = _cached_generate_suggested_prompts(st.session_state.messages) # Generate prompts for new empty chat
@@ -502,8 +531,9 @@ def delete_chat_session(chat_id: str):
         else:
             # If a non-current chat was deleted, just rerun to update the sidebar
             st.rerun()
-    else:
-        print(f"Attempted to delete non-existent chat ID: {chat_id}")
+    except Exception as e:
+        print(f"Error deleting chat {chat_id} from Hugging Face: {e}")
+        st.error(f"Error deleting chat from cloud: {e}")
         # No rerun needed if chat_id wasn't found, as nothing changed.
 
 def rename_chat(chat_id: str, new_name: str): # Modified to accept chat_id
@@ -573,7 +603,7 @@ def handle_user_input(chat_input_value: str | None):
             # This will also update st.session_state.chat_metadata and st.session_state.all_chat_messages
             # with the new chat's entry.
             new_chat_id = create_new_chat_session_in_memory()
-            # Now that the chat is created and current_chat_id is set, save its metadata to disk.
+            # Now that the chat is created and current_chat_id is set, save its metadata to Hugging Face.
             # Only save metadata if long-term memory is enabled
             if st.session_state.long_term_memory_enabled:
                 save_chat_metadata(st.session_state.user_id, st.session_state.chat_metadata)
@@ -651,30 +681,44 @@ def handle_regeneration_request():
 
 def forget_me_and_reset():
     """
-    Deletes all user chat histories from disk, removes the user ID cookie,
+    Deletes all user chat histories from the Hugging Face dataset, removes the user ID cookie,
     and resets the Streamlit session state to a fresh start.
     """
     user_id_to_delete = st.session_state.get("user_id")
-    if user_id_to_delete:
-        user_dir = os.path.join(MEMORY_DIR, user_id_to_delete)
-        if os.path.exists(user_dir):
-            try:
-                shutil.rmtree(user_dir)
-                print(f"Successfully deleted user directory: {user_dir}")
-            except Exception as e:
-                print(f"Error deleting user directory {user_dir}: {e}")
-                st.error(f"Failed to delete user data from disk: {e}")
-        
-        # Delete the user ID cookie
+    hf_token = os.getenv("HF_TOKEN")
+
+    if user_id_to_delete and hf_token:
         try:
-            cookies.delete(cookie="user_id")
-            print(f"Deleted user ID cookie for {user_id_to_delete}")
+            # Load the existing dataset
+            existing_dataset = load_dataset(HF_USER_MEMORIES_DATASET_ID, split="train", token=hf_token)
+
+            # Filter out all rows belonging to the user_id to be deleted
+            filtered_dataset = existing_dataset.filter(
+                lambda row: row["user_id"] != user_id_to_delete,
+                num_proc=os.cpu_count()
+            )
+            print(f"Filtered out all data for user {user_id_to_delete}. Remaining rows: {len(filtered_dataset)}")
+
+            # Push the filtered dataset back to the Hugging Face Hub
+            filtered_dataset.push_to_hub(HF_USER_MEMORIES_DATASET_ID, private=True, token=hf_token)
+            print(f"Successfully deleted all data for user {user_id_to_delete} from Hugging Face dataset '{HF_USER_MEMORIES_DATASET_ID}'.")
+
         except Exception as e:
-            print(f"ERROR: Failed to delete user_id cookie for {user_id_to_delete}: {e}")
-            st.error(f"Failed to delete user ID cookie: {e}")
+            print(f"Error deleting user data from Hugging Face for user {user_id_to_delete}: {e}")
+            st.error(f"Failed to delete user data from cloud: {e}")
+    elif not hf_token:
+        print("HF_TOKEN environment variable not set. Cannot delete user data from Hugging Face.")
+        st.warning("Cannot delete user data from cloud: Hugging Face token not configured.")
+
+    # Delete the user ID cookie
+    try:
+        cookies.delete(cookie="user_id")
+        print(f"Deleted user ID cookie for {user_id_to_delete}")
+    except Exception as e:
+        print(f"ERROR: Failed to delete user_id cookie for {user_id_to_delete}: {e}")
+        st.error(f"Failed to delete user ID cookie: {e}")
 
     # Reset session state to clear all chat history and user data in memory
-    # This effectively simulates a fresh start for the user.
     st.session_state.chat_metadata = {}
     st.session_state.all_chat_messages = {}
     st.session_state.current_chat_id = None
@@ -839,22 +883,11 @@ def main():
     if st.session_state.long_term_memory_enabled:
         # LTM is ON
         if st.session_state.current_chat_id and st.session_state.current_chat_id in st.session_state.chat_metadata:
-            # Valid current_chat_id exists, ensure messages are loaded (lazy load)
+            # Valid current_chat_id exists, ensure messages are loaded (they should be by _initialize_user_session_data)
             if st.session_state.all_chat_messages.get(st.session_state.current_chat_id) is None:
-                print(f"CHAT LOGIC (LTM ON): Lazy loading messages for current chat: {st.session_state.current_chat_id}")
-                user_dir = os.path.join(MEMORY_DIR, st.session_state.user_id)
-                chat_file = os.path.join(user_dir, f"{st.session_state.current_chat_id}.json")
-                if os.path.exists(chat_file):
-                    try:
-                        with open(chat_file, "r", encoding="utf-8") as f:
-                            st.session_state.all_chat_messages[st.session_state.current_chat_id] = json.load(f)
-                    except Exception as e:
-                        print(f"Error loading messages for chat {st.session_state.current_chat_id}: {e}. Setting to empty.")
-                        st.session_state.all_chat_messages[st.session_state.current_chat_id] = []
-                else:
-                    print(f"Chat file not found for {st.session_state.current_chat_id}. Setting to empty.")
-                    st.session_state.all_chat_messages[st.session_state.current_chat_id] = []
-
+                print(f"WARNING: Messages for current chat ID '{st.session_state.current_chat_id}' were not loaded by _initialize_user_session_data. This indicates an issue. Setting to empty list.")
+                st.session_state.all_chat_messages[st.session_state.current_chat_id] = [] # Fallback
+            
             st.session_state.messages = st.session_state.all_chat_messages.get(st.session_state.current_chat_id, [])
             st.session_state.chat_modified = True # Existing chat is considered modifiable
             chat_state_resolved = True
@@ -863,7 +896,7 @@ def main():
         elif st.session_state.chat_metadata: # No current_chat_id, but other chats exist in metadata
             first_available_chat_id = next(iter(st.session_state.chat_metadata))
             print(f"CHAT LOGIC (LTM ON): No current chat ID. Selecting first available: '{first_available_chat_id}'. Rerunning via switch_chat.")
-            # switch_chat handles loading messages and sets current_chat_id, then reruns.
+            # switch_chat handles setting current_chat_id and messages, then reruns.
             # This rerun is acceptable here as it's a one-time setup for the session or view.
             switch_chat(first_available_chat_id)
             # Execution stops here due to rerun in switch_chat

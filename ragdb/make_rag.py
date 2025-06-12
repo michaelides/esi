@@ -1,4 +1,5 @@
 import os
+import sys
 import asyncio
 from urllib.parse import urlparse
 from llama_index.core import SimpleDirectoryReader, VectorStoreIndex, StorageContext
@@ -15,6 +16,12 @@ import shutil
 
 # Load environment variables from a .env file if it exists
 load_dotenv()
+
+# Add the project root to sys.path to allow importing config.py
+# This assumes config.py is in the directory above ragdb/
+current_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.abspath(os.path.join(current_dir, os.pardir))
+sys.path.insert(0, project_root)
 
 # PROJECT_ROOT and other configurations are now imported from config.py
 from config import (
@@ -128,4 +135,3 @@ async def main():
 
 if __name__ == "__main__":
    asyncio.run(main())
-

@@ -110,34 +110,47 @@ def display_chat():
 
                 if source_type == "pdf":
                     pdf_name = rag_data.get("name", "source.pdf")
-                    pdf_relative_path = rag_data.get("path")
+                    pdf_source_path = rag_data.get("path") # This will be either http:// or file://
+                    citation_num = rag_data.get('citation_number')
+                    citation_prefix = f"[{citation_num}] " if citation_num else ""
                     
-                    identifier = pdf_relative_path
+                    identifier = pdf_source_path # Use the path/URL as identifier for deduplication
+
                     if identifier and identifier not in displayed_rag_identifiers:
-                        pdf_absolute_path = os.path.join(PROJECT_ROOT, pdf_relative_path) if pdf_relative_path else None
+                        if pdf_source_path and pdf_source_path.startswith("http"):
+                            # It's a Hugging Face URL, display as a link
+                            st.markdown(f"Source: {citation_prefix}[{pdf_name}]({pdf_source_path})")
+                            print(f"Added link for RAG PDF (URL): {citation_prefix}{pdf_name} (URL: {pdf_source_path})")
+                            display_item = True
+                        elif pdf_source_path and pdf_source_path.startswith("file://"):
+                            # It's a local file path with 'file://' prefix
+                            local_file_path = pdf_source_path[len("file://"):] # Remove 'file://'
+                            # The path from tools.py is already absolute, so no need to join with PROJECT_ROOT
+                            pdf_absolute_path = local_file_path 
 
-                        if pdf_absolute_path and os.path.exists(pdf_absolute_path):
-                            try:
-                                citation_num = rag_data.get('citation_number')
-                                citation_prefix = f"[{citation_num}] " if citation_num else ""
-                                button_label = f"{citation_prefix}Download PDF: {pdf_name}"
-
-                                with open(pdf_absolute_path, "rb") as fp:
-                                    st.download_button(
-                                        label=button_label,
-                                        data=fp,
-                                        file_name=pdf_name,
-                                        mime="application/pdf",
-                                        key=f"rag_pdf_{msg_idx}_{rag_idx}_{pdf_name}"
-                                    )
-                                print(f"Added download button for RAG PDF: {button_label} (Path: {pdf_absolute_path})")
-                                display_item = True
-                            except Exception as e:
-                                st.error(f"Error creating download button for {pdf_name}: {e}")
-                                print(f"Error for RAG PDF '{pdf_name}': {e}")
-                        elif pdf_relative_path:
-                            st.warning(f"Referenced PDF '{pdf_name}' not found.")
-                            print(f"Warning: Referenced PDF '{pdf_name}' not found at expected absolute path: {pdf_absolute_path}")
+                            if os.path.exists(pdf_absolute_path):
+                                try:
+                                    button_label = f"{citation_prefix}Download PDF: {pdf_name}"
+                                    with open(pdf_absolute_path, "rb") as fp:
+                                        st.download_button(
+                                            label=button_label,
+                                            data=fp,
+                                            file_name=pdf_name,
+                                            mime="application/pdf",
+                                            key=f"rag_pdf_{msg_idx}_{rag_idx}_{pdf_name}"
+                                        )
+                                    print(f"Added download button for RAG PDF (local file://): {button_label} (Path: {pdf_absolute_path})")
+                                    display_item = True
+                                except Exception as e:
+                                    st.error(f"Error creating download button for {pdf_name}: {e}")
+                                    print(f"Error for RAG PDF '{pdf_name}': {e}")
+                            else:
+                                st.warning(f"Referenced PDF '{pdf_name}' not found locally at '{pdf_absolute_path}'.")
+                                print(f"Warning: Referenced PDF '{pdf_name}' not found at expected absolute path: {pdf_absolute_path}")
+                        else:
+                            # Unexpected path format
+                            st.warning(f"Referenced PDF '{pdf_name}' has an unsupported path format: '{pdf_source_path}'.")
+                            print(f"Warning: Referenced PDF '{pdf_name}' has an unsupported path format: '{pdf_source_path}'.")
                 
                 elif source_type == "web":
                     url = rag_data.get("url")
@@ -210,7 +223,7 @@ def display_chat():
                     key=f"copy_btn_{msg_idx}",
                     help="Copy message to clipboard",
                     on_click=_copy_button_callback,
-                    args=(text_to_display, msg_idx) # Corrected: Use text_to_display here
+                    args=(text_to_copy_display, msg_idx) # Corrected: Use text_to_display here
                 )
             
             # JS injection for clipboard based on session state

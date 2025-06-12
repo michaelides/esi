@@ -120,7 +120,8 @@ def display_chat():
                         if pdf_source_path and pdf_source_path.startswith("http"):
                             # It's a Hugging Face URL, display as a link
                             st.markdown(f"Source: {citation_prefix}[{pdf_name}]({pdf_source_path})")
-                            print(f"Added link for RAG PDF (URL): {citation_prefix}{pdf_name} (URL: {pdf_source_path})")
+                            # Modified print statement to not show the full URL
+                            print(f"Added link for RAG PDF (URL): {citation_prefix}{pdf_name}")
                             display_item = True
                         elif pdf_source_path and pdf_source_path.startswith("file://"):
                             # It's a local file path with 'file://' prefix

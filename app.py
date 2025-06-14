@@ -207,8 +207,8 @@ def _load_user_data_from_hf(user_id: str) -> Dict[str, Any]:
         messages_filename_in_repo = f"user_memories/{user_id}_messages.json"
 
         # Construct the full HfFileSystem path
-        metadata_hf_path = f"datasets/{HF_USER_MEMORIES_DATASET_ID}@main/{metadata_filename_in_repo}"
-        messages_hf_path = f"datasets/{HF_USER_MEMORIES_DATASET_ID}@main/{messages_filename_in_repo}"
+        metadata_hf_path = f"datasets/{HF_USER_MEMORIES_DATASET_ID}/{metadata_filename_in_repo}"
+        messages_hf_path = f"datasets/{HF_USER_MEMORIES_DATASET_ID}/{messages_filename_in_repo}"
 
         # Try to download and load metadata using HfFileSystem
         try:
@@ -251,9 +251,8 @@ def save_chat_history(user_id: str, chat_id: str, messages: List[Dict[str, Any]]
         return
 
     try:
-        api = HfApi(token=hf_token)
         messages_filename_in_repo = f"user_memories/{user_id}_messages.json"
-        messages_hf_path = f"datasets/{HF_USER_MEMORIES_DATASET_ID}@main/{messages_filename_in_repo}"
+        messages_hf_path = f"datasets/{HF_USER_MEMORIES_DATASET_ID}/{messages_filename_in_repo}"
 
         # Load existing messages, append the new chat, and save
         try:
@@ -269,13 +268,10 @@ def save_chat_history(user_id: str, chat_id: str, messages: List[Dict[str, Any]]
 
         existing_messages[chat_id] = messages
 
-        # Upload the combined messages
-        api.upload_file(
-            repo_id=HF_USER_MEMORIES_DATASET_ID,
-            path_in_repo=messages_filename_in_repo,
-            repo_type="dataset",
-            content=io.StringIO(json.dumps(existing_messages, indent=2)).getvalue().encode("utf-8"),
-        )
+        # Use fs.open to write the content
+        with fs.open(messages_hf_path, "w", token=hf_token) as f:
+            f.write(json.dumps(existing_messages, indent=2))
+        
         print(f"Chat history for chat {chat_id} saved to {messages_filename_in_repo} on Hugging Face.")
 
     except Exception as e:
@@ -293,16 +289,14 @@ def save_chat_metadata(user_id: str, chat_metadata: Dict[str, str]):
         return
 
     try:
-        api = HfApi(token=hf_token)
-        metadata_filename = f"user_memories/{user_id}_metadata.json"
+        metadata_filename_in_repo = f"user_memories/{user_id}_metadata.json"
+        metadata_hf_path = f"datasets/{HF_USER_MEMORIES_DATASET_ID}/{metadata_filename_in_repo}"
 
-        api.upload_file(
-            repo_id=HF_USER_MEMORIES_DATASET_ID,
-            path_in_repo=metadata_filename,
-            repo_type="dataset",
-            content=io.StringIO(json.dumps(chat_metadata, indent=2)).getvalue().encode("utf-8"),
-        )
-        print(f"Chat metadata for user {user_id} saved to {metadata_filename} on Hugging Face.")
+        # Use fs.open to write the content
+        with fs.open(metadata_hf_path, "w", token=hf_token) as f:
+            f.write(json.dumps(chat_metadata, indent=2))
+        
+        print(f"Chat metadata for user {user_id} saved to {metadata_filename_in_repo} on Hugging Face.")
 
     except Exception as e:
         print(f"Error saving chat metadata to Hugging Face for user {user_id}: {e}")
@@ -408,7 +402,7 @@ def switch_chat(chat_id: str):
 
     # Messages for the target chat_id should already be loaded in st.session_state.all_chat_messages
     # by _initialize_user_session_data or _load_user_data_from_hf.
-    # If for some reason they are not, it indicates an issue with the loading logic.
+    # If for some reason they are not, it indicates an heinous issue with the loading logic.
     if st.session_state.all_chat_messages.get(chat_id) is None:
         print(f"WARNING: Messages for current chat ID '{chat_id}' were not loaded. Setting to empty list.")
         st.session_state.all_chat_messages[chat_id] = [] # Fallback

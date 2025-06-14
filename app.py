@@ -927,7 +927,7 @@ def main():
         handle_user_input_callback=handle_user_input,
         long_term_memory_enabled=st.session_state.long_term_memory_enabled, # Pass the new setting
         forget_me_callback=forget_me_and_reset, # Pass the new callback
-        set_long_term_memory_callback=_set_long_memory_preference # Pass the new callback
+        set_long_term_memory_callback=_set_long_term_memory_preference # Pass the new callback
     )
 
     chat_input_for_handler = st.session_state.get("chat_input_value_from_stui")

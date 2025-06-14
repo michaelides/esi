@@ -12,21 +12,15 @@ from agent import create_orchestrator_agent, generate_suggested_prompts, SUGGEST
 from dotenv import load_dotenv
 from docx import Document
 from io import BytesIO
-import shutil # Import shutil for directory deletion
-
-from PyPDF2 import PdfReader
 import io # Import io module for BytesIO
 from llama_index.core.tools import FunctionTool # Import FunctionTool
 
 # Import necessary libraries for Hugging Face integration
-from datasets import Dataset, load_dataset, DatasetDict
-from huggingface_hub import HfApi, Repository, HfFileSystem # Keep HfApi for upload_file
-import pandas as pd # Import pandas for data manipulation
+from huggingface_hub import HfFileSystem 
 import os # Import os to access environment variables
 
-# Import HF_USER_MEMORIES_DATASET_ID from config.py
-from config import HF_USER_MEMORIES_DATASET_ID
-fs = HfFileSystem() # Initialize HfFileSystem globally
+# Initialize HfFileSystem globally
+fs = HfFileSystem() 
 load_dotenv()
 
 PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
@@ -203,12 +197,14 @@ def _load_user_data_from_hf(user_id: str) -> Dict[str, Any]:
     all_chat_messages = {}
 
     try:
+        from config import HF_DATASET_ID # Re-import HF_DATASET_ID from config
+
         metadata_filename_in_repo = f"user_memories/{user_id}_metadata.json"
         messages_filename_in_repo = f"user_memories/{user_id}_messages.json"
 
         # Construct the full HfFileSystem path
-        metadata_hf_path = f"datasets/{HF_USER_MEMORIES_DATASET_ID}/{metadata_filename_in_repo}"
-        messages_hf_path = f"datasets/{HF_USER_MEMORIES_DATASET_ID}/{messages_filename_in_repo}"
+        metadata_hf_path = f"datasets/{HF_DATASET_ID}/{metadata_filename_in_repo}"
+        messages_hf_path = f"datasets/{HF_DATASET_ID}/{messages_filename_in_repo}"
 
         # Try to download and load metadata using HfFileSystem
         try:
@@ -251,8 +247,9 @@ def save_chat_history(user_id: str, chat_id: str, messages: List[Dict[str, Any]]
         return
 
     try:
+        from config import HF_DATASET_ID # Re-import HF_DATASET_ID from config
         messages_filename_in_repo = f"user_memories/{user_id}_messages.json"
-        messages_hf_path = f"datasets/{HF_USER_MEMORIES_DATASET_ID}/{messages_filename_in_repo}"
+        messages_hf_path = f"datasets/{HF_DATASET_ID}/{messages_filename_in_repo}"
 
         # Load existing messages, append the new chat, and save
         try:
@@ -289,8 +286,9 @@ def save_chat_metadata(user_id: str, chat_metadata: Dict[str, str]):
         return
 
     try:
+        from config import HF_DATASET_ID # Re-import HF_DATASET_ID from config
         metadata_filename_in_repo = f"user_memories/{user_id}_metadata.json"
-        metadata_hf_path = f"datasets/{HF_USER_MEMORIES_DATASET_ID}/{metadata_filename_in_repo}"
+        metadata_hf_path = f"datasets/{HF_DATASET_ID}/{metadata_filename_in_repo}"
 
         # Use fs.open to write the content
         with fs.open(metadata_hf_path, "w", token=hf_token) as f:
@@ -344,7 +342,7 @@ def get_agent_response(query: str, chat_history: List[ChatMessage]) -> str:
         # print(f"Modified query with verbosity: {modified_query}") # Removed verbose log
 
         with st.spinner("ESI is thinking..."):
-            response = agent.chat(modified_query, chat_history=chat_history) 
+            response = agent.chat(modified_query, chat_history=formatted_history) 
 
         response_text = response.response if hasattr(response, 'response') else str(response)
 
@@ -434,26 +432,46 @@ def delete_chat_session(chat_id: str):
     is_current_chat = (chat_id == st.session_state.current_chat_id)
 
     try:
-        existing_dataset = load_dataset(HF_USER_MEMORIES_DATASET_ID, split="train", token=hf_token)
-
-        filtered_dataset = existing_dataset.filter(
-            lambda row: not (row["user_id"] == st.session_state.user_id and row["chat_id"] == chat_id),
-            num_proc=os.cpu_count()
-        )
-        print(f"Deleting chat '{chat_id}' for user '{st.session_state.user_id}' from Hugging Face.")
-
-        filtered_dataset.push_to_hub(HF_USER_MEMORIES_DATASET_ID, private=True, token=hf_token)
-        print(f"Successfully deleted chat '{chat_id}' from Hugging Face.")
-
-        # Update in-memory session state
+        # Update in-memory session state first
         if chat_id in st.session_state.all_chat_messages:
             del st.session_state.all_chat_messages[chat_id]
         if chat_id in st.session_state.chat_metadata:
             del st.session_state.chat_metadata[chat_id]
         
-        # Save updated metadata to Hugging Face
+        # Save updated metadata and messages to Hugging Face
+        # This effectively removes the chat from the JSON files
         save_chat_metadata(st.session_state.user_id, st.session_state.chat_metadata)
-        print(f"Chat '{chat_id}' deleted.")
+        # Note: save_chat_history is designed to update a specific chat_id.
+        # To "delete" a chat's messages, we rely on the metadata being updated and the messages file
+        # being overwritten without that chat_id.
+        # A more explicit deletion would be to load the messages file, remove the chat_id entry, and save.
+        # For now, the metadata update is sufficient to make the chat "disappear" from the UI.
+        # The actual messages JSON file for the user will still contain the deleted chat's messages
+        # until the user's *entire* messages file is overwritten by a save_chat_history call
+        # that *doesn't* include the deleted chat_id.
+        # For a full deletion, we'd need to reload all messages, remove the specific chat_id, and then save the *entire* messages dict.
+        # Let's refine this:
+        from config import HF_DATASET_ID
+        messages_filename_in_repo = f"user_memories/{st.session_state.user_id}_messages.json"
+        messages_hf_path = f"datasets/{HF_DATASET_ID}/{messages_filename_in_repo}"
+        
+        # Load current messages, remove the specific chat_id, then save the whole thing back
+        try:
+            existing_messages_content = fs.read_text(messages_hf_path, token=hf_token)
+            existing_messages = json.loads(existing_messages_content)
+        except FileNotFoundError:
+            existing_messages = {}
+        
+        if chat_id in existing_messages:
+            del existing_messages[chat_id]
+            with fs.open(messages_hf_path, "w", token=hf_token) as f:
+                f.write(json.dumps(existing_messages, indent=2))
+            print(f"Chat history for chat {chat_id} explicitly removed from {messages_filename_in_repo} on Hugging Face.")
+        else:
+            print(f"Chat history for chat {chat_id} not found in {messages_filename_in_repo} on Hugging Face.")
+
+
+        print(f"Chat '{chat_id}' deleted from in-memory state and updated on Hugging Face.")
 
         # If the deleted chat was the current one, switch to another or create a new one
         if is_current_chat:
@@ -614,7 +632,7 @@ def handle_regeneration_request():
 
 def forget_me_and_reset():
     """
-    Deletes all user chat histories from the Hugging Face dataset, removes the user ID cookie,
+    Deletes all user chat histories from the Hugging Face JSON files, removes the user ID cookie,
     and resets the Streamlit session state to a fresh start.
     """
     user_id_to_delete = st.session_state.get("user_id")
@@ -622,19 +640,39 @@ def forget_me_and_reset():
 
     if user_id_to_delete and hf_token:
         try:
-            existing_dataset = load_dataset(HF_USER_MEMORIES_DATASET_ID, split="train", token=hf_token)
+            from config import HF_DATASET_ID # Re-import HF_DATASET_ID from config
+            metadata_hf_path = f"datasets/{HF_DATASET_ID}/user_memories/{user_id_to_delete}_metadata.json"
+            messages_hf_path = f"datasets/{HF_DATASET_ID}/user_memories/{user_id_to_delete}_messages.json"
 
-            filtered_dataset = existing_dataset.filter(
-                lambda row: row["user_id"] != user_id_to_delete,
-                num_proc=os.cpu_count()
-            )
-            print(f"Deleting all data for user '{user_id_to_delete}' from Hugging Face.")
+            # Attempt to delete both files
+            deleted_any = False
+            try:
+                fs.rm(metadata_hf_path, token=hf_token)
+                print(f"Deleted metadata file for user '{user_id_to_delete}' from Hugging Face.")
+                deleted_any = True
+            except FileNotFoundError:
+                print(f"Metadata file for user '{user_id_to_delete}' not found, skipping deletion.")
+            except Exception as e:
+                print(f"Error deleting metadata file for user '{user_id_to_delete}': {e}")
+                st.error(f"Failed to delete metadata from cloud: {e}")
 
-            filtered_dataset.push_to_hub(HF_USER_MEMORIES_DATASET_ID, private=True, token=hf_token)
-            print(f"Successfully deleted all data for user '{user_id_to_delete}' from Hugging Face.")
+            try:
+                fs.rm(messages_hf_path, token=hf_token)
+                print(f"Deleted messages file for user '{user_id_to_delete}' from Hugging Face.")
+                deleted_any = True
+            except FileNotFoundError:
+                print(f"Messages file for user '{user_id_to_delete}' not found, skipping deletion.")
+            except Exception as e:
+                print(f"Error deleting messages file for user '{user_id_to_delete}': {e}")
+                st.error(f"Failed to delete messages from cloud: {e}")
+
+            if deleted_any:
+                print(f"Successfully attempted to delete all data for user '{user_id_to_delete}' from Hugging Face.")
+            else:
+                print(f"No files found to delete for user '{user_id_to_delete}' on Hugging Face.")
 
         except Exception as e:
-            print(f"Error deleting user data from Hugging Face for user {user_id_to_delete}: {e}")
+            print(f"General error during Hugging Face deletion for user {user_id_to_delete}: {e}")
             st.error(f"Failed to delete user data from cloud: {e}")
     elif not hf_token:
         print("HF_TOKEN environment variable not set. Cannot delete user data from Hugging Face.")

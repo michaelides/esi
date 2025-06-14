@@ -4,8 +4,7 @@ import subprocess
 import sys
 import urllib.parse # Added for URL encoding
 
-from llama_index.core.tools import FunctionTool, QueryEngineTool
-from llama_index.core.vector_stores import SimpleVectorStore
+from llama_index.core.tools import FunctionTool
 from llama_index.readers.web import SimpleWebPageReader
 from llama_index.readers.semanticscholar import SemanticScholarReader
 from llama_index.tools.wikipedia import WikipediaToolSpec
@@ -13,7 +12,6 @@ from llama_index.tools.tavily_research import TavilyToolSpec
 from llama_index.tools.duckduckgo import DuckDuckGoSearchToolSpec
 from llama_index.core import VectorStoreIndex, StorageContext, load_index_from_storage
 from llama_index.core import Settings 
-from llama_index.tools.code_interpreter import CodeInterpreterToolSpec
 from huggingface_hub import HfFileSystem
 
 # --- Hugging Face RAG Configuration ---

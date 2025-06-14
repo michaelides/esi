@@ -20,13 +20,13 @@ from llama_index.core.tools import FunctionTool # Import FunctionTool
 
 # Import necessary libraries for Hugging Face integration
 from datasets import Dataset, load_dataset, DatasetDict
-from huggingface_hub import HfApi, Repository, HfFileSystem
+from huggingface_hub import HfApi, Repository, HfFileSystem # Keep HfApi for upload_file
 import pandas as pd # Import pandas for data manipulation
 import os # Import os to access environment variables
 
 # Import HF_USER_MEMORIES_DATASET_ID from config.py
 from config import HF_USER_MEMORIES_DATASET_ID
-fs = HfFileSystem()
+fs = HfFileSystem() # Initialize HfFileSystem globally
 load_dotenv()
 
 PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
@@ -203,32 +203,33 @@ def _load_user_data_from_hf(user_id: str) -> Dict[str, Any]:
     all_chat_messages = {}
 
     try:
-        api = HfApi(token=hf_token)
-        metadata_filename = f"user_memories/{user_id}_metadata.json"
-        messages_filename = f"user_memories/{user_id}_messages.json"
+        metadata_filename_in_repo = f"user_memories/{user_id}_metadata.json"
+        messages_filename_in_repo = f"user_memories/{user_id}_messages.json"
 
+        # Construct the full HfFileSystem path
+        metadata_hf_path = f"datasets/{HF_USER_MEMORIES_DATASET_ID}@main/{metadata_filename_in_repo}"
+        messages_hf_path = f"datasets/{HF_USER_MEMORIES_DATASET_ID}@main/{messages_filename_in_repo}"
+
+        # Try to download and load metadata using HfFileSystem
         try:
-            metadata_content = api.get_file_content(
-                repo_id=HF_USER_MEMORIES_DATASET_ID,
-                filename=metadata_filename,
-                repo_type="dataset",
-                revision="main",
-            ).decode("utf-8")
+            metadata_content = fs.read_text(metadata_hf_path, token=hf_token)
             all_chat_metadata = json.loads(metadata_content)
+        except FileNotFoundError as e:
+            print(f"Metadata file not found for user {user_id} at {metadata_hf_path}: {e}. Metadata will be empty.")
+            all_chat_metadata = {}
         except Exception as e:
-            print(f"Error loading metadata for user {user_id} from {metadata_filename}: {e}. Metadata will be empty.")
+            print(f"Error loading metadata for user {user_id} from {metadata_hf_path}: {e}. Metadata will be empty.")
             all_chat_metadata = {}
 
+        # Try to download and load messages using HfFileSystem
         try:
-            messages_content = api.get_file_content(
-                repo_id=HF_USER_MEMORIES_DATASET_ID,
-                filename=messages_filename,
-                repo_type="dataset",
-                revision="main",
-            ).decode("utf-8")
+            messages_content = fs.read_text(messages_hf_path, token=hf_token)
             all_chat_messages = json.loads(messages_content)
+        except FileNotFoundError as e:
+            print(f"Messages file not found for user {user_id} at {messages_hf_path}: {e}. Messages will be empty.")
+            all_chat_messages = {}
         except Exception as e:
-            print(f"Error loading messages for user {user_id} from {messages_filename}: {e}. Messages will be empty.")
+            print(f"Error loading messages for user {user_id} from {messages_hf_path}: {e}. Messages will be empty.")
             all_chat_messages = {}
 
         return {"metadata": all_chat_metadata, "messages": all_chat_messages}
@@ -251,19 +252,19 @@ def save_chat_history(user_id: str, chat_id: str, messages: List[Dict[str, Any]]
 
     try:
         api = HfApi(token=hf_token)
-        messages_filename = f"user_memories/{user_id}_messages.json"
+        messages_filename_in_repo = f"user_memories/{user_id}_messages.json"
+        messages_hf_path = f"datasets/{HF_USER_MEMORIES_DATASET_ID}@main/{messages_filename_in_repo}"
 
         # Load existing messages, append the new chat, and save
         try:
-            existing_messages_content = api.get_file_content(
-                repo_id=HF_USER_MEMORIES_DATASET_ID,
-                filename=messages_filename,
-                repo_type="dataset",
-                revision="main",
-            ).decode("utf-8")
+            # Use fs.read_text to get the existing messages file content
+            existing_messages_content = fs.read_text(messages_hf_path, token=hf_token)
             existing_messages = json.loads(existing_messages_content)
+        except FileNotFoundError as e:
+            print(f"Existing messages file not found at {messages_hf_path}: {e}. Starting with empty messages.")
+            existing_messages = {}
         except Exception as e:
-            print(f"Error loading existing messages from {messages_filename}: {e}. Starting with empty messages.")
+            print(f"Error loading existing messages from {messages_hf_path}: {e}. Starting with empty messages.")
             existing_messages = {}
 
         existing_messages[chat_id] = messages
@@ -271,11 +272,11 @@ def save_chat_history(user_id: str, chat_id: str, messages: List[Dict[str, Any]]
         # Upload the combined messages
         api.upload_file(
             repo_id=HF_USER_MEMORIES_DATASET_ID,
-            path_in_repo=messages_filename,
+            path_in_repo=messages_filename_in_repo,
             repo_type="dataset",
             content=io.StringIO(json.dumps(existing_messages, indent=2)).getvalue().encode("utf-8"),
         )
-        print(f"Chat history for chat {chat_id} saved to {messages_filename} on Hugging Face.")
+        print(f"Chat history for chat {chat_id} saved to {messages_filename_in_repo} on Hugging Face.")
 
     except Exception as e:
         print(f"Error saving chat history to Hugging Face for chat {chat_id} (user {user_id}): {e}")

@@ -20,13 +20,13 @@ from llama_index.core.tools import FunctionTool # Import FunctionTool
 
 # Import necessary libraries for Hugging Face integration
 from datasets import Dataset, load_dataset, DatasetDict
-from huggingface_hub import HfApi, Repository
+from huggingface_hub import HfApi, Repository, HfFileSystem
 import pandas as pd # Import pandas for data manipulation
 import os # Import os to access environment variables
 
 # Import HF_USER_MEMORIES_DATASET_ID from config.py
 from config import HF_USER_MEMORIES_DATASET_ID
-
+fs = HfFileSystem()
 load_dotenv()
 
 PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))

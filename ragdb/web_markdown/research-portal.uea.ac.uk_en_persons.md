@@ -1,4 +1,4 @@
-Search results 1 - 50 out of 3,614 results 
+Search results 1 - 50 out of 3,556 results 
   * [Skip to main navigation](https://research-portal.uea.ac.uk/en/persons#main-navigation)
   * [Skip to search](https://research-portal.uea.ac.uk/en/persons#main-search)
   * [Skip to main content](https://research-portal.uea.ac.uk/en/persons#main-content)
@@ -27,13 +27,127 @@ Search by expertise, name or affiliation
 
 [ ](https://research-portal.uea.ac.uk/en/searchAll/index/?search=)
 ## Filters for People
+Sustainable Development Goals 
+  * [ SDG 3 - Good Health and Well-being (350) ](https://research-portal.uea.ac.uk/en/persons/?indexableKeyword=%2Fdk%2Fatira%2Fpure%2Fsustainabledevelopmentgoals%2Fgood_health_and_well_being&nofollow=true)
+  * [ SDG 13 - Climate Action (188) ](https://research-portal.uea.ac.uk/en/persons/?indexableKeyword=%2Fdk%2Fatira%2Fpure%2Fsustainabledevelopmentgoals%2Fclimate_action&nofollow=true)
+  * [ SDG 16 - Peace, Justice and Strong Institutions (146) ](https://research-portal.uea.ac.uk/en/persons/?indexableKeyword=%2Fdk%2Fatira%2Fpure%2Fsustainabledevelopmentgoals%2Fpeace_justice_and_strong_institutions&nofollow=true)
+  * [ SDG 11 - Sustainable Cities and Communities (86) ](https://research-portal.uea.ac.uk/en/persons/?indexableKeyword=%2Fdk%2Fatira%2Fpure%2Fsustainabledevelopmentgoals%2Fsustainable_cities_and_communities&nofollow=true)
+  * [ SDG 10 - Reduced Inequalities (85) ](https://research-portal.uea.ac.uk/en/persons/?indexableKeyword=%2Fdk%2Fatira%2Fpure%2Fsustainabledevelopmentgoals%2Freduced_inequalities&nofollow=true)
+  * [ SDG 5 - Gender Equality (84) ](https://research-portal.uea.ac.uk/en/persons/?indexableKeyword=%2Fdk%2Fatira%2Fpure%2Fsustainabledevelopmentgoals%2Fgender_equality&nofollow=true)
+  * [ SDG 4 - Quality Education (84) ](https://research-portal.uea.ac.uk/en/persons/?indexableKeyword=%2Fdk%2Fatira%2Fpure%2Fsustainabledevelopmentgoals%2Fquality_education&nofollow=true)
+  * [ SDG 14 - Life Below Water (76) ](https://research-portal.uea.ac.uk/en/persons/?indexableKeyword=%2Fdk%2Fatira%2Fpure%2Fsustainabledevelopmentgoals%2Flife_below_water&nofollow=true)
+  * [ SDG 15 - Life on Land (73) ](https://research-portal.uea.ac.uk/en/persons/?indexableKeyword=%2Fdk%2Fatira%2Fpure%2Fsustainabledevelopmentgoals%2Flife_on_land&nofollow=true)
+  * [ SDG 12 - Responsible Consumption and Production (68) ](https://research-portal.uea.ac.uk/en/persons/?indexableKeyword=%2Fdk%2Fatira%2Fpure%2Fsustainabledevelopmentgoals%2Fresponsible_consumption_and_production&nofollow=true)
+  * [ SDG 7 - Affordable and Clean Energy (47) ](https://research-portal.uea.ac.uk/en/persons/?indexableKeyword=%2Fdk%2Fatira%2Fpure%2Fsustainabledevelopmentgoals%2Faffordable_and_clean_energy&nofollow=true)
+  * [ SDG 9 - Industry, Innovation, and Infrastructure (47) ](https://research-portal.uea.ac.uk/en/persons/?indexableKeyword=%2Fdk%2Fatira%2Fpure%2Fsustainabledevelopmentgoals%2Findustry_innovation_and_infrastructure&nofollow=true)
+  * [ SDG 8 - Decent Work and Economic Growth (39) ](https://research-portal.uea.ac.uk/en/persons/?indexableKeyword=%2Fdk%2Fatira%2Fpure%2Fsustainabledevelopmentgoals%2Fdecent_work_and_economic_growth&nofollow=true)
+  * [ SDG 1 - No Poverty (36) ](https://research-portal.uea.ac.uk/en/persons/?indexableKeyword=%2Fdk%2Fatira%2Fpure%2Fsustainabledevelopmentgoals%2Fno_poverty&nofollow=true)
+  * [ SDG 2 - Zero Hunger (27) ](https://research-portal.uea.ac.uk/en/persons/?indexableKeyword=%2Fdk%2Fatira%2Fpure%2Fsustainabledevelopmentgoals%2Fzero_hunger&nofollow=true)
+  * [ SDG 6 - Clean Water and Sanitation (25) ](https://research-portal.uea.ac.uk/en/persons/?indexableKeyword=%2Fdk%2Fatira%2Fpure%2Fsustainabledevelopmentgoals%2Fclean_water_and_sanitation&nofollow=true)
+  * [ SDG 17 - Partnerships for the Goals (20) ](https://research-portal.uea.ac.uk/en/persons/?indexableKeyword=%2Fdk%2Fatira%2Fpure%2Fsustainabledevelopmentgoals%2Fpartnerships&nofollow=true)
+
+Show moreShow less
+Media Experts 
+  * [ Climate Change (16) ](https://research-portal.uea.ac.uk/en/persons/?indexableKeyword=%2Fdk%2Fatira%2Fpure%2Fkeywords%2Fmedia_experts%2Fclimate_change&nofollow=true)
+  * [ Mental Health (10) ](https://research-portal.uea.ac.uk/en/persons/?indexableKeyword=%2Fdk%2Fatira%2Fpure%2Fkeywords%2Fmedia_experts%2Fmental_health&nofollow=true)
+  * [ Gender politics (9) ](https://research-portal.uea.ac.uk/en/persons/?indexableKeyword=%2Fdk%2Fatira%2Fpure%2Fkeywords%2Fmedia_experts%2Fgender_politics&nofollow=true)
+  * [ Media studies (9) ](https://research-portal.uea.ac.uk/en/persons/?indexableKeyword=%2Fdk%2Fatira%2Fpure%2Fkeywords%2Fmedia_experts%2Fmedia_studies&nofollow=true)
+  * [ Psychology (9) ](https://research-portal.uea.ac.uk/en/persons/?indexableKeyword=%2Fdk%2Fatira%2Fpure%2Fkeywords%2Fmedia_experts%2Fpsychology&nofollow=true)
+  * [ Technology (9) ](https://research-portal.uea.ac.uk/en/persons/?indexableKeyword=%2Fdk%2Fatira%2Fpure%2Fkeywords%2Fmedia_experts%2Ftechnology&nofollow=true)
+  * [ Covid (8) ](https://research-portal.uea.ac.uk/en/persons/?indexableKeyword=%2Fdk%2Fatira%2Fpure%2Fkeywords%2Fmedia_experts%2Fcovid&nofollow=true)
+  * [ Education (8) ](https://research-portal.uea.ac.uk/en/persons/?indexableKeyword=%2Fdk%2Fatira%2Fpure%2Fkeywords%2Fmedia_experts%2Feducation&nofollow=true)
+  * [ Healthy Ageing (8) ](https://research-portal.uea.ac.uk/en/persons/?indexableKeyword=%2Fdk%2Fatira%2Fpure%2Fkeywords%2Fmedia_experts%2Fhealthy_ageing&nofollow=true)
+  * [ Public Health (8) ](https://research-portal.uea.ac.uk/en/persons/?indexableKeyword=%2Fdk%2Fatira%2Fpure%2Fkeywords%2Fmedia_experts%2Fpublic_health&nofollow=true)
+  * [ Dementia (7) ](https://research-portal.uea.ac.uk/en/persons/?indexableKeyword=%2Fdk%2Fatira%2Fpure%2Fkeywords%2Fmedia_experts%2Fdementia&nofollow=true)
+  * [ History (7) ](https://research-portal.uea.ac.uk/en/persons/?indexableKeyword=%2Fdk%2Fatira%2Fpure%2Fkeywords%2Fmedia_experts%2Fhistory&nofollow=true)
+  * [ Social Media (7) ](https://research-portal.uea.ac.uk/en/persons/?indexableKeyword=%2Fdk%2Fatira%2Fpure%2Fkeywords%2Fmedia_experts%2Fsocial_media&nofollow=true)
+  * [ Sustainable development (7) ](https://research-portal.uea.ac.uk/en/persons/?indexableKeyword=%2Fdk%2Fatira%2Fpure%2Fkeywords%2Fmedia_experts%2Fsustainable_development&nofollow=true)
+  * [ Biodiversity (6) ](https://research-portal.uea.ac.uk/en/persons/?indexableKeyword=%2Fdk%2Fatira%2Fpure%2Fkeywords%2Fmedia_experts%2Fbiodiversity&nofollow=true)
+  * [ Environment (6) ](https://research-portal.uea.ac.uk/en/persons/?indexableKeyword=%2Fdk%2Fatira%2Fpure%2Fkeywords%2Fmedia_experts%2Fenvironment&nofollow=true)
+  * [ Environmental Politics (6) ](https://research-portal.uea.ac.uk/en/persons/?indexableKeyword=%2Fdk%2Fatira%2Fpure%2Fkeywords%2Fmedia_experts%2Fenvironmental_politics&nofollow=true)
+  * [ Impacts of climate change (6) ](https://research-portal.uea.ac.uk/en/persons/?indexableKeyword=%2Fdk%2Fatira%2Fpure%2Fkeywords%2Fmedia_experts%2Fimpacts_of_climate_change&nofollow=true)
+  * [ Language & Communication (6) ](https://research-portal.uea.ac.uk/en/persons/?indexableKeyword=%2Fdk%2Fatira%2Fpure%2Fkeywords%2Fmedia_experts%2Flanguage_communication&nofollow=true)
+  * [ Law (6) ](https://research-portal.uea.ac.uk/en/persons/?indexableKeyword=%2Fdk%2Fatira%2Fpure%2Fkeywords%2Fmedia_experts%2Flaw&nofollow=true)
+  * [ Biology (5) ](https://research-portal.uea.ac.uk/en/persons/?indexableKeyword=%2Fdk%2Fatira%2Fpure%2Fkeywords%2Fmedia_experts%2Fbiology&nofollow=true)
+  * [ Conservation (5) ](https://research-portal.uea.ac.uk/en/persons/?indexableKeyword=%2Fdk%2Fatira%2Fpure%2Fkeywords%2Fmedia_experts%2Fconservation&nofollow=true)
+  * [ Economics (5) ](https://research-portal.uea.ac.uk/en/persons/?indexableKeyword=%2Fdk%2Fatira%2Fpure%2Fkeywords%2Fmedia_experts%2Feconomics&nofollow=true)
+  * [ Infectious diseases (5) ](https://research-portal.uea.ac.uk/en/persons/?indexableKeyword=%2Fdk%2Fatira%2Fpure%2Fkeywords%2Fmedia_experts%2Finfectious_diseases&nofollow=true)
+  * [ Medicine (5) ](https://research-portal.uea.ac.uk/en/persons/?indexableKeyword=%2Fdk%2Fatira%2Fpure%2Fkeywords%2Fmedia_experts%2Fmedicine&nofollow=true)
+  * [ Microbiology (5) ](https://research-portal.uea.ac.uk/en/persons/?indexableKeyword=%2Fdk%2Fatira%2Fpure%2Fkeywords%2Fmedia_experts%2Fmicrobiology&nofollow=true)
+  * [ Neuroscience (5) ](https://research-portal.uea.ac.uk/en/persons/?indexableKeyword=%2Fdk%2Fatira%2Fpure%2Fkeywords%2Fmedia_experts%2Fneuroscience&nofollow=true)
+  * [ Wellbeing at work (5) ](https://research-portal.uea.ac.uk/en/persons/?indexableKeyword=%2Fdk%2Fatira%2Fpure%2Fkeywords%2Fmedia_experts%2Fwellbeing_at_work&nofollow=true)
+  * [ AI (4) ](https://research-portal.uea.ac.uk/en/persons/?indexableKeyword=%2Fdk%2Fatira%2Fpure%2Fkeywords%2Fmedia_experts%2Fai&nofollow=true)
+  * [ Archaeology (4) ](https://research-portal.uea.ac.uk/en/persons/?indexableKeyword=%2Fdk%2Fatira%2Fpure%2Fkeywords%2Fmedia_experts%2Farchaeology&nofollow=true)
+  * [ Art history (4) ](https://research-portal.uea.ac.uk/en/persons/?indexableKeyword=%2Fdk%2Fatira%2Fpure%2Fkeywords%2Fmedia_experts%2Fart_history&nofollow=true)
+  * [ Carbon emissions (4) ](https://research-portal.uea.ac.uk/en/persons/?indexableKeyword=%2Fdk%2Fatira%2Fpure%2Fkeywords%2Fmedia_experts%2Fcarbon_emissions&nofollow=true)
+  * [ Finance (4) ](https://research-portal.uea.ac.uk/en/persons/?indexableKeyword=%2Fdk%2Fatira%2Fpure%2Fkeywords%2Fmedia_experts%2Ffinance&nofollow=true)
+
+Show more
+Time period 
+  * [ Profiles with work in the past 5 years  ](https://research-portal.uea.ac.uk/en/persons/?publicationYearsOld=5&publicationYear=2021&publicationYear=2022&publicationYear=2023&publicationYear=2024&publicationYear=2025&nofollow=true)
+  * [ Profiles with work in the past 10 years  ](https://research-portal.uea.ac.uk/en/persons/?publicationYearsOld=10&publicationYear=2016&publicationYear=2017&publicationYear=2018&publicationYear=2019&publicationYear=2020&publicationYear=2021&publicationYear=2022&publicationYear=2023&publicationYear=2024&publicationYear=2025&nofollow=true)
+
+
+Research units 
+  * [ University of East Anglia (3556) ](https://research-portal.uea.ac.uk/en/persons/?organisationIds=33b7bb5b-d59d-41fa-8499-083dfdc2eec2&nofollow=true)
+  * [ Faculty of Science (1292) ](https://research-portal.uea.ac.uk/en/persons/?organisationIds=51542a61-d795-4a52-b385-8959032aa80d&nofollow=true)
+  * [ Faculty of Medicine and Health Sciences (885) ](https://research-portal.uea.ac.uk/en/persons/?organisationIds=816409c3-6085-4b7a-ae59-49de03993dbf&nofollow=true)
+  * [ Faculty of Social Sciences (814) ](https://research-portal.uea.ac.uk/en/persons/?organisationIds=b3ed8a62-8e87-438f-bea2-97dd52b54461&nofollow=true)
+  * [ Faculty of Arts and Humanities (659) ](https://research-portal.uea.ac.uk/en/persons/?organisationIds=072e5a47-faae-4812-a9b4-8ac45b0fc4c6&nofollow=true)
+  * [ Norwich Medical School (603) ](https://research-portal.uea.ac.uk/en/persons/?organisationIds=0a4a930e-8e97-4ede-bb46-28380ddef6b3&nofollow=true)
+  * [ School of Biological Sciences (426) ](https://research-portal.uea.ac.uk/en/persons/?organisationIds=cd59935c-4beb-4aed-bd5d-7b559f520101&nofollow=true)
+  * [ School of Environmental Sciences (279) ](https://research-portal.uea.ac.uk/en/persons/?organisationIds=c5e3b37e-1d84-4189-a048-da9c0be6cd8f&nofollow=true)
+  * [ School of Health Sciences (251) ](https://research-portal.uea.ac.uk/en/persons/?organisationIds=6727f39f-21c5-4e25-9d0e-9457ff3a0a01&nofollow=true)
+  * [ School of Chemistry, Pharmacy and Pharmacology (228) ](https://research-portal.uea.ac.uk/en/persons/?organisationIds=6c3596a8-da1b-4c9e-9318-e0fbd0f124ef&nofollow=true)
+  * [ School of History and Art History (190) ](https://research-portal.uea.ac.uk/en/persons/?organisationIds=96262937-d6f4-4944-aa5c-a5e1051eca72&nofollow=true)
+  * [ School of Literature, Drama and Creative Writing (188) ](https://research-portal.uea.ac.uk/en/persons/?organisationIds=79327e54-f481-47ca-bbca-a31d2c4a96bd&nofollow=true)
+  * [ Norwich Business School (186) ](https://research-portal.uea.ac.uk/en/persons/?organisationIds=bcba4530-05c0-4f46-8f7a-a633f7db0c2a&nofollow=true)
+  * [ School of Education & Lifelong Learning (182) ](https://research-portal.uea.ac.uk/en/persons/?organisationIds=9ad4a7d3-2415-406a-a08d-c7909f8d8cb1&nofollow=true)
+  * [ Lifespan Health (152) ](https://research-portal.uea.ac.uk/en/persons/?organisationIds=6c4f4ea7-a359-4fd2-8871-e0b6ce640100&nofollow=true)
+  * [ School of Politics, Philosophy and Area Studies (151) ](https://research-portal.uea.ac.uk/en/persons/?organisationIds=6c3d2d8c-bff3-4efc-9ba0-3275149cbeee&nofollow=true)
+  * [ School of Global Development (140) ](https://research-portal.uea.ac.uk/en/persons/?organisationIds=48dae8b9-f9fe-4161-8948-bca58a290f00&nofollow=true)
+  * [ School of Computing Sciences (134) ](https://research-portal.uea.ac.uk/en/persons/?organisationIds=4a6d5bc9-5fbc-4ccb-935c-48af4dbf82b6&nofollow=true)
+  * [ School of Media, Language and Communication Studies (133) ](https://research-portal.uea.ac.uk/en/persons/?organisationIds=4f5855c7-5326-42dd-a740-131ed660b0e6&nofollow=true)
+  * [ School of Engineering, Mathematics and Physics (113) ](https://research-portal.uea.ac.uk/en/persons/?organisationIds=036f1bfa-8da5-4f26-a918-b86cc3d89dd8&nofollow=true)
+  * [ Tyndall Centre for Climate Change Research (108) ](https://research-portal.uea.ac.uk/en/persons/?organisationIds=53f115c6-a86e-4368-90c1-b05740cc2391&nofollow=true)
+  * [ Population Health (107) ](https://research-portal.uea.ac.uk/en/persons/?organisationIds=6c6dd292-4290-4072-8d58-a98269c7fac1&nofollow=true)
+  * [ ClimateUEA (106) ](https://research-portal.uea.ac.uk/en/persons/?organisationIds=679d4939-692d-48db-a05a-c496c07cba12&nofollow=true)
+  * [ Professional Services (101) ](https://research-portal.uea.ac.uk/en/persons/?organisationIds=34af55a2-cea3-4dff-868f-7db170568122&nofollow=true)
+  * [ Centre for Ocean and Atmospheric Sciences (99) ](https://research-portal.uea.ac.uk/en/persons/?organisationIds=5d55a5e7-787d-48a7-a9e6-0e277298a7df&nofollow=true)
+  * [ School of Psychology (97) ](https://research-portal.uea.ac.uk/en/persons/?organisationIds=0fe7fdb2-d5b5-4934-8a92-b946cb295e13&nofollow=true)
+  * [ Metabolic Health (76) ](https://research-portal.uea.ac.uk/en/persons/?organisationIds=2c328734-abe3-4a16-8ca8-6a3d609de833&nofollow=true)
+  * [ School of Law (75) ](https://research-portal.uea.ac.uk/en/persons/?organisationIds=d5927a7d-2f71-4730-afa5-83e003c59b71&nofollow=true)
+  * [ The Sainsbury Laboratory (72) ](https://research-portal.uea.ac.uk/en/persons/?organisationIds=3c47e6a0-75f4-4117-b358-d02781b83c9f&nofollow=true)
+  * [ School of Economics (69) ](https://research-portal.uea.ac.uk/en/persons/?organisationIds=8c228f72-79d0-4f5b-94c5-8e03e8042fe2&nofollow=true)
+  * [ School of Social Work (56) ](https://research-portal.uea.ac.uk/en/persons/?organisationIds=a937a5a5-ade6-4927-b8e6-20098c181428&nofollow=true)
+  * [ Environmental Social Sciences (45) ](https://research-portal.uea.ac.uk/en/persons/?organisationIds=d35ea4a2-9108-40b1-8d37-a7bf5925b464&nofollow=true)
+  * [ Norwich Institute for Healthy Aging (45) ](https://research-portal.uea.ac.uk/en/persons/?organisationIds=d3b6a165-5a5f-4828-8ce6-72035517c008&nofollow=true)
+  * [ Area Studies (42) ](https://research-portal.uea.ac.uk/en/persons/?organisationIds=e9444dff-71d4-454a-863b-d08fe47b3966&nofollow=true)
+  * [ Interdisciplinary Institute for the Humanities (41) ](https://research-portal.uea.ac.uk/en/persons/?organisationIds=4fa8cc56-ab20-4be6-add6-48375387a030&nofollow=true)
+  * [ Geosciences (38) ](https://research-portal.uea.ac.uk/en/persons/?organisationIds=3fcdf96f-2cc8-4e61-bfc5-277d9ee8876f&nofollow=true)
+  * [ Norwich Clinical Trials Unit (37) ](https://research-portal.uea.ac.uk/en/persons/?organisationIds=c233a162-1bd1-4ab4-97a6-9cec50717a36&nofollow=true)
+  * [ Art History and World Art Studies (37) ](https://research-portal.uea.ac.uk/en/persons/?organisationIds=fb1765a3-fea9-490c-aae6-1db1fb78ed32&nofollow=true)
+  * [ Politics & International Relations (35) ](https://research-portal.uea.ac.uk/en/persons/?organisationIds=99cc9c0a-a7d9-4ebf-b261-d138375092f2&nofollow=true)
+  * [ Media Equality (34) ](https://research-portal.uea.ac.uk/en/persons/?organisationIds=a5a71bf5-cb6d-4114-952b-c1505c977854&nofollow=true)
+  * [ Centre for Competition Policy (32) ](https://research-portal.uea.ac.uk/en/persons/?organisationIds=718d48b1-97bf-406d-8ec3-8f6d23fb6cf4&nofollow=true)
+  * [ Sainsbury Research Unit for the Arts of Africa, Oceania and the Americas (32) ](https://research-portal.uea.ac.uk/en/persons/?organisationIds=888eaf57-c9c7-4a12-bfe9-abfbdea2baf4&nofollow=true)
+  * [ Marketing (32) ](https://research-portal.uea.ac.uk/en/persons/?organisationIds=8b11f2e9-f743-4ff2-abd1-fc074ccbe104&nofollow=true)
+  * [ Collaborative Centre for Sustainable Use of the Seas (32) ](https://research-portal.uea.ac.uk/en/persons/?organisationIds=994f3102-3634-4d1d-819f-e0ef915ee182&nofollow=true)
+  * [ Centre for Research on Children and Families (30) ](https://research-portal.uea.ac.uk/en/persons/?organisationIds=6da1ba10-e705-4b0a-9b08-ef76fcabfcd3&nofollow=true)
+  * [ Employment Systems and Institutions (30) ](https://research-portal.uea.ac.uk/en/persons/?organisationIds=95b5c80c-2ed1-4b10-9d2d-2425af699182&nofollow=true)
+  * [ Centre for Ecology, Evolution and Conservation (30) ](https://research-portal.uea.ac.uk/en/persons/?organisationIds=c8a89a24-917f-4d25-b62a-09ae11c0f66d&nofollow=true)
+  * [ Environmental Biology (29) ](https://research-portal.uea.ac.uk/en/persons/?organisationIds=81e36f41-b661-494c-9271-50eab452def1&nofollow=true)
+  * [ Norwich Epidemiology Centre (28) ](https://research-portal.uea.ac.uk/en/persons/?organisationIds=77f84499-5876-41f4-a030-5e266775cc2c&nofollow=true)
+  * [ Applied Econometrics And Finance (27) ](https://research-portal.uea.ac.uk/en/persons/?organisationIds=5a13931e-5d78-423b-a386-0bfdf0bbe8cc&nofollow=true)
+
+Show more
 Close 
 "Research units" 
 Search concepts    
   
 ---  
 Selected filters  [ Clear all ](https://research-portal.uea.ac.uk/en/persons/?showAdvanced=false&allConcepts=true&inferConcepts=true&originalSearch=&improvedLayoutOrganisationUuid=)  
-  * 1 - 50 out of 3,614 results 
+  * 1 - 50 out of 3,556 results 
   * Last Name (ascending)
     * [Last Name(descending)](https://research-portal.uea.ac.uk/en/persons/?ordering=lastNameFirstName&descending=true)
   * [ ](https://research-portal.uea.ac.uk/en/persons/?format=rss "View search result as RSS")
@@ -214,8 +328,9 @@ Person: Other related - academic, Research Group Member
   * ![No photo of Advait Aithal](https://research-portal.uea.ac.uk/assets/no-portrait-473c6d005990baa1f418d9c668dcd4ec.png)
 ### [Advait Aithal](https://research-portal.uea.ac.uk/en/persons/advait-aithal)
     * [A.Aithal@.](https://research-portal.uea.ac.uk/en/persons)
+    * [Faculty of Science](https://research-portal.uea.ac.uk/en/organisations/faculty-of-science) - Associate Tutor
     * [School of Chemistry, Pharmacy and Pharmacology](https://research-portal.uea.ac.uk/en/organisations/school-of-chemistry-pharmacy-and-pharmacology)
-Person: Degree of Doctor of Philosophy
+Person: Degree of Doctor of Philosophy, Associate Tutor
   * ![No photo of Damilola Ajulo](https://research-portal.uea.ac.uk/assets/no-portrait-473c6d005990baa1f418d9c668dcd4ec.png)
 ### [Damilola Ajulo](https://research-portal.uea.ac.uk/en/persons/damilola-ajulo)
     * [D.Ajulo@.](https://research-portal.uea.ac.uk/en/persons)

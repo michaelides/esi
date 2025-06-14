@@ -21,7 +21,7 @@ Articles in this section
 
 [See more](https://help.researchgate.net/hc/en-us/sections/4405078552209-Profile)
 #  Verification on ResearchGate 
-4 months ago Updated
+5 months ago Updated
 When you read research and connect with others online, you should be able to feel confident that you’re interacting with real people and credible information. But we know it’s not that easy. To help you make better-informed decisions about the research, people, and opportunities you engage with, we’ve introduced verification on ResearchGate.
 **Profile affiliation verification** is a way for ResearchGate members to confirm their affiliation with the institution listed on their profile. A **Verified Badge** on a researcher’s profile signals that they verified their affiliation.
 ### How does verification work?
@@ -35,7 +35,7 @@ Verification is available for ResearchGate members affiliated with a recognized 
 Read our [FAQs](https://help.researchgate.net/hc/en-us/articles/29668859386897) to learn more about verification.
 Was this article helpful?
 Yes No
-6181 out of 7501 found this helpful
+6902 out of 8549 found this helpful
 [ Return to top ](https://help.researchgate.net/hc/en-us/articles/26108483493521-Verification-on-ResearchGate#article-container)
 © 2008-2024 ResearchGate GmbH. All rights reserved.
   * [Terms](https://www.researchgate.net/terms-of-service)

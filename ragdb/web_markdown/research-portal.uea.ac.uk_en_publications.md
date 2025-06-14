@@ -1,4 +1,4 @@
-Search results 1 - 50 out of 72,428 results 
+Search results 1 - 50 out of 72,606 results 
   * [Skip to main navigation](https://research-portal.uea.ac.uk/en/publications#main-navigation)
   * [Skip to search](https://research-portal.uea.ac.uk/en/publications#main-search)
   * [Skip to main content](https://research-portal.uea.ac.uk/en/publications#main-content)
@@ -33,7 +33,7 @@ Search concepts
   
 ---  
 Selected filters  [ Clear all ](https://research-portal.uea.ac.uk/en/publications/?showAdvanced=false&allConcepts=true&inferConcepts=true&originalSearch=&improvedLayoutOrganisationUuid=)  
-  * 1 - 50 out of 72,428 results 
+  * 1 - 50 out of 72,606 results 
   * Publication Year, Title (descending)
     * [Publication Year, Title(ascending)](https://research-portal.uea.ac.uk/en/publications/?ordering=publicationYearThenTitle&descending=false)
     * [Title](https://research-portal.uea.ac.uk/en/publications/?ordering=title&descending=false)
@@ -60,11 +60,20 @@ File
     * Citations
       * Citation Indexes: 2
     * Captures
-      * Readers: 71
+      * Readers: 85
     * Mentions
       * News Mentions: 1
 [see details](https://plu.mx/plum/a/?doi=10.1177/13623613241271931 "PlumX Metrics Detail Page")
-[ ![Article has an altmetric score of 17](https://badges.altmetric.com/?size=128&score=17&types=bttttttt) ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=167073174)
+[ ![Article has an altmetric score of 16](https://badges.altmetric.com/?size=128&score=16&types=bttttttt) ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=167073174)
+  * ### [0 to 9 and the New York Avant-Garde: Publishing by Numbers](https://research-portal.uea.ac.uk/en/publications/0-to-9-and-the-new-york-avant-garde-publishing-by-numbers)
+[Hair, R.](https://research-portal.uea.ac.uk/en/persons/ross-hair), 8 Aug 2025, [Palgrave Macmillian](https://research-portal.uea.ac.uk/en/publications). 229 p. (New Directions in Book History)
+Research output: Book/Report › Book
+  * ### [10 top tips for the management of GLP-1 receptor agonists in adults within primary care](https://research-portal.uea.ac.uk/en/publications/10-top-tips-for-the-management-of-glp-1-receptor-agonists-in-adul)
+Dobbie, L. J., [Parretti, H.](https://research-portal.uea.ac.uk/en/persons/helen-parretti), Fallows, E., Le Brocq, S., De Giorgio, S., McGowan, B. & Patel, D., 19 May 2025, (E-pub ahead of print) In: [Obesity Facts.](https://research-portal.uea.ac.uk/en/publications)
+Research output: Contribution to journal › Review article › peer-review
+Open Access
+File
+3 Downloads (Pure)
   * ### [162 A team approach: developing a collaborative culture within the specialty training team](https://research-portal.uea.ac.uk/en/publications/162a-team-approach-developing-a-collaborative-culture-within-the-)
 Zizkova, E., [Barran, C.](https://research-portal.uea.ac.uk/en/persons/charlotte-barran), Warren, A., Gorb, N., Friel, O., Naunton, R., Perks, E., Micallef, L., Adeyefa, L., Viviers-Hogreve, K. & Sipanoun, P., 17 Jan 2025.
 Research output: Contribution to conference › Poster
@@ -87,7 +96,7 @@ File
     * Citations
       * Citation Indexes: 1
     * Captures
-      * Readers: 2
+      * Readers: 3
     * Mentions
       * News Mentions: 1
 [see details](https://plu.mx/plum/a/?doi=10.1021/acsomega.4c09944 "PlumX Metrics Detail Page")
@@ -106,9 +115,9 @@ Research output: Contribution to journal › Article › peer-review
 [Plum Print visual indicator of research metrics](https://plu.mx/plum/a/?doi=10.1016/j.jddst.2024.106534 "PlumX Metrics Detail Page")
 ![plumX logo](https://cdn.plu.mx/aa49358c1c9f6a8c537942b2f77a5c36/plumx-inverse-logo.png)
     * Citations
-      * Citation Indexes: 3
+      * Citation Indexes: 4
     * Captures
-      * Readers: 15
+      * Readers: 19
     * Mentions
       * News Mentions: 2
 [see details](https://plu.mx/plum/a/?doi=10.1016/j.jddst.2024.106534 "PlumX Metrics Detail Page")
@@ -122,44 +131,55 @@ Li, X., Cao, Y., Hu, Z., [Zhang, X.](https://research-portal.uea.ac.uk/en/person
 Research output: Contribution to journal › Article › peer-review
 Open Access
 File
-1 Downloads (Pure)
+2 Downloads (Pure)
   * ### [A broader corporate purpose? Evidence from UK public companies, 2000–2016](https://research-portal.uea.ac.uk/en/publications/a-broader-corporate-purpose-evidence-from-uk-public-companies-200)
 [Patacconi, A.](https://research-portal.uea.ac.uk/en/persons/andrea-patacconi), Shamshur, A. & Ulianiuk, P., 22 Jan 2025, (E-pub ahead of print) In: [European Management Review.](https://research-portal.uea.ac.uk/en/publications)
 Research output: Contribution to journal › Article › peer-review
 Open Access
 File
-22 Downloads (Pure)
+24 Downloads (Pure)
 [Plum Print visual indicator of research metrics](https://plu.mx/plum/a/?doi=10.1111/emre.12706 "PlumX Metrics Detail Page")
 ![plumX logo](https://cdn.plu.mx/aa49358c1c9f6a8c537942b2f77a5c36/plumx-inverse-logo.png)
     * Captures
-      * Readers: 2
+      * Readers: 3
 [see details](https://plu.mx/plum/a/?doi=10.1111/emre.12706 "PlumX Metrics Detail Page")
   * ### [Abrupt ending of the Madden–Julian Oscillation by convectively coupled Kelvin wave precipitation leaves a swath of flooding across Indonesia](https://research-portal.uea.ac.uk/en/publications/abrupt-ending-of-the-maddenjulian-oscillation-by-convectively-cou)
 [Senior, N. V.](https://research-portal.uea.ac.uk/en/persons/natasha-senior), [Matthews, A. J.](https://research-portal.uea.ac.uk/en/persons/adrian-matthews), [Webber, B. G. M.](https://research-portal.uea.ac.uk/en/persons/ben-webber), Paski, J. A. I., Nuryanto, D. E., Jones, R. W., Permana, D. S. & Febriyanti, A. H., 29 Apr 2025, (E-pub ahead of print) In: [Quarterly Journal of the Royal Meteorological Society.](https://research-portal.uea.ac.uk/en/publications) e4997.
 Research output: Contribution to journal › Article › peer-review
 Open Access
 File
+1 Downloads (Pure)
+[Plum Print visual indicator of research metrics](https://plu.mx/plum/a/?doi=10.1002/qj.4997 "PlumX Metrics Detail Page")
+![plumX logo](https://cdn.plu.mx/aa49358c1c9f6a8c537942b2f77a5c36/plumx-inverse-logo.png)
+    * Captures
+      * Readers: 3
+[see details](https://plu.mx/plum/a/?doi=10.1002/qj.4997 "PlumX Metrics Detail Page")
   * ### [Access to best-evidenced mental health support for care-experienced young people: Learnings from the implementation of cognitive therapy for PTSD](https://research-portal.uea.ac.uk/en/publications/access-to-best-evidenced-mental-health-support-for-care-experienc)
 McGuire, R., [Meiser-Stedman, R.](https://research-portal.uea.ac.uk/en/persons/richard-meiser-stedman), Smith, P., Schmidt, D., Bjornstad, G., Bosworth, R., Clarke, T., Coombes, J., Geijer Simpson, E., Hudson, K., Oliveira, P., Macleod, J., McGovern, R., Stallard, P., Wood, K. & Hiller, R. M., Mar 2025, In: [British Journal of Clinical Psychology.](https://research-portal.uea.ac.uk/en/publications) 64, 1, p. 63-85 23 p.
 Research output: Contribution to journal › Article › peer-review
 Open Access
 File
 1 Citation (Scopus)
-4 Downloads (Pure)
+6 Downloads (Pure)
 [Plum Print visual indicator of research metrics](https://plu.mx/plum/a/?doi=10.1111/bjc.12471 "PlumX Metrics Detail Page")
 ![plumX logo](https://cdn.plu.mx/aa49358c1c9f6a8c537942b2f77a5c36/plumx-inverse-logo.png)
     * Citations
-      * Citation Indexes: 2
+      * Citation Indexes: 3
     * Captures
-      * Readers: 37
+      * Readers: 60
 [see details](https://plu.mx/plum/a/?doi=10.1111/bjc.12471 "PlumX Metrics Detail Page")
 [ ![Article has an altmetric score of 23](https://badges.altmetric.com/?size=128&score=23&types=tttttttt) ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=165422056)
+  * ### [Accommodating territorial contestation and national constitutional change: The cases of Cyprus and Ireland](https://research-portal.uea.ac.uk/en/publications/accommodating-territorial-contestation-and-national-constitutiona)
+[Skoutaris, N.](https://research-portal.uea.ac.uk/en/persons/nikos-skoutaris), 10 Jun 2025, In: [Irish Studies in International Affairs.](https://research-portal.uea.ac.uk/en/publications) 36, 2, p. 244-264 21 p.
+Research output: Contribution to journal › Article › peer-review
+Open Access
+File
   * ### [A characterisation of semigroups with only countably many subdirect products with Z](https://research-portal.uea.ac.uk/en/publications/a-characterisation-of-semigroups-with-only-countably-many-subdire)
 Clayton, A., [Reilly, C.](https://research-portal.uea.ac.uk/en/persons/catherine-reilly) & Ruškuc, N., Apr 2025, In: [Bulletin of the Australian Mathematical Society.](https://research-portal.uea.ac.uk/en/publications) 111, 2, p. 314-323 10 p.
 Research output: Contribution to journal › Article › peer-review
 Open Access
 File
-5 Downloads (Pure)
+6 Downloads (Pure)
   * ### [Achieving SDG 7 (clean energy) through international investment law, and beyond](https://research-portal.uea.ac.uk/en/publications/achieving-sdg-7-clean-energy-through-international-investment-law)
 [Kent, A.](https://research-portal.uea.ac.uk/en/persons/avidan-kent), 2025, _Research Handbook on Investment Law and Sustainable Development._ Cordonier Segger, M. C., Gleason, T. & Stephenson, S. (eds.). [Edward Elgar](https://research-portal.uea.ac.uk/en/publications)
 Research output: Chapter in Book/Report/Conference proceeding › Chapter (peer-reviewed)
@@ -181,12 +201,13 @@ Maksimov, I., Asakai, T., Hibino, Y. & [Clegg, S. L.](https://research-portal.ue
 Research output: Contribution to journal › Article › peer-review
 Open Access
 File
+1 Downloads (Pure)
   * ### [A Cultural History of Fairy Tales. Edited By Anne E. Duggan. 6 Volumes. London: Bloomsbury, 2021. "Adaptations"](https://research-portal.uea.ac.uk/en/publications/a-cultural-history-of-fairy-tales-edited-by-anne-e-duggan-6-volum)
 [Darley, S. J.](https://research-portal.uea.ac.uk/en/persons/sarah-jessica-darley), 2025, In: [Marvels and Tales: Journal of Fairy-Tale Studies.](https://research-portal.uea.ac.uk/en/publications) 38, 2, p. 302-305 4 p.
 Research output: Contribution to journal › Book/Film/Article review › peer-review
 Open Access
 File
-32 Downloads (Pure)
+46 Downloads (Pure)
   * ### [Adam Plummer, _The British Trauma Film: Psychoanalysis and Popular British Cinema in the Immediate Aftermath of the Second World War_ (London: Bloomsbury Academic, 2023)](https://research-portal.uea.ac.uk/en/publications/adam-plummer-ithe-british-trauma-film-psychoanalysis-and-popular-)
 [Snelson, T.](https://research-portal.uea.ac.uk/en/persons/tim-snelson), Jan 2025, In: [Journal of British Cinema and Television.](https://research-portal.uea.ac.uk/en/publications) 22, 1, p. 138-140 3 p.
 Research output: Contribution to journal › Book/Film/Article review › peer-review
@@ -195,7 +216,7 @@ Simms, I., Charlett, A., Colón-González, F. J., Blomquist, P. B., [Lake, I. R.
 Research output: Contribution to journal › Article › peer-review
 Open Access
 File
-11 Downloads (Pure)
+12 Downloads (Pure)
 [Plum Print visual indicator of research metrics](https://plu.mx/plum/a/?doi=10.1017/S0950268825000160 "PlumX Metrics Detail Page")
 ![plumX logo](https://cdn.plu.mx/aa49358c1c9f6a8c537942b2f77a5c36/plumx-inverse-logo.png)
     * Mentions
@@ -206,11 +227,13 @@ File
 Research output: Contribution to journal › Article › peer-review
 Open Access
 File
-1 Downloads (Pure)
+2 Downloads (Pure)
 [Plum Print visual indicator of research metrics](https://plu.mx/plum/a/?doi=10.1038/s41597-025-04804-4 "PlumX Metrics Detail Page")
 ![plumX logo](https://cdn.plu.mx/aa49358c1c9f6a8c537942b2f77a5c36/plumx-inverse-logo.png)
+    * Citations
+      * Policy Citations: 1
     * Captures
-      * Readers: 2
+      * Readers: 4
 [see details](https://plu.mx/plum/a/?doi=10.1038/s41597-025-04804-4 "PlumX Metrics Detail Page")
 [ ![Article has an altmetric score of 2](https://badges.altmetric.com/?size=128&score=2&types=uuuuuuuu) ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=175424611)
   * ### [Advancing social impact assessments for more effective and equitable conservation](https://research-portal.uea.ac.uk/en/publications/advancing-social-impact-assessments-for-more-effective-and-equita)
@@ -218,11 +241,11 @@ File
 Research output: Contribution to journal › Review article › peer-review
 Open Access
 File
-1 Downloads (Pure)
+2 Downloads (Pure)
 [Plum Print visual indicator of research metrics](https://plu.mx/plum/a/?doi=10.1111/cobi.14453 "PlumX Metrics Detail Page")
 ![plumX logo](https://cdn.plu.mx/aa49358c1c9f6a8c537942b2f77a5c36/plumx-inverse-logo.png)
     * Captures
-      * Readers: 2
+      * Readers: 10
 [see details](https://plu.mx/plum/a/?doi=10.1111/cobi.14453 "PlumX Metrics Detail Page")
 [ ![Article has an altmetric score of 2](https://badges.altmetric.com/?size=128&score=2&types=tttttfff) ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=175805988)
   * ### [Aerosol trace element solubility and deposition fluxes over the Mediterranean Sea and Black Sea basins](https://research-portal.uea.ac.uk/en/publications/aerosol-trace-element-solubility-and-deposition-fluxes-over-the-m)
@@ -230,7 +253,7 @@ Shelley, R. U., [Baker, A. R.](https://research-portal.uea.ac.uk/en/persons/alex
 Research output: Contribution to journal › Article › peer-review
 Open Access
 File
-5 Downloads (Pure)
+6 Downloads (Pure)
 [ ![Article has an altmetric score of 1](https://badges.altmetric.com/?size=128&score=1&types=tttttttt) ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=173637370)
   * ### [A feasibility randomized-controlled trial of an executive functioning telerehabilitation intervention for stroke survivors](https://research-portal.uea.ac.uk/en/publications/a-feasibility-randomized-controlled-trial-of-an-executive-functio)
 Ene, C. G., [Gracey, F.](https://research-portal.uea.ac.uk/en/persons/fergus-gracey) & [Ford, C.](https://research-portal.uea.ac.uk/en/persons/cat-ford), 27 Mar 2025, (E-pub ahead of print) In: [Brain Injury.](https://research-portal.uea.ac.uk/en/publications)
@@ -239,14 +262,14 @@ Open Access
 [Plum Print visual indicator of research metrics](https://plu.mx/plum/a/?doi=10.1080/02699052.2025.2483449 "PlumX Metrics Detail Page")
 ![plumX logo](https://cdn.plu.mx/aa49358c1c9f6a8c537942b2f77a5c36/plumx-inverse-logo.png)
     * Captures
-      * Readers: 1
+      * Readers: 8
 [see details](https://plu.mx/plum/a/?doi=10.1080/02699052.2025.2483449 "PlumX Metrics Detail Page")
   * ### [A film-maker not a note-taker: A roundtable discussion on the craft of script supervision](https://research-portal.uea.ac.uk/en/publications/a-film-maker-not-a-note-taker-a-roundtable-discussion-on-the-craf)
 [Williams, M. (ed.)](https://research-portal.uea.ac.uk/en/persons/melanie-williams), 6 Feb 2025, In: [Open Screens.](https://research-portal.uea.ac.uk/en/publications) 7, 1
 Research output: Contribution to journal › Article › peer-review
 Open Access
 File
-6 Downloads (Pure)
+9 Downloads (Pure)
 [ ![Article has an altmetric score of 1](https://badges.altmetric.com/?size=128&score=1&types=ffffffff) ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=175049227)
   * ### [Aftermath: Thinking and Healing with Grass in Contemporary Poetry](https://research-portal.uea.ac.uk/en/publications/aftermath-thinking-and-healing-with-grass-in-contemporary-poetry)
 [Corfield Carr, H.](https://research-portal.uea.ac.uk/en/persons/holly-corfield-carr), 6 Feb 2025, _Cambridge Handbook of Literature and Plants._ Lander Johnson, B. (ed.). [Cambridge University Press](https://research-portal.uea.ac.uk/en/publications), p. 213-230 18 p.
@@ -259,11 +282,11 @@ Shirzaei, M., Vahedifard, F., Sadhasivam, N., Ohenhen, L., Dasho, O., Tiwari, A.
 Research output: Contribution to journal › Comment/debate › peer-review
 Open Access
 File
-7 Downloads (Pure)
+8 Downloads (Pure)
 [Plum Print visual indicator of research metrics](https://plu.mx/plum/a/?doi=10.1038/s44304-024-00056-1 "PlumX Metrics Detail Page")
 ![plumX logo](https://cdn.plu.mx/aa49358c1c9f6a8c537942b2f77a5c36/plumx-inverse-logo.png)
     * Captures
-      * Readers: 7
+      * Readers: 10
     * Mentions
       * News Mentions: 3
 [see details](https://plu.mx/plum/a/?doi=10.1038/s44304-024-00056-1 "PlumX Metrics Detail Page")
@@ -289,7 +312,7 @@ Aslanyan, V. & [Kirby, J.](https://research-portal.uea.ac.uk/en/persons/jonathan
 Research output: Contribution to journal › Article › peer-review
 Open Access
 File
-3 Downloads (Pure)
+5 Downloads (Pure)
 [ ![Article has an altmetric score of 1](https://badges.altmetric.com/?size=128&score=1&types=tttttttt) ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=163069368)
   * ### [A micromechanical model for the determination of nonlinear coupled electro-magneto-thermo-elastic effects on magnetoelectric composites](https://research-portal.uea.ac.uk/en/publications/a-micromechanical-model-for-the-determination-of-nonlinear-couple)
 Li, Z., Ye, J., Liu, L., Wang, Y., Yang, L., Shi, Y. & [Liu, D.](https://research-portal.uea.ac.uk/en/persons/dianzi-liu), Apr 2025, In: [Composite Structures.](https://research-portal.uea.ac.uk/en/publications) 360, 119017.
@@ -307,13 +330,41 @@ Fryers, M. & [Ashby, A.](https://research-portal.uea.ac.uk/en/persons/ady-ashby)
 Research output: Contribution to journal › Article › peer-review
 Open Access
 File
+[Plum Print visual indicator of research metrics](https://plu.mx/plum/a/?doi=10.1177/17496020251340583 "PlumX Metrics Detail Page")
+![plumX logo](https://cdn.plu.mx/aa49358c1c9f6a8c537942b2f77a5c36/plumx-inverse-logo.png)
+    * Mentions
+      * News Mentions: 1
+[see details](https://plu.mx/plum/a/?doi=10.1177/17496020251340583 "PlumX Metrics Detail Page")
 [ ![Article has an altmetric score of 1](https://badges.altmetric.com/?size=128&score=1&types=uuuuuuuu) ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=176944750)
   * ### [An Air-Ground Cooperative Real-Time Delivery Scheme Based on Joint Scheduling](https://research-portal.uea.ac.uk/en/publications/an-air-ground-cooperative-real-time-delivery-scheme-based-on-join)
 Huang, J., Liu, Y., Cao, Y., [Zhang, X.](https://research-portal.uea.ac.uk/en/persons/xu-zhang), Lin, H., Song, Y. & Chen, Z., 20 Jan 2025, _2024 IEEE International Conference on Systems, Man, and Cybernetics, SMC 2024 - Proceedings._ [The Institute of Electrical and Electronics Engineers (IEEE)](https://research-portal.uea.ac.uk/en/publications), p. 2410-2415 6 p. (Conference Proceedings - IEEE International Conference on Systems, Man and Cybernetics).
 Research output: Chapter in Book/Report/Conference proceeding › Conference contribution
+  * ### [Analysis for health system resilience against the economic crisis: A best-fit framework synthesis](https://research-portal.uea.ac.uk/en/publications/analysis-for-health-system-resilience-against-the-economic-crisis)
+Foroughi, Z., Ebrahimi, P., Yazdani, S., [Aryankhesal, A.](https://research-portal.uea.ac.uk/en/persons/aidin-aryankhesal), Heydari, M. & Maleki, M., 14 Mar 2025, In: [Health Research Policy and Systems.](https://research-portal.uea.ac.uk/en/publications) 23, 33.
+Research output: Contribution to journal › Article › peer-review
+Open Access
+File
+[Plum Print visual indicator of research metrics](https://plu.mx/plum/a/?doi=10.1186/s12961-025-01285-0 "PlumX Metrics Detail Page")
+![plumX logo](https://cdn.plu.mx/aa49358c1c9f6a8c537942b2f77a5c36/plumx-inverse-logo.png)
+    * Captures
+      * Readers: 5
+    * Mentions
+      * News Mentions: 1
+[see details](https://plu.mx/plum/a/?doi=10.1186/s12961-025-01285-0 "PlumX Metrics Detail Page")
+[ ![Article has an altmetric score of 11](https://badges.altmetric.com/?size=128&score=11&types=bttttuuu) ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=175195780)
+  * ### [Analysis of recurrent events in cluster randomised trials: The PLEASANT trial case study](https://research-portal.uea.ac.uk/en/publications/analysis-of-recurrent-events-in-cluster-randomised-trials-the-ple)
+[Grant, K.](https://research-portal.uea.ac.uk/en/persons/kelly-grant) & Julious, S. A., 14 May 2025, (E-pub ahead of print) In: [Statistical Methods in Medical Research.](https://research-portal.uea.ac.uk/en/publications) 09622802251316972.
+Research output: Contribution to journal › Article › peer-review
+Open Access
+[ ![Article has an altmetric score of 5](https://badges.altmetric.com/?size=128&score=5&types=tttttuuu) ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=177257185)
   * ### [An analysis of the first relapse in giant cell arteritis using ultrasonography](https://research-portal.uea.ac.uk/en/publications/an-analysis-of-the-first-relapse-in-giant-cell-arteritis-using-ul)
 [Mukhtyar, C. B.](https://research-portal.uea.ac.uk/en/persons/chetan-mukhtyar), Alanoor, S. & Ducker, G., Apr 2025, In: [Seminars in Arthritis and Rheumatism.](https://research-portal.uea.ac.uk/en/publications) 71, 152646.
 Research output: Contribution to journal › Article › peer-review
+[Plum Print visual indicator of research metrics](https://plu.mx/plum/a/?doi=10.1016/j.semarthrit.2025.152646 "PlumX Metrics Detail Page")
+![plumX logo](https://cdn.plu.mx/aa49358c1c9f6a8c537942b2f77a5c36/plumx-inverse-logo.png)
+    * Captures
+      * Readers: 1
+[see details](https://plu.mx/plum/a/?doi=10.1016/j.semarthrit.2025.152646 "PlumX Metrics Detail Page")
 [ ![Article has an altmetric score of 1](https://badges.altmetric.com/?size=128&score=1&types=ttttuuuu) ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=173807979)
   * ### [A Nature-based Solutions framework for embedding climate change mitigation and adaptation into urban land use plans through Strategic Environmental Assessment (SEA)](https://research-portal.uea.ac.uk/en/publications/a-nature-based-solutions-framework-for-embedding-climate-change-m)
 Gallardo, A. L. C. F. & [Bond, A.](https://research-portal.uea.ac.uk/en/persons/alan-bond), Feb 2025, In: [Environmental Management.](https://research-portal.uea.ac.uk/en/publications) 75, 2, p. 256-271 16 p., e729.
@@ -321,31 +372,44 @@ Research output: Contribution to journal › Article › peer-review
 [Plum Print visual indicator of research metrics](https://plu.mx/plum/a/?doi=10.1007/s00267-024-02073-2 "PlumX Metrics Detail Page")
 ![plumX logo](https://cdn.plu.mx/aa49358c1c9f6a8c537942b2f77a5c36/plumx-inverse-logo.png)
     * Captures
-      * Readers: 10
+      * Readers: 15
 [see details](https://plu.mx/plum/a/?doi=10.1007/s00267-024-02073-2 "PlumX Metrics Detail Page")
   * ### [An authenticity expectations gap? A comparison of publics' and Members of Parliament's views on politicians being true to themselves](https://research-portal.uea.ac.uk/en/publications/an-authenticity-expectations-gap-a-comparison-of-publics-and-memb)
 [Kenny, J.](https://research-portal.uea.ac.uk/en/persons/john-kenny) & [Geese, L.](https://research-portal.uea.ac.uk/en/persons/lucas-geese), Apr 2025, In: [Polity.](https://research-portal.uea.ac.uk/en/publications) 57, 2, p. 350-369 10 p.
 Research output: Contribution to journal › Article › peer-review
 Open Access
 File
-1 Downloads (Pure)
+2 Downloads (Pure)
 [Plum Print visual indicator of research metrics](https://plu.mx/plum/a/?doi=10.1086/734680 "PlumX Metrics Detail Page")
 ![plumX logo](https://cdn.plu.mx/aa49358c1c9f6a8c537942b2f77a5c36/plumx-inverse-logo.png)
     * Citations
       * Citation Indexes: 1
 [see details](https://plu.mx/plum/a/?doi=10.1086/734680 "PlumX Metrics Detail Page")
+  * ### [Ancient dog introgression into the Iberian wolf genome may have facilitated adaptation to human-dominated landscapes](https://research-portal.uea.ac.uk/en/publications/ancient-dog-introgression-into-the-iberian-wolf-genome-may-have-f)
+Lobo, D., Morales, H. E., [Van Oosterhout, C.](https://research-portal.uea.ac.uk/en/persons/cock-van-oosterhout), López-Bao, J. V., Silva, P., Llaneza, L., Pacheco, C., Castro, D., Hernández-Alonso, G., Pacheco, G., Archer, J., Gilbert, M. T. P., Ferrand, N. & Godinho, R., Mar 2025, In: [Genome Research.](https://research-portal.uea.ac.uk/en/publications) 35, 3, p. 432-445 14 p.
+Research output: Contribution to journal › Article › peer-review
+Open Access
+File
+[Plum Print visual indicator of research metrics](https://plu.mx/plum/a/?doi=10.1101/gr.279093.124 "PlumX Metrics Detail Page")
+![plumX logo](https://cdn.plu.mx/aa49358c1c9f6a8c537942b2f77a5c36/plumx-inverse-logo.png)
+    * Captures
+      * Readers: 5
+[see details](https://plu.mx/plum/a/?doi=10.1101/gr.279093.124 "PlumX Metrics Detail Page")
+[ ![Article has an altmetric score of 48](https://badges.altmetric.com/?size=128&score=48&types=mttttuuu) ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=174211613)
   * ### [An expert consensus statement on biomarkers of ageing for use in intervention studies](https://research-portal.uea.ac.uk/en/publications/an-expert-consensus-statement-on-biomarkers-of-ageing-for-use-in-)
 Perri, G., French, C., Agostinis-Sobrinho, C., Anand, A., Antarianto, R. D., Arai, Y., Baur, J. A., Cauli, O., Clivaz-Duc, M., Colloca, G., Demetriades, C., de Lucia, C., Di Gessa, G., Diniz, B. S., Dotchin, C. L., Eaglestone, G., Elliott, B. T., Espeland, M. A., Ferrucci, L., Fisher, J., [ & 44 others](https://research-portal.uea.ac.uk/en/publications)Grammatopoulos, D. K., Hardiany, N. S., Hassan-Smith, Z., Hastings, W. J., Jain, S., Joshi, P. K., Katsila, T., Kemp, G. J., Khaiyat, O. A., Lamming, D. W., Gallegos, J. L., Madeo, F., Maier, A. B., Martin-Ruiz, C., Martins, I. J., Mathers, J. C., Mattin, L. R., Merchant, R. A., Moskalev, A., Neytchev, O., Ni Lochlainn, M., Owen, C. M., Phillips, S. M., Pratt, J., Prokopidis, K., Rattray, N. J. W., Rúa-Alonso, M., Schomburg, L., Scott, D., Shyam, S., Sillanpää, E., Tan, M. M. C., Teh, R., Tobin, S. W., Vila-Chã, C. J., Vorluni, L., Weber, D., [Welch, A.](https://research-portal.uea.ac.uk/en/persons/ailsa-welch), Wilson, D., Wilson, T., Zhao, T., Philippou, E., Korolchuk, V. I. & Shannon, O. M., May 2025, In: [The Journals of Gerontology, Series A: Biological Sciences and Medical Sciences.](https://research-portal.uea.ac.uk/en/publications) 80, 5, glae297.
 Research output: Contribution to journal › Article › peer-review
 Open Access
 File
-7 Downloads (Pure)
+18 Downloads (Pure)
 [Plum Print visual indicator of research metrics](https://plu.mx/plum/a/?doi=10.1093/gerona/glae297 "PlumX Metrics Detail Page")
 ![plumX logo](https://cdn.plu.mx/aa49358c1c9f6a8c537942b2f77a5c36/plumx-inverse-logo.png)
+    * Citations
+      * Citation Indexes: 1
     * Captures
-      * Readers: 17
+      * Readers: 24
     * Mentions
-      * News Mentions: 1
+      * News Mentions: 2
 [see details](https://plu.mx/plum/a/?doi=10.1093/gerona/glae297 "PlumX Metrics Detail Page")
 [ ![Article has an altmetric score of 58](https://badges.altmetric.com/?size=128&score=58&types=mtttttfu) ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=172322634)
   * ### [An exploration of digital servitization business models in manufacturing SMEs](https://research-portal.uea.ac.uk/en/publications/an-exploration-of-digital-servitization-business-models-in-manufa)
@@ -356,69 +420,25 @@ Research output: Contribution to journal › Article › peer-review
     * Citations
       * Citation Indexes: 1
     * Captures
-      * Readers: 23
+      * Readers: 28
 [see details](https://plu.mx/plum/a/?doi=10.1080/00472778.2024.2448966 "PlumX Metrics Detail Page")
   * ### [An implementation facilitation intervention to improve the musculoskeletal X-ray reporting by radiographers across London](https://research-portal.uea.ac.uk/en/publications/an-implementation-facilitation-intervention-to-improve-the-muscul)
 Lockwood, P., [Burton, C.](https://research-portal.uea.ac.uk/en/persons/christopher-burton), Shaw, T., Woznitza, N., Compton, E., Groombridge, H., Hayes, N., Mane, U., O’Brien, A. & Patterson, S., 14 Feb 2025, In: [BMC Health Services Research.](https://research-portal.uea.ac.uk/en/publications) 25, 248.
 Research output: Contribution to journal › Article › peer-review
 Open Access
 File
-1 Downloads (Pure)
+4 Downloads (Pure)
 [Plum Print visual indicator of research metrics](https://plu.mx/plum/a/?doi=10.1186/s12913-025-12356-x "PlumX Metrics Detail Page")
 ![plumX logo](https://cdn.plu.mx/aa49358c1c9f6a8c537942b2f77a5c36/plumx-inverse-logo.png)
     * Captures
-      * Readers: 5
+      * Readers: 6
     * Mentions
       * News Mentions: 1
 [see details](https://plu.mx/plum/a/?doi=10.1186/s12913-025-12356-x "PlumX Metrics Detail Page")
-  * ### [An integrated framework on autonomous valet parking and battery swapping service considering malicious false data injection attack](https://research-portal.uea.ac.uk/en/publications/an-integrated-framework-on-autonomous-valet-parking-and-battery-s)
-Li, X., Cao, Y., Hu, Z., [Zhang, X.](https://research-portal.uea.ac.uk/en/persons/xu-zhang), Lin, H. & Liu, Z., 3 Feb 2025, In: [IEEE Transactions on Transportation Electrification.](https://research-portal.uea.ac.uk/en/publications) 11, 1, p. 3806-3822 17 p.
-Research output: Contribution to journal › Article › peer-review
-[Plum Print visual indicator of research metrics](https://plu.mx/plum/a/?doi=10.1109/TTE.2024.3447024 "PlumX Metrics Detail Page")
-![plumX logo](https://cdn.plu.mx/aa49358c1c9f6a8c537942b2f77a5c36/plumx-inverse-logo.png)
-    * Citations
-      * Citation Indexes: 2
-    * Captures
-      * Readers: 11
-    * Mentions
-      * News Mentions: 1
-[see details](https://plu.mx/plum/a/?doi=10.1109/TTE.2024.3447024 "PlumX Metrics Detail Page")
-  * ### [An intron-split microRNA mediates cleavage of the mRNA encoded by low phosphate root in Solanaceae](https://research-portal.uea.ac.uk/en/publications/an-intron-split-microrna-mediates-cleavage-of-the-mrna-encoded-by)
-Medina-Calzada, Z., Jing, R., [Moxon, S.](https://research-portal.uea.ac.uk/en/persons/simon-moxon), Zhu, H., Xu, P. & [Dalmay, T.](https://research-portal.uea.ac.uk/en/persons/tamas-dalmay), 7 Jan 2025, In: [Planta.](https://research-portal.uea.ac.uk/en/publications) 261, 2, 27.
-Research output: Contribution to journal › Article › peer-review
-Open Access
-File
-20 Downloads (Pure)
-[Plum Print visual indicator of research metrics](https://plu.mx/plum/a/?doi=10.1007/s00425-024-04596-8 "PlumX Metrics Detail Page")
-![plumX logo](https://cdn.plu.mx/aa49358c1c9f6a8c537942b2f77a5c36/plumx-inverse-logo.png)
-    * Mentions
-      * News Mentions: 1
-[see details](https://plu.mx/plum/a/?doi=10.1007/s00425-024-04596-8 "PlumX Metrics Detail Page")
-  * ### [A novel demodulator design for signal processing of inductive oil debris sensors](https://research-portal.uea.ac.uk/en/publications/a-novel-demodulator-design-for-signal-processing-of-inductive-oil)
-Wang, G., Wu, X., Qian, Z., [Liu, D.](https://research-portal.uea.ac.uk/en/persons/dianzi-liu), Li, P. & Kuznetsova, I., Jan 2025, In: [Measurement Science and Technology.](https://research-portal.uea.ac.uk/en/publications) 36, 1, 015112.
-Research output: Contribution to journal › Article › peer-review
-  * ### [A novel human milk fortifier supports adequate growth in very low birth weight infants: A non-inferiority randomised controlled trial](https://research-portal.uea.ac.uk/en/publications/a-novel-human-milk-fortifier-supports-adequate-growth-in-very-low-2)
-Picaud, J-C., Reynolds, P. R., [Clarke, P.](https://research-portal.uea.ac.uk/en/persons/paul-clarke), van den Hooven, E., van Weissenbruch, M. M., van Lingen, R. A., Goedhart, A., Botma, A., Boettger, R., van Westering-Kroon, E., Fusch, C., Hascoet, J. M. & The Renoir Study Group, 4 Mar 2025, (E-pub ahead of print) In: [Archives of Disease in Childhood - Fetal and Neonatal Edition.](https://research-portal.uea.ac.uk/en/publications) fetalneonatal-2024-327282.
-Research output: Contribution to journal › Article › peer-review
-Open Access
-[ ![Article has an altmetric score of 5](https://badges.altmetric.com/?size=128&score=5&types=tttttttf) ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=174871485)
-  * ### [An Unobtrusive Approach to Emotion Detection](https://research-portal.uea.ac.uk/en/publications/an-unobtrusive-approach-to-emotion-detection)
-[Chin, J.](https://research-portal.uea.ac.uk/en/persons/jeannette-chin) & Klos, D., 2025, _Handbook on Smart Health._ [IOS Press](https://research-portal.uea.ac.uk/en/publications), (Studies in Health Technology and Informatics Book Series).
-Research output: Chapter in Book/Report/Conference proceeding › Chapter
-  * ### [An update of a systematic review and meta-analyses exploring flavours in intervention studies of e-cigarettes for smoking cessation](https://research-portal.uea.ac.uk/en/publications/an-update-of-a-systematic-review-and-meta-analyses-exploring-flav)
-Lindson, N., Livingstone-Banks, J., Butley, A. R., Levy, D. T., Barnett, P., Theodoulou, A., [Notley, C.](https://research-portal.uea.ac.uk/en/persons/caitlin-notley), Rigotti, N. A., Chen, Y. & Hartmann-Boyce, J., Apr 2025, In: [Addiction.](https://research-portal.uea.ac.uk/en/publications) 120, 4, p. 770-778 9 p.
-Research output: Contribution to journal › Article › peer-review
-Open Access
-File
-[Plum Print visual indicator of research metrics](https://plu.mx/plum/a/?doi=10.1111/add.16736 "PlumX Metrics Detail Page")
-![plumX logo](https://cdn.plu.mx/aa49358c1c9f6a8c537942b2f77a5c36/plumx-inverse-logo.png)
-    * Citations
-      * Citation Indexes: 1
-[see details](https://plu.mx/plum/a/?doi=10.1111/add.16736 "PlumX Metrics Detail Page")
-[ ![Article has an altmetric score of 2](https://badges.altmetric.com/?size=128&score=2&types=tttttttt) ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=172279331)
-  * ### [An Urban Electric Vehicle Charging System via Hybrid Heterogeneous Modes](https://research-portal.uea.ac.uk/en/publications/an-urban-electric-vehicle-charging-system-via-hybrid-heterogeneou)
-Zhang, K., Liu, Y., Liu, S., Gao, J., Cao, Y., Ahmad, N. & [Zhang, X.](https://research-portal.uea.ac.uk/en/persons/xu-zhang), 20 Jan 2025, _2024 IEEE International Conference on Systems, Man, and Cybernetics, SMC 2024 - Proceedings._ [The Institute of Electrical and Electronics Engineers (IEEE)](https://research-portal.uea.ac.uk/en/publications), p. 1469-1476 8 p. (Conference Proceedings - IEEE International Conference on Systems, Man and Cybernetics).
+  * ### [An innovative multi-hazard climate change risk assessment framework: Evidence from a place-based assessment of challenges and solutions in the UK Fens](https://research-portal.uea.ac.uk/en/publications/an-innovative-multi-hazard-climate-change-risk-assessment-framewo)
+[Jenkins, K.](https://research-portal.uea.ac.uk/en/persons/katie-jenkins), [Nicholls, R.](https://research-portal.uea.ac.uk/en/persons/robert-nicholls), Sayers, P., Redhead, J., [Price, J.](https://research-portal.uea.ac.uk/en/persons/jeff-price), [He, Y.](https://research-portal.uea.ac.uk/en/persons/helen-he), [Minns, A.](https://research-portal.uea.ac.uk/en/persons/asher-minns) & Pywell, R., 15 Mar 2025, _EGU General Assembly 2025._ EGU25-18584
 Research output: Chapter in Book/Report/Conference proceeding › Conference contribution
+Open Access
 
 
   * 1
@@ -448,56 +468,65 @@ Cookies Settings
 Contact us
 [](https://research-portal.uea.ac.uk/en/publications)
 [ Blogged by **1** ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=167073174&tab=blogs)
-[ Posted by **15** X users ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=167073174&tab=twitter)
-**71** readers on Mendeley 
+[ Posted by **14** X users ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=167073174&tab=twitter)
+**83** readers on Mendeley 
 [ See more details ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=167073174)
 [ Posted by **1** X users ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=176329249&tab=twitter)
 [ See more details ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=176329249)
-[ Posted by **36** X users ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=165422056&tab=twitter)
-**39** readers on Mendeley 
-[ See more details ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=165422056)
 [ Reddited by **1** ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=175173312&tab=reddit)
 [ Referenced by **1** Bluesky users ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=175173312&tab=bluesky)
-**2** readers on Mendeley 
+**3** readers on Mendeley 
 [ See more details ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=175173312)
+[ Referenced by **2** Bluesky users ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=175424611&tab=bluesky)
+**5** readers on Mendeley 
+[ See more details ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=175424611)
 [ Picked up by **2** news outlets ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=173093060&tab=news)
-[ Posted by **14** X users ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=173093060&tab=twitter)
+[ Posted by **15** X users ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=173093060&tab=twitter)
 [ On **1** Facebook pages ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=173093060&tab=facebook)
 [ Referenced by **10** Bluesky users ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=173093060&tab=bluesky)
-**7** readers on Mendeley 
+**10** readers on Mendeley 
 [ See more details ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=173093060)
+[ Posted by **35** X users ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=165422056&tab=twitter)
+**60** readers on Mendeley 
+[ See more details ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=165422056)
+[ Blogged by **1** ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=175195780&tab=blogs)
+[ Posted by **3** X users ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=175195780&tab=twitter)
+[ Referenced by **2** Bluesky users ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=175195780&tab=bluesky)
+**5** readers on Mendeley 
+[ See more details ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=175195780)
 [ Posted by **2** X users ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=175805988&tab=twitter)
 [ On **1** Facebook pages ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=175805988&tab=facebook)
-**3** readers on Mendeley 
+**10** readers on Mendeley 
 [ See more details ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=175805988)
-[ Referenced by **2** Bluesky users ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=175424611&tab=bluesky)
-**3** readers on Mendeley 
-[ See more details ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=175424611)
-[ Posted by **1** X users ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=167128312&tab=twitter)
-[ See more details ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=167128312)
 [ On **1** Facebook pages ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=175049227&tab=facebook)
 [ See more details ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=175049227)
+[ Posted by **4** X users ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=177257185&tab=twitter)
+[ Referenced by **3** Bluesky users ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=177257185&tab=bluesky)
+[ See more details ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=177257185)
 [ Referenced by **2** Bluesky users ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=176944750&tab=bluesky)
 [ See more details ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=176944750)
 [ Posted by **2** X users ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=163069368&tab=twitter)
 **1** reader on Mendeley 
 [ See more details ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=163069368)
 [ Picked up by **1** news outlets ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=172322634&tab=news)
-[ Posted by **89** X users ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=172322634&tab=twitter)
+[ Posted by **88** X users ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=172322634&tab=twitter)
 [ On **1** Facebook pages ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=172322634&tab=facebook)
 [ Referenced by **3** Bluesky users ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=172322634&tab=bluesky)
-**18** readers on Mendeley 
+**24** readers on Mendeley 
 [ See more details ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=172322634)
-[ Posted by **4** X users ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=172279331&tab=twitter)
-[ See more details ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=172279331)
-[ Posted by **2** X users ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=173637370&tab=twitter)
-[ See more details ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=173637370)
+[ Posted by **1** X users ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=167128312&tab=twitter)
+[ See more details ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=167128312)
 [ Posted by **1** X users ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=173807979&tab=twitter)
 [ Referenced by **1** Bluesky users ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=173807979&tab=bluesky)
+**1** readers on Mendeley 
 [ See more details ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=173807979)
-[ Posted by **7** X users ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=174871485&tab=twitter)
-[ On **1** Facebook pages ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=174871485&tab=facebook)
-[ See more details ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=174871485)
+[ Picked up by **1** news outlets ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=174211613&tab=news)
+[ Posted by **31** X users ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=174211613&tab=twitter)
+[ Referenced by **25** Bluesky users ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=174211613&tab=bluesky)
+**5** readers on Mendeley 
+[ See more details ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=174211613)
+[ Posted by **2** X users ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=173637370&tab=twitter)
+[ See more details ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=173637370)
 We use cookies to analyse and improve our service.[Cookie Policy](https://research-portal.uea.ac.uk/en/about/cookies/)
 Cookies Settings Reject All Accept All Cookies
 ![Company Logo](https://cdn.cookielaw.org/logos/static/ot_company_logo.png)

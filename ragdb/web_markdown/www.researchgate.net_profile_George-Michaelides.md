@@ -30,24 +30,24 @@ Contact
 **Connect with experts in your field**
 Join ResearchGate to contact this researcher and connect with your scientific community.
 [Join for free](https://www.researchgate.net/profile/signup.SignUp.html)
-[Log in](https://www.researchgate.net/login?_sg=vaHq_xfZwAPhTmWT3riwr-qM2oayXKNMPn3x6tVCEFA79vzNzBnQpEPFszveqByKvSDwk1Fsm98s2Q)
+[Log in](https://www.researchgate.net/login?_sg=5pHwbrR9TJyZxOZieVaS6iMVPmhnTyfLlsHHo1Hly--jT7BFYvMDSdQ7w35wSy-V27Aeg4cVNZLe6Q)
 Contact
 **Connect with experts in your field**
 Join ResearchGate to contact this researcher and connect with your scientific community.
 [Join for free](https://www.researchgate.net/profile/signup.SignUp.html)
-[Log in](https://www.researchgate.net/login?_sg=vaHq_xfZwAPhTmWT3riwr-qM2oayXKNMPn3x6tVCEFA79vzNzBnQpEPFszveqByKvSDwk1Fsm98s2Q)
+[Log in](https://www.researchgate.net/login?_sg=5pHwbrR9TJyZxOZieVaS6iMVPmhnTyfLlsHHo1Hly--jT7BFYvMDSdQ7w35wSy-V27Aeg4cVNZLe6Q)
 [About](https://www.researchgate.net/profile/profile/George-Michaelides#about)
-[Publications 47](https://www.researchgate.net/profile/profile/George-Michaelides#publications)
+[Publications 48](https://www.researchgate.net/profile/profile/George-Michaelides#publications)
 [Questions 3](https://www.researchgate.net/profile/profile/George-Michaelides#qa)
 [Network](https://www.researchgate.net/profile/profile/George-Michaelides#network)
 ## About
-47
+48
 Publications
-65,286
+65,441
 Reads 
 **How we measure 'reads'**
 A 'read' is counted each time someone views a publication summary (such as the title, abstract, and list of authors), clicks on a figure, or views or downloads the full-text. [Learn more](https://explore.researchgate.net/display/support/Reads)
-615
+625
 Citations
 Introduction
 George Michaelides currently works at Norwich Business School, University of East Anglia
@@ -122,42 +122,39 @@ Field of study
 
 
 ## Publications
-Publications (47)
-[ ![Pearson's bivariate correlations between predictor and outcome variables](https://www.researchgate.net/profile/George-Michaelides)](https://www.researchgate.net/figure/Pearsons-bivariate-correlations-between-predictor-and-outcome-variables_tbl1_360807069)
-[ ![Polynomial regression model for task proficiency](https://www.researchgate.net/profile/George-Michaelides)](https://www.researchgate.net/figure/Polynomial-regression-model-for-task-proficiency_tbl2_360807069)
-[ ![Polynomial regression model for proactivity](https://www.researchgate.net/profile/George-Michaelides)](https://www.researchgate.net/figure/Polynomial-regression-model-for-proactivity_tbl3_360807069)
-[ ![Polynomial regression model for adaptivity](https://www.researchgate.net/profile/George-Michaelides)](https://www.researchgate.net/figure/Polynomial-regression-model-for-adaptivity_tbl4_360807069)
+Publications (48)
+[Daily workplace embitterment and work-related rumination during off-job time: illegitimate tasks as antecedents and the buffering role of appreciation](https://www.researchgate.net/publication/391724337_Daily_workplace_embitterment_and_work-related_rumination_during_off-job_time_illegitimate_tasks_as_antecedents_and_the_buffering_role_of_appreciation)
+Article
+Full-text available
+  * May 2025
+
+
+  * [ ![Evie Michailidis](https://www.researchgate.net/profile/George-Michaelides)Evie Michailidis](https://www.researchgate.net/profile/Evie-Michailidis)
+  * [ ![Despoina Xanthopoulou](https://www.researchgate.net/profile/George-Michaelides)Despoina Xanthopoulou](https://www.researchgate.net/profile/Despoina-Xanthopoulou)
+  * [ ![George Michaelides](https://www.researchgate.net/profile/George-Michaelides)George Michaelides](https://www.researchgate.net/profile/George-Michaelides)
+
+
+This daily diary study aims to expand the understanding of workplace embitterment (i.e. an emotional response to unjust work experiences) by determining its daily antecedents and consequences. By drawing on the stress-as-offense-to-self theory and the recovery literature we hypothesise that daily illegitimate(i.e. unnecessary and unreasonable) task...
+[View](https://www.researchgate.net/publication/391724337_Daily_workplace_embitterment_and_work-related_rumination_during_off-job_time_illegitimate_tasks_as_antecedents_and_the_buffering_role_of_appreciation)
+[ ![The dual‐process segmentation model.](https://www.researchgate.net/profile/George-Michaelides)](https://www.researchgate.net/figure/The-dual-process-segmentation-model_fig1_381661296)
+[ ![The moderating effect of hours working onsite on the effect of...](https://www.researchgate.net/profile/George-Michaelides)](https://www.researchgate.net/figure/The-moderating-effect-of-hours-working-onsite-on-the-effect-of-segmentation-on-state_fig2_381661296)
 ![](https://www.researchgate.net/profile/George-Michaelides)
-[Curvilinear Relationships Between Age and Job Performance and the Role of Job Complexity](https://www.researchgate.net/publication/360807069_Curvilinear_relationships_between_age_and_job_performance_and_the_role_of_job_complexity)
+![](https://www.researchgate.net/profile/George-Michaelides)
+![](https://www.researchgate.net/profile/George-Michaelides)
+[A dual‐process model of the effects of boundary segmentation on work–nonwork conflict](https://www.researchgate.net/publication/381661296_A_dual-process_model_of_the_effects_of_boundary_segmentation_on_work-nonwork_conflict)
 Article
 Full-text available
-  * May 2022
+  * Jun 2024
 
 
-  * [ ![Maria Karanika-Murray](https://www.researchgate.net/profile/George-Michaelides)Maria Karanika-Murray](https://www.researchgate.net/profile/Maria-Karanika-Murray)
-  * [ ![Marc Van Veldhoven](https://www.researchgate.net/profile/George-Michaelides)Marc Van Veldhoven](https://www.researchgate.net/profile/Marc-Veldhoven)
   * [ ![George Michaelides](https://www.researchgate.net/profile/George-Michaelides)George Michaelides](https://www.researchgate.net/profile/George-Michaelides)
-  * [...]
-  * [ ![Natalie Harrison](https://www.researchgate.net/profile/George-Michaelides)Natalie Harrison](https://www.researchgate.net/profile/Natalie-Harrison-4)
-
-
-Despite suggestions that work performance varies with age, the empirical evidence is inconclusive and contradictory. Possible reasons for this are the lack of differentiation between different types of performance and a naïve assumption of a negative linear relationship between age and task performance across the working lifespan. With this study w...
-[View](https://www.researchgate.net/publication/360807069_Curvilinear_relationships_between_age_and_job_performance_and_the_role_of_job_complexity)
-[Satisfaction with one's job and working at home in the COVID‐19 pandemic: A two‐wave study](https://www.researchgate.net/publication/364626590_Satisfaction_with_one's_job_and_working_at_home_in_the_Covid-19_pandemic_a_two_wave_study)
-Article
-Full-text available
-  * Oct 2022
-
-
+  * [ ![Karen Niven](https://www.researchgate.net/profile/George-Michaelides)Karen Niven](https://www.researchgate.net/profile/Karen-Niven-2)
   * [ ![Stephen Wood](https://www.researchgate.net/profile/George-Michaelides)Stephen Wood](https://www.researchgate.net/profile/Stephen-Wood-8)
-  * [ ![George Michaelides](https://www.researchgate.net/profile/George-Michaelides)George Michaelides](https://www.researchgate.net/profile/George-Michaelides)
   * [ ![Inceoglu Ilke](https://www.researchgate.net/profile/George-Michaelides)Inceoglu Ilke](https://www.researchgate.net/profile/Inceoglu-Ilke)
-  * [...]
-  * [ ![Kevin Daniels](https://www.researchgate.net/profile/George-Michaelides)Kevin Daniels](https://www.researchgate.net/profile/Kevin-Daniels-2)
 
 
-As greater numbers of people have worked at home during the COVID‐19 pandemic, workers, organizations and policy makers have begun considering the benefits of a sustained move towards homeworking, with workers’ satisfaction with homeworking often cited as a key driver. But is satisfaction with homeworking that relevant to workers’ overall job satis...
-[View](https://www.researchgate.net/publication/364626590_Satisfaction_with_one's_job_and_working_at_home_in_the_Covid-19_pandemic_a_two_wave_study)
+Segmentation of work from nonwork life is widely presented as desirable to maximize recovery from work. Yet it involves effort which may reduce its positive effects. We present a dual‐process model of segmentation based on integrating boundary theory and self‐regulation theory that shows how creating and maintaining boundaries can have both positiv...
+[View](https://www.researchgate.net/publication/381661296_A_dual-process_model_of_the_effects_of_boundary_segmentation_on_work-nonwork_conflict)
 [ ![Figure 1](https://www.researchgate.net/profile/George-Michaelides)](https://www.researchgate.net/figure/fig1_380457729)
 [ ![Figure 2](https://www.researchgate.net/profile/George-Michaelides)](https://www.researchgate.net/figure/fig2_380457729)
 [ ![Sample Demographic Characteristics](https://www.researchgate.net/profile/George-Michaelides)](https://www.researchgate.net/figure/Sample-Demographic-Characteristics_tbl1_380457729)
@@ -177,35 +174,41 @@ Full-text available
 
 In the literature on the antecedents and mediators of employee well-being, there is little or no acknowledgement of sudden changes in the social and environmental context in which perceptions of well-being are formed. Contextual influences are rarely so impactful and unexpected as those associated with the COVID-19 pandemic. To continue operating w...
 [View](https://www.researchgate.net/publication/380457729_Well-Being_and_Empowerment_Perceptions_in_a_Sudden_Shift_to_Working_from_Home)
-[A dual-process model of the effects of boundary segmentation on work–nonwork conflict](https://www.researchgate.net/publication/381661296_A_dual-process_model_of_the_effects_of_boundary_segmentation_on_work-nonwork_conflict)
+[Mindfulness for Performance and Wellbeing in the Police: Linking Individual and Organizational Outcomes](https://www.researchgate.net/publication/368922541_Mindfulness_for_Performance_and_Wellbeing_in_the_Police_Linking_Individual_and_Organizational_Outcomes)
 Article
 Full-text available
-  * Jun 2024
+  * Mar 2023
 
 
+  * [ ![Helen Fitzhugh](https://www.researchgate.net/profile/George-Michaelides)Helen Fitzhugh](https://www.researchgate.net/profile/Helen-Fitzhugh)
   * [ ![George Michaelides](https://www.researchgate.net/profile/George-Michaelides)George Michaelides](https://www.researchgate.net/profile/George-Michaelides)
-  * [ ![Karen Niven](https://www.researchgate.net/profile/George-Michaelides)Karen Niven](https://www.researchgate.net/profile/Karen-Niven-2)
-  * [ ![Stephen Wood](https://www.researchgate.net/profile/George-Michaelides)Stephen Wood](https://www.researchgate.net/profile/Stephen-Wood-8)
-  * [ ![Inceoglu Ilke](https://www.researchgate.net/profile/George-Michaelides)Inceoglu Ilke](https://www.researchgate.net/profile/Inceoglu-Ilke)
+  * [ ![Kevin Daniels](https://www.researchgate.net/profile/George-Michaelides)Kevin Daniels](https://www.researchgate.net/profile/Kevin-Daniels-2)
+  * [...]
+  * [ ![Emike Nasamu](https://www.researchgate.net/profile/George-Michaelides)Emike Nasamu](https://www.researchgate.net/scientific-contributions/Emike-Nasamu-2194650975)
 
 
-Segmentation of work from nonwork life is widely presented as desirable to maximize recovery from work. Yet it involves effort which may reduce its positive effects. We present a dual-process model of segmentation based on integrating boundary theory and self-regulation theory that shows how creating and maintaining boundaries can have both positiv...
-[View](https://www.researchgate.net/publication/381661296_A_dual-process_model_of_the_effects_of_boundary_segmentation_on_work-nonwork_conflict)
-[On States and Traits in Work-Family Research](https://www.researchgate.net/publication/381545343_On_States_and_Traits_in_Work-Family_Research)
+This article reports on the largest randomized control trial (with followup) to examine the effects of mindfulness among police officers and staff. The benefits of mindfulness for wellbeing are established, but less is known about long-term impact on employee wellbeing and the implications of individual outcomes at organizational level. In the RCT,...
+[View](https://www.researchgate.net/publication/368922541_Mindfulness_for_Performance_and_Wellbeing_in_the_Police_Linking_Individual_and_Organizational_Outcomes)
+[ ![Conceptual model](https://www.researchgate.net/profile/George-Michaelides)](https://www.researchgate.net/figure/Conceptual-model_fig1_364626590)
+![](https://www.researchgate.net/profile/George-Michaelides)
+![](https://www.researchgate.net/profile/George-Michaelides)
+![](https://www.researchgate.net/profile/George-Michaelides)
+![](https://www.researchgate.net/profile/George-Michaelides)
+[Satisfaction with one's job and working at home in the COVID‐19 pandemic: A two‐wave study](https://www.researchgate.net/publication/364626590_Satisfaction_with_one's_job_and_working_at_home_in_the_Covid-19_pandemic_a_two_wave_study)
 Article
 Full-text available
-  * Jun 2024
+  * Nov 2022
 
 
-  * [ ![Chuck Lance](https://www.researchgate.net/profile/George-Michaelides)Chuck Lance](https://www.researchgate.net/profile/Chuck-Lance)
-  * [ ![Tracy Lambert Griggs](https://www.researchgate.net/profile/George-Michaelides)Tracy Lambert Griggs](https://www.researchgate.net/profile/Tracy-Griggs)
-  * [ ![Youngah Park](https://www.researchgate.net/profile/George-Michaelides)Youngah Park](https://www.researchgate.net/profile/Youngah-Park)
+  * [ ![Stephen Wood](https://www.researchgate.net/profile/George-Michaelides)Stephen Wood](https://www.researchgate.net/profile/Stephen-Wood-8)
+  * [ ![George Michaelides](https://www.researchgate.net/profile/George-Michaelides)George Michaelides](https://www.researchgate.net/profile/George-Michaelides)
+  * [ ![Inceoglu Ilke](https://www.researchgate.net/profile/George-Michaelides)Inceoglu Ilke](https://www.researchgate.net/profile/Inceoglu-Ilke)
   * [...]
-  * [ ![Stephen Wood](https://www.researchgate.net/profile/George-Michaelides)Stephen Wood](https://www.researchgate.net/scientific-contributions/Stephen-J-Wood-2109497275)
+  * [ ![Kevin Daniels](https://www.researchgate.net/profile/George-Michaelides)Kevin Daniels](https://www.researchgate.net/profile/Kevin-Daniels-2)
 
 
-Latent state-trait research on work-family conflict confirms that occasionspecific variation in work-related demands is related to corresponding variations in perceptions of work interfering with family (WIF), but WIF also displays moderate (~35%) to substantial (~80%) trait-like stability over time. What is not clear to date is whether this cross-...
-[View](https://www.researchgate.net/publication/381545343_On_States_and_Traits_in_Work-Family_Research)
+As greater numbers of people have worked at home during the COVID‐19 pandemic, workers, organisations and policy makers have begun considering the benefits of a sustained move towards homeworking, with workers' satisfaction with homeworking often cited as a key driver. But is satisfaction with homeworking that relevant to workers' overall job satis...
+[View](https://www.researchgate.net/publication/364626590_Satisfaction_with_one's_job_and_working_at_home_in_the_Covid-19_pandemic_a_two_wave_study)
 [ ![Figure 1. Three-element multidimensional-scaling solution for...](https://www.researchgate.net/profile/George-Michaelides)](https://www.researchgate.net/figure/Three-element-multidimensional-scaling-solution-for-assessment-center-dimensions-Note_fig1_386133708)
 [ ![Figure 2. Two-dimensional multidimensional scaling solution for...](https://www.researchgate.net/profile/George-Michaelides)](https://www.researchgate.net/figure/Two-dimensional-multidimensional-scaling-solution-for-assessment-center-exercises-Note_fig2_386133708)
 [ ![Figure 3. Three-element multidimensional scaling solution for...](https://www.researchgate.net/profile/George-Michaelides)](https://www.researchgate.net/figure/Three-element-multidimensional-scaling-solution-for-assessment-center-dimension-exercise_fig3_386133708)
@@ -245,6 +248,21 @@ Full-text available
 
 The challenges that individuals and teams face in complex and unstable environments can negatively affect individuals’ psychological health and team performance. In such contexts, resilience becomes an essential resource for both teams and individuals. It is therefore important to develop a comprehensive approach of resilience at work. The aim of t...
 [View](https://www.researchgate.net/publication/385561026_The_effects_of_individual_and_team_resilience_on_psychological_health_and_team_performance_a_multi-level_approach)
+[On States and Traits in Work-Family Research](https://www.researchgate.net/publication/381545343_On_States_and_Traits_in_Work-Family_Research)
+Article
+Full-text available
+  * Jun 2024
+
+
+  * [ ![Chuck Lance](https://www.researchgate.net/profile/George-Michaelides)Chuck Lance](https://www.researchgate.net/profile/Chuck-Lance)
+  * [ ![Tracy Lambert Griggs](https://www.researchgate.net/profile/George-Michaelides)Tracy Lambert Griggs](https://www.researchgate.net/profile/Tracy-Griggs)
+  * [ ![Youngah Park](https://www.researchgate.net/profile/George-Michaelides)Youngah Park](https://www.researchgate.net/profile/Youngah-Park)
+  * [...]
+  * [ ![Stephen Wood](https://www.researchgate.net/profile/George-Michaelides)Stephen Wood](https://www.researchgate.net/scientific-contributions/Stephen-J-Wood-2109497275)
+
+
+Latent state-trait research on work-family conflict confirms that occasionspecific variation in work-related demands is related to corresponding variations in perceptions of work interfering with family (WIF), but WIF also displays moderate (~35%) to substantial (~80%) trait-like stability over time. What is not clear to date is whether this cross-...
+[View](https://www.researchgate.net/publication/381545343_On_States_and_Traits_in_Work-Family_Research)
 [Organisational Change towards Sustainability: From Ambition to Impact through mindsets and communities of practice](https://www.researchgate.net/publication/381670941_Organisational_Change_towards_Sustainability_From_Ambition_to_Impact_through_mindsets_and_communities_of_practice)
 Chapter
   * Aug 2023
@@ -259,21 +277,6 @@ Chapter
 
 In this chapter it is argued that building a sustainability mindset amongst organizational members is a key mechanism to enable business models to transition to a transformative sustainable mode of operating in the world. The organizational sustainability literature calls for a mindset paradigm shift at organizational level, yet it says little abou...
 [View](https://www.researchgate.net/publication/381670941_Organisational_Change_towards_Sustainability_From_Ambition_to_Impact_through_mindsets_and_communities_of_practice)
-[Mindfulness for Performance and Wellbeing in the Police: Linking Individual and Organizational Outcomes](https://www.researchgate.net/publication/368922541_Mindfulness_for_Performance_and_Wellbeing_in_the_Police_Linking_Individual_and_Organizational_Outcomes)
-Article
-Full-text available
-  * Mar 2023
-
-
-  * [ ![Helen Fitzhugh](https://www.researchgate.net/profile/George-Michaelides)Helen Fitzhugh](https://www.researchgate.net/profile/Helen-Fitzhugh)
-  * [ ![George Michaelides](https://www.researchgate.net/profile/George-Michaelides)George Michaelides](https://www.researchgate.net/profile/George-Michaelides)
-  * [ ![Kevin Daniels](https://www.researchgate.net/profile/George-Michaelides)Kevin Daniels](https://www.researchgate.net/profile/Kevin-Daniels-2)
-  * [...]
-  * [ ![Emike Nasamu](https://www.researchgate.net/profile/George-Michaelides)Emike Nasamu](https://www.researchgate.net/scientific-contributions/Emike-Nasamu-2194650975)
-
-
-This article reports on the largest randomized control trial (with followup) to examine the effects of mindfulness among police officers and staff. The benefits of mindfulness for wellbeing are established, but less is known about long-term impact on employee wellbeing and the implications of individual outcomes at organizational level. In the RCT,...
-[View](https://www.researchgate.net/publication/368922541_Mindfulness_for_Performance_and_Wellbeing_in_the_Police_Linking_Individual_and_Organizational_Outcomes)
 [The Measurement of Well-Being at Work](https://www.researchgate.net/publication/368724316_The_Measurement_of_Well-Being_at_Work)
 Chapter
   * Feb 2023
@@ -353,21 +356,41 @@ Full-text available
 
 Work engagement can cross over from one individual to another, and this process may depend on several factors, such as the work context or individual differences. With this study, we argue that agreeableness, one of the Big five personality measures that characterized empathetic, can be instrumental in the crossover process. Specifically, we hypoth...
 [View](https://www.researchgate.net/publication/361472878_Crossover_of_Work_Engagement_The_Moderating_Role_of_Agreeableness)
-[Reliability in Assessment Centers Depends on Measurement Intentions](https://www.researchgate.net/publication/360912627_Reliability_in_Assessment_Centers_Depends_on_Measurement_Intentions)
+[ ![Pearson's bivariate correlations between predictor and outcome variables](https://www.researchgate.net/profile/George-Michaelides)](https://www.researchgate.net/figure/Pearsons-bivariate-correlations-between-predictor-and-outcome-variables_tbl1_360807069)
+[ ![Polynomial regression model for task proficiency](https://www.researchgate.net/profile/George-Michaelides)](https://www.researchgate.net/figure/Polynomial-regression-model-for-task-proficiency_tbl2_360807069)
+[ ![Polynomial regression model for proactivity](https://www.researchgate.net/profile/George-Michaelides)](https://www.researchgate.net/figure/Polynomial-regression-model-for-proactivity_tbl3_360807069)
+[ ![Polynomial regression model for adaptivity](https://www.researchgate.net/profile/George-Michaelides)](https://www.researchgate.net/figure/Polynomial-regression-model-for-adaptivity_tbl4_360807069)
+![](https://www.researchgate.net/profile/George-Michaelides)
+[Curvilinear Relationships Between Age and Job Performance and the Role of Job Complexity](https://www.researchgate.net/publication/360807069_Curvilinear_relationships_between_age_and_job_performance_and_the_role_of_job_complexity)
 Article
 Full-text available
   * May 2022
 
 
-  * [ ![Duncan J.R. Jackson](https://www.researchgate.net/profile/George-Michaelides)Duncan J.R. Jackson](https://www.researchgate.net/scientific-contributions/Duncan-JR-Jackson-80324172)
+  * [ ![Maria Karanika-Murray](https://www.researchgate.net/profile/George-Michaelides)Maria Karanika-Murray](https://www.researchgate.net/profile/Maria-Karanika-Murray)
+  * [ ![Marc Van Veldhoven](https://www.researchgate.net/profile/George-Michaelides)Marc Van Veldhoven](https://www.researchgate.net/profile/Marc-Veldhoven)
+  * [ ![George Michaelides](https://www.researchgate.net/profile/George-Michaelides)George Michaelides](https://www.researchgate.net/profile/George-Michaelides)
+  * [...]
+  * [ ![Natalie Harrison](https://www.researchgate.net/profile/George-Michaelides)Natalie Harrison](https://www.researchgate.net/profile/Natalie-Harrison-4)
+
+
+Despite suggestions that work performance varies with age, the empirical evidence is inconclusive and contradictory. Possible reasons for this are the lack of differentiation between different types of performance and a naïve assumption of a negative linear relationship between age and task performance across the working lifespan. With this study w...
+[View](https://www.researchgate.net/publication/360807069_Curvilinear_relationships_between_age_and_job_performance_and_the_role_of_job_complexity)
+[Reliability in assessment centres depends on general and exercise performance, but not on dimensions](https://www.researchgate.net/publication/360912627_Reliability_in_assessment_centres_depends_on_general_and_exercise_performance_but_not_on_dimensions)
+Article
+Full-text available
+  * Jun 2022
+
+
+  * [ ![Duncan J. R. Jackson](https://www.researchgate.net/profile/George-Michaelides)Duncan J. R. Jackson](https://www.researchgate.net/scientific-contributions/Duncan-JR-Jackson-80324172)
   * [ ![George Michaelides](https://www.researchgate.net/profile/George-Michaelides)George Michaelides](https://www.researchgate.net/profile/George-Michaelides)
   * [ ![Chris Dewberry](https://www.researchgate.net/profile/George-Michaelides)Chris Dewberry](https://www.researchgate.net/profile/Chris-Dewberry)
   * [...]
   * [ ![Catherine Stephens](https://www.researchgate.net/profile/George-Michaelides)Catherine Stephens](https://www.researchgate.net/scientific-contributions/Catherine-Stephens-2222469928)
 
 
-In two recent studies, the median reliability of assessment centers (ACs) was estimated at. 90 (range=. 23, Jackson et al., 2016; Putka & Hoffman, 2013). However, these studies, among many others (eg, Lance et al., 2004; Sackett & Dreher, 1982) indicate that the dimensions which ACs are designed to measure contribute very little to their reliabilit...
-[View](https://www.researchgate.net/publication/360912627_Reliability_in_Assessment_Centers_Depends_on_Measurement_Intentions)
+This study contributes to the literature on assessment centre (AC) measurement structure by evaluating whether dimension, exercise or mixed‐model theoretical perspectives are supported by reliability outcomes. In a large‐scale study (Ncandidates = 2917) utilizing Bayesian generalizability theory, we tested reliability estimates configured to confor...
+[View](https://www.researchgate.net/publication/360912627_Reliability_in_assessment_centres_depends_on_general_and_exercise_performance_but_not_on_dimensions)
 [ ![Distribution of the sample by country](https://www.researchgate.net/profile/George-Michaelides)](https://www.researchgate.net/figure/Distribution-of-the-sample-by-country_tbl1_345810496)
 [ ![Hypotheses and model comparisons](https://www.researchgate.net/profile/George-Michaelides)](https://www.researchgate.net/figure/Hypotheses-and-model-comparisons_tbl2_345810496)
 [ ![Means, standard deviations and correlations among the four study variables](https://www.researchgate.net/profile/George-Michaelides)](https://www.researchgate.net/figure/Means-standard-deviations-and-correlations-among-the-four-study-variables_tbl3_345810496)
@@ -464,7 +487,12 @@ Full-text available
 
 Purpose The purpose of this study is to examine the protective effect of social support on psychological health and how it differs by gender in the context of part-time employment. Design/methodology/approach The sample consisted of 22,786 employees from four service sector organisations. Structural equation modelling was used to test a moderated...
 [View](https://www.researchgate.net/publication/342049889_Social_support_as_protective_factor_of_the_effects_of_part-time_work_on_psychological_health_a_moderated_mediation_model)
-[Recessionary actions and absence: A workplace-level study](https://www.researchgate.net/publication/339882362_Recessionary_actions_and_absence_A_workplace-level_study)
+[ ![Conceptual model](https://www.researchgate.net/profile/George-Michaelides)](https://www.researchgate.net/figure/Conceptual-model_fig1_339882362)
+![](https://www.researchgate.net/profile/George-Michaelides)
+![](https://www.researchgate.net/profile/George-Michaelides)
+![](https://www.researchgate.net/profile/George-Michaelides)
+![](https://www.researchgate.net/profile/George-Michaelides)
+[Recessionary actions and absence: A workplace‐level study](https://www.researchgate.net/publication/339882362_Recessionary_actions_and_absence_A_workplace-level_study)
 Article
 Full-text available
   * Mar 2020
@@ -511,12 +539,12 @@ Full-text available
 
 The multifaceted structure of multisource job performance ratings has been a subject of research and debate for over 30 years. However, progress in the field has been hampered by the confounding of effects relevant to the measurement design of multisource ratings and, as a consequence, the impact of ratee-, rater-, source-, and dimension-related ef...
 [View](https://www.researchgate.net/publication/333746212_The_implications_of_unconfounding_multisource_performance_ratings)
-[ ![Figure 1. Theoretical model.](https://www.researchgate.net/profile/George-Michaelides)](https://www.researchgate.net/figure/Theoretical-model_fig1_332232747)
+[ ![Theoretical model.](https://www.researchgate.net/profile/George-Michaelides)](https://www.researchgate.net/figure/Theoretical-model_fig1_332232747)
+[ ![Study 1: The moderating effect of psychological empowerment on the...](https://www.researchgate.net/profile/George-Michaelides)](https://www.researchgate.net/figure/Study-1-The-moderating-effect-of-psychological-empowerment-on-the-relationship-between_fig2_332232747)
 [ ![Study 1: Psychological empowerment as a moderator of the relationship...](https://www.researchgate.net/profile/George-Michaelides)](https://www.researchgate.net/figure/Study-1-Psychological-empowerment-as-a-moderator-of-the-relationship-between-PLMXD-and_tbl1_332232747)
 [ ![Study 2: Moderated-mediation analyses using psychological empowerment...](https://www.researchgate.net/profile/George-Michaelides)](https://www.researchgate.net/figure/Study-2-Moderated-mediation-analyses-using-psychological-empowerment-as-a-moderator-of_tbl2_332232747)
 [ ![Study 3: Moderated-mediation analyses using psychological empowerment...](https://www.researchgate.net/profile/George-Michaelides)](https://www.researchgate.net/figure/Study-3-Moderated-mediation-analyses-using-psychological-empowerment-as-a-second-path_tbl3_332232747)
-![](https://www.researchgate.net/profile/George-Michaelides)
-[The importance of being psychologically empowered: Buffering the negative effects of employee perceptions of Leader–Member Exchange differentiation](https://www.researchgate.net/publication/332232747_The_importance_of_being_psychologically_empowered_Buffering_the_negative_effects_of_employee_perceptions_of_Leader-Member_Exchange_differentiation)
+[The importance of being psychologically empowered: Buffering the negative effects of employee perceptions of leader–member exchange differentiation](https://www.researchgate.net/publication/332232747_The_importance_of_being_psychologically_empowered_Buffering_the_negative_effects_of_employee_perceptions_of_leader-member_exchange_differentiation)
 Article
 Full-text available
   * Apr 2019
@@ -528,8 +556,8 @@ Full-text available
   * [ ![Alexander Swaab](https://www.researchgate.net/profile/George-Michaelides)Alexander Swaab](https://www.researchgate.net/profile/Alexander-Swaab)
 
 
-Although differentiated relationships among leaders and their followers are fundamental to leader–member exchange ( LMX ) theory, research provides limited knowledge about whether employees’ responses to individual perceptions of LMX differentiation are uniform. In a field study, we examined whether individual‐level psychological empowerment buffer...
-[View](https://www.researchgate.net/publication/332232747_The_importance_of_being_psychologically_empowered_Buffering_the_negative_effects_of_employee_perceptions_of_Leader-Member_Exchange_differentiation)
+Although differentiated relationships among leaders and their followers are fundamental to leader–member exchange (LMX) theory, research provides limited knowledge about whether employees’ responses to individual perceptions of LMX differentiation are uniform. In a field study, we examined whether individual‐level psychological empowerment buffers...
+[View](https://www.researchgate.net/publication/332232747_The_importance_of_being_psychologically_empowered_Buffering_the_negative_effects_of_employee_perceptions_of_leader-member_exchange_differentiation)
 [Supplementary Material 2](https://www.researchgate.net/publication/321568779_Supplementary_Material_2)
 Data
   * Jan 2018
@@ -864,6 +892,9 @@ View All
   * [ ![Peter Kuppens](https://www.researchgate.net/profile/George-Michaelides)](https://www.researchgate.net/profile/profile/Peter-Kuppens)
 [Peter Kuppens](https://www.researchgate.net/profile/profile/Peter-Kuppens)
     * KU Leuven
+  * [ ![Paul E. Spector](https://www.researchgate.net/profile/George-Michaelides)](https://www.researchgate.net/profile/profile/Paul-Spector)
+[Paul E. Spector](https://www.researchgate.net/profile/profile/Paul-Spector)
+    * University of South Florida
   * [ ![Huy Le](https://www.researchgate.net/profile/George-Michaelides)](https://www.researchgate.net/profile/profile/Huy-Le)
 [Huy Le](https://www.researchgate.net/profile/profile/Huy-Le)
     * The University of Texas at San Antonio
@@ -873,9 +904,6 @@ View All
   * [ ![Kristen Shockley](https://www.researchgate.net/profile/George-Michaelides)](https://www.researchgate.net/profile/profile/Kristen-Shockley)
 [Kristen Shockley](https://www.researchgate.net/profile/profile/Kristen-Shockley)
     * University of Georgia
-  * [ ![Russell A. Matthews](https://www.researchgate.net/profile/George-Michaelides)](https://www.researchgate.net/profile/profile/Russell-Matthews-2)
-[Russell A. Matthews](https://www.researchgate.net/profile/profile/Russell-Matthews-2)
-    * University of Alabama
 
 
 Cited By
@@ -916,12 +944,12 @@ Co-authors
   * [ ![Chuck Lance](https://www.researchgate.net/profile/George-Michaelides)](https://www.researchgate.net/profile/profile/Chuck-Lance)
 [Chuck Lance](https://www.researchgate.net/profile/profile/Chuck-Lance)
     * University of the Western Cape
-  * [ ![Robert William Vaughan](https://www.researchgate.net/profile/George-Michaelides)](https://www.researchgate.net/profile/profile/Robert-Vaughan-5)
-[Robert William Vaughan](https://www.researchgate.net/profile/profile/Robert-Vaughan-5)
-    * Retired !!
   * [ ![Stephen D Marks](https://www.researchgate.net/profile/George-Michaelides)](https://www.researchgate.net/profile/profile/Stephen-Marks-3)
 [Stephen D Marks](https://www.researchgate.net/profile/profile/Stephen-Marks-3)
     * University College London
+  * [ ![Wei-Ning Yang](https://www.researchgate.net/profile/George-Michaelides)](https://www.researchgate.net/profile/profile/Wei-Ning-Yang)
+[Wei-Ning Yang](https://www.researchgate.net/profile/profile/Wei-Ning-Yang)
+    * King's College London
   * [ ![Kate Mackenzie Davey](https://www.researchgate.net/profile/George-Michaelides)](https://www.researchgate.net/profile/profile/Kate-Mackenzie-Davey)
 [Kate Mackenzie Davey](https://www.researchgate.net/profile/profile/Kate-Mackenzie-Davey)
     * Birkbeck, University of London
@@ -1056,16 +1084,16 @@ Only verified researchers can join ResearchGate and send messages to other membe
 You may be eligible for a free account
 Sorry, you need to be a researcher to join ResearchGate.
 Due to our privacy policy, only current members can send messages to people on ResearchGate.
-Already a member? [Log in](https://www.researchgate.net/profile/login?urlAfterLogin=profile%2FGeorge-Michaelides%3FsendMessage%3D1&_sg=kgNi1x5xU40SHnRvrmp6sEk6Vpb76tTcsMOGi2yioAxWsaQXTfqNiZp_gu-nh79xNoiVHxtmBcFMhA)
-Already a member? [Log in](https://www.researchgate.net/profile/login?urlAfterLogin=profile%2FGeorge-Michaelides%3FsendMessage%3D1&_sg=kgNi1x5xU40SHnRvrmp6sEk6Vpb76tTcsMOGi2yioAxWsaQXTfqNiZp_gu-nh79xNoiVHxtmBcFMhA)
-[Join for free](https://www.researchgate.net/profile/signup.SignUp.html?ev=su_profileMessage&_sg=Ne14M6maSF5MUunNhbQrZlksar1KxJHkhvLV4lmE9h_ToRD5bLY2SwmQIpSR8CZftfWEhuO88S6YuJrlpwHG5G2TLrA)
+Already a member? [Log in](https://www.researchgate.net/profile/login?urlAfterLogin=profile%2FGeorge-Michaelides%3FsendMessage%3D1&_sg=6lejgkpAghsShvUSQ2-jRiiZxyw8hYhek-L8IEhm6n25xGnkNnAm6nEVxb8u79vr7l94mcBIrCmDxQ)
+Already a member? [Log in](https://www.researchgate.net/profile/login?urlAfterLogin=profile%2FGeorge-Michaelides%3FsendMessage%3D1&_sg=6lejgkpAghsShvUSQ2-jRiiZxyw8hYhek-L8IEhm6n25xGnkNnAm6nEVxb8u79vr7l94mcBIrCmDxQ)
+[Join for free](https://www.researchgate.net/profile/signup.SignUp.html?ev=su_profileMessage&_sg=V4fvbTmgotYBg8ESmK4wF77R2jM-dtavd6njdRxPVSJhCTb6hR4koiZKDpedRCIHQ7tt08i6fqMSylpC-3LI4RpIVsU)
 Back
 Close
 [ ![ResearchGate Logo](https://www.researchgate.net/profile/images/icons/svgicons/researchgate-logo-white.svg)](https://www.researchgate.net/)
 or
 [Discover by subject area](https://www.researchgate.net/profile/topics)
   * [Recruit researchers](https://www.researchgate.net/profile/scientific-recruitment/?utm_source=researchgate&utm_medium=community-loggedout&utm_campaign=indextop)
-  * [Join for free](https://www.researchgate.net/profile/signup.SignUp.html?hdrsu=1&_sg%5B0%5D=76ETNQERiXA7e9p6Y77e-toSbfM8Id29xZYX-nRLu5JYEKXEJ_UT3xwhMycJJ9oEa8jjigui5Ih8Vv8Qi_-K8C9OkLk)
+  * [Join for free](https://www.researchgate.net/profile/signup.SignUp.html?hdrsu=1&_sg%5B0%5D=_0r4d1pahhrSaPk2QXbirYulPJ3sMXYbLscP6JTI8eCUW1gtrPcKCfKLlWBw77tMiRPdC6JTXoGApYNvZ9ANNawwYKU)
   * Login
 Email 
 **Tip:** Most researchers use their institutional email address as their ResearchGate login
@@ -1083,7 +1111,7 @@ Keep me logged in
 Log in
 or
 [Continue with Google](https://www.researchgate.net/profile/connector/google)
-No account? [Sign up](https://www.researchgate.net/profile/signup.SignUp.html?hdrsu=1&_sg%5B0%5D=76ETNQERiXA7e9p6Y77e-toSbfM8Id29xZYX-nRLu5JYEKXEJ_UT3xwhMycJJ9oEa8jjigui5Ih8Vv8Qi_-K8C9OkLk)
+No account? [Sign up](https://www.researchgate.net/profile/signup.SignUp.html?hdrsu=1&_sg%5B0%5D=_0r4d1pahhrSaPk2QXbirYulPJ3sMXYbLscP6JTI8eCUW1gtrPcKCfKLlWBw77tMiRPdC6JTXoGApYNvZ9ANNawwYKU)
 
 
 [![App Store](https://i1.rgstatic.net/images/nativeApp/app_store_dark_logo.svg)](https://www.researchgate.net/profile/go.GetApp.html?interested=true&originCh=footerLoggedOut)

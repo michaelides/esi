@@ -88,22 +88,25 @@ Project: Research
 Research output per year
 Research output per year
   * ### [Daily workplace embitterment and work-related rumination during off-job time: Illegitimate tasks as antecedents and the buffering role of appreciation](https://research-portal.uea.ac.uk/en/publications/daily-workplace-embitterment-and-work-related-rumination-during-o)
-Michailidis, E., Xanthopoulou, D. & [Michaelides, G.](https://research-portal.uea.ac.uk/en/persons/george-michaelides), 20 Mar 2025, (Accepted/In press) In: [Work & Stress.](https://research-portal.uea.ac.uk/en/persons/george-michaelides)
+Michailidis, E., Xanthopoulou, D. & [Michaelides, G.](https://research-portal.uea.ac.uk/en/persons/george-michaelides), 13 May 2025, (E-pub ahead of print) In: [Work & Stress.](https://research-portal.uea.ac.uk/en/persons/george-michaelides)
 Research output: Contribution to journal › Article › peer-review
+Open Access
+File
 [](https://plu.mx/plum/a/?doi=10.1080/02678373.2025.2484761)
+[ ![Article has an altmetric score of 93](https://badges.altmetric.com/?size=128&score=93&types=mmmmmmmb) ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=177074283)
   * ### [The expert assessor perspective on assessment center taxonomies](https://research-portal.uea.ac.uk/en/publications/the-expert-assessor-perspective-on-assessment-center-taxonomies)
 Jackson, D. J. R., [Michaelides, G.](https://research-portal.uea.ac.uk/en/persons/george-michaelides), Dewberry, C. & Yang, W-N., Jan 2025, In: [Human Performance.](https://research-portal.uea.ac.uk/en/persons/george-michaelides) 38, 1, p. 1-27 27 p.
 Research output: Contribution to journal › Article › peer-review
 Open Access
 File
-42 Downloads (Pure)
+50 Downloads (Pure)
 [](https://plu.mx/plum/a/?doi=10.1080/08959285.2024.2428190)
   * ### [A dual-process model of the effects of boundary segmentation on work–nonwork conflict](https://research-portal.uea.ac.uk/en/publications/a-dual-process-model-of-the-effects-of-boundary-segmentation-on-w)
 [Michaelides, G.](https://research-portal.uea.ac.uk/en/persons/george-michaelides), Niven, K., Wood, S. & Inceoglu, I., Dec 2024, In: [Journal of Occupational and Organizational Psychology.](https://research-portal.uea.ac.uk/en/persons/george-michaelides) 97, 4, p. 1502-1525 24 p.
 Research output: Contribution to journal › Article › peer-review
 Open Access
 File
-12 Downloads (Pure)
+13 Downloads (Pure)
 [](https://plu.mx/plum/a/?doi=10.1111/joop.12526)
   * ### [Curvilinear relationships between age and job performance and the role of job complexity](https://research-portal.uea.ac.uk/en/publications/curvilinear-relationships-between-age-and-job-performance-and-the)
 Karanika-Murray, M., van Veldhoven, M., [Michaelides, G.](https://research-portal.uea.ac.uk/en/persons/george-michaelides), Baguley, T., Gkiontsi, D. & Harrison, N., Apr 2024, In: [Work, Aging and Retirement.](https://research-portal.uea.ac.uk/en/persons/george-michaelides) 10, 2, p. 156–173 18 p.
@@ -111,7 +114,7 @@ Research output: Contribution to journal › Article › peer-review
 Open Access
 File
 5 Citations (Scopus)
-19 Downloads (Pure)
+20 Downloads (Pure)
 [](https://plu.mx/plum/a/?doi=10.1093/workar/waac006)
 [ ![Article has an altmetric score of 43](https://badges.altmetric.com/?size=128&score=43&types=mmmbtttt) ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=133581522)
   * ### [How can you change sustainability behaviours in your workplace? CAST Briefing 23](https://research-portal.uea.ac.uk/en/publications/how-can-you-change-sustainability-behaviours-in-your-workplace-ca)
@@ -175,7 +178,6 @@ Press/Media: Blog
 Powered by [Pure](http://www.elsevier.com/online-tools/research-intelligence/products-and-services/pure), [Scopus](http://www.scopus.com/) & [Elsevier Fingerprint Engine™](https://www.elsevier.com/products/elsevier-fingerprint-engine)
 All content on this site: Copyright © 2025 University of East Anglia, its licensors, and contributors. All rights are reserved, including those for text and data mining, AI training, and similar technologies. For all open access content, the relevant licensing terms apply 
 We use cookies to help provide and enhance our service and tailor content. By continuing you agree to the [use of cookies](https://research-portal.uea.ac.uk/en/about/cookies/)
-Cookies Settings
 [Log in to Pure](https://pure.uea.ac.uk/admin/workspace.xhtml)
 [University of East Anglia data protection policy](https://www.uea.ac.uk/about/university-information/statutory-and-legal/data-protection)
 [About web accessibility](https://research-portal.uea.ac.uk/en/web-accessibility/)
@@ -185,44 +187,8 @@ Contact us
 [ Picked up by **4** news outlets ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=133581522&tab=news)
 [ Blogged by **1** ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=133581522&tab=blogs)
 [ Posted by **5** X users ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=133581522&tab=twitter)
-**62** readers on Mendeley 
+**64** readers on Mendeley 
 [ See more details ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=133581522)
-We use cookies to analyse and improve our service.[Cookie Policy](https://research-portal.uea.ac.uk/en/about/cookies/)
-Cookies Settings Reject All Accept All Cookies
-![Company Logo](https://cdn.cookielaw.org/logos/static/ot_company_logo.png)
-## Cookie Preference Centre
-We process your information to deliver content, extract insights, and generate reports to understand service usage; and/or access or store information on devices for that purpose. See the below section for more information, or to change our default settings.   
-[Cookie Policy](https://research-portal.uea.ac.uk/en/about/cookies/)
-Allow All
-###  Manage Consent Preferences
-#### Strictly Necessary Cookies
-Always Active
-These cookies are necessary for the website to function and cannot be switched off in our systems. They are usually only set in response to actions made by you which amount to a request for services, such as setting your privacy preferences, logging in or filling in forms. You can set your browser to block or alert you about these cookies, but some parts of the site will not then work. These cookies do not store any personally identifiable information.   
-  
-
-Cookies Details‎
-#### Performance Cookies
-Performance Cookies
-These cookies allow us to count visits and traffic sources so we can measure and improve the performance of our site. They help us to know which pages are the most and least popular and see how visitors move around the site.
-Cookies Details‎
-#### Functional Cookies
-Functional Cookies
-These cookies enable the website to provide enhanced functionality and personalisation. They may be set by us or by third party providers whose services we have added to our pages. If you do not allow these cookies then some or all of these services may not function properly.
-Cookies Details‎
-#### Targeting Cookies
-Targeting Cookies
-These cookies may be set through our site by our advertising partners. They may be used by those companies to build a profile of your interests and show you relevant adverts on other sites. If you do not allow these cookies, you will experience less targeted advertising.
-Cookies Details‎
-Back Button
-### Cookie List
-Search Icon
-Filter Icon
-Clear
-checkbox label label
-Apply Cancel
-Consent Leg.Interest
-checkbox label label
-checkbox label label
-checkbox label label
-Confirm My Choices
-[![Powered by Onetrust](https://cdn.cookielaw.org/logos/static/powered_by_logo.svg)](https://www.onetrust.com/products/cookie-consent/)
+[ Picked up by **13** news outlets ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=177074283&tab=news)
+[ Blogged by **1** ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=177074283&tab=blogs)
+[ See more details ](https://www.altmetric.com/details.php?domain=research-portal.uea.ac.uk&citation_id=177074283)

@@ -1,4 +1,4 @@
-Search results 1 - 50 out of 1,276 results 
+Search results 1 - 50 out of 1,286 results 
   * [Skip to main navigation](https://research-portal.uea.ac.uk/en/prizes#main-navigation)
   * [Skip to search](https://research-portal.uea.ac.uk/en/prizes#main-search)
   * [Skip to main content](https://research-portal.uea.ac.uk/en/prizes#main-content)
@@ -33,7 +33,7 @@ Search concepts
   
 ---  
 Selected filters  [ Clear all ](https://research-portal.uea.ac.uk/en/prizes/?showAdvanced=false&allConcepts=true&inferConcepts=true&originalSearch=&improvedLayoutOrganisationUuid=)  
-  * 1 - 50 out of 1,276 results 
+  * 1 - 50 out of 1,286 results 
   * Title (ascending)
     * [Title(descending)](https://research-portal.uea.ac.uk/en/prizes/?ordering=title&descending=true)
     * [Award date](https://research-portal.uea.ac.uk/en/prizes/?ordering=awardedDate&descending=true)
@@ -183,15 +183,15 @@ Prize: Appointment
   * ### [Adjunct Professor at Ocean University of China](https://research-portal.uea.ac.uk/en/prizes/adjunct-professor-at-ocean-university-of-china)
 [Mock, Thomas](https://research-portal.uea.ac.uk/en/persons/thomas-mock) (Recipient), Jan 2025
 Prize: Appointment
+  * ### [Adrian Gill Award for Advances at the Interface of Atmospheric Science and Related Disciplines](https://research-portal.uea.ac.uk/en/prizes/adrian-gill-award-for-advances-at-the-interface-of-atmospheric-sc)
+[Matthews, Adrian](https://research-portal.uea.ac.uk/en/persons/adrian-matthews) (Recipient), 4 Jun 2025
+Prize: Prize (including medals and awards)
   * ### [Adrian Gill Prize ](https://research-portal.uea.ac.uk/en/prizes/adrian-gill-prize)
 [Renfrew, Ian](https://research-portal.uea.ac.uk/en/persons/ian-renfrew) (Recipient), 2018
 Prize: Prize (including medals and awards)
   * ### [Adult Literacy Education Journalist of the Year Award](https://research-portal.uea.ac.uk/en/prizes/adult-literacy-education-journalist-of-the-year-award)
 [Chirwa, John Aubrey](https://research-portal.uea.ac.uk/en/persons/john-aubrey-chirwa) (Recipient), 2020
 Prize: Prize (including medals and awards)
-  * ### [Advanced Practitioner, Video Interaction Guidance, AVIGUK ](https://research-portal.uea.ac.uk/en/prizes/advanced-practitioner-video-interaction-guidance-aviguk)
-[Flannery, Lauren](https://research-portal.uea.ac.uk/en/persons/lauren-flannery) (Recipient), 20 Aug 2024
-Prize: Other distinction
 
 
   * 1

@@ -40,5 +40,5 @@ dependencies = [
     "streamlit>=1.45.0",
     "tavily-python>=0.7.0",
     "trafilatura>=2.0.0",
-    "wikipedia>=1.4.0",
+    "wikipedia>=1.4.0", # Added for Hugging Face datasets
 ]

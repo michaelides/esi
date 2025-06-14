@@ -1,4 +1,4 @@
-Search results 1 - 50 out of 8,469 results 
+Search results 1 - 50 out of 8,587 results 
   * [Skip to main navigation](https://research-portal.uea.ac.uk/en/activities#main-navigation)
   * [Skip to search](https://research-portal.uea.ac.uk/en/activities#main-search)
   * [Skip to main content](https://research-portal.uea.ac.uk/en/activities#main-content)
@@ -27,13 +27,48 @@ Search by expertise, name or affiliation
 
 [ ](https://research-portal.uea.ac.uk/en/searchAll/index/?search=)
 ## Filters for Activities
+Type 
+  * [ Participation in conference (1586) ](https://research-portal.uea.ac.uk/en/activities/?type=%2Fdk%2Fatira%2Fpure%2Factivity%2Factivitytypes%2Fattendance%2Fconferenceparticipation&nofollow=true)
+  * [ Other (878) ](https://research-portal.uea.ac.uk/en/activities/?type=%2Fdk%2Fatira%2Fpure%2Factivity%2Factivitytypes%2Fotheractivity%2Fother_activity&nofollow=true)
+  * [ N​etwork, W​o​r​k​i​n​g G​r​o​u​p or Professional Association (751) ](https://research-portal.uea.ac.uk/en/activities/?type=%2Fdk%2Fatira%2Fpure%2Factivity%2Factivitytypes%2Fmembership%2Fcontributiontotheworkofnationalorinternational&nofollow=true)
+  * [ Invited talk (629) ](https://research-portal.uea.ac.uk/en/activities/?type=%2Fdk%2Fatira%2Fpure%2Factivity%2Factivitytypes%2Fattendance%2Finvited_talk&nofollow=true)
+  * [ Publication editorial role (628) ](https://research-portal.uea.ac.uk/en/activities/?type=%2Fdk%2Fatira%2Fpure%2Factivity%2Factivitytypes%2Feditorialwork%2Feditorial&nofollow=true)
+  * [ Committee (549) ](https://research-portal.uea.ac.uk/en/activities/?type=%2Fdk%2Fatira%2Fpure%2Factivity%2Factivitytypes%2Fmembership%2Fcommittee&nofollow=true)
+  * [ Public lecture/debate/seminar (528) ](https://research-portal.uea.ac.uk/en/activities/?type=%2Fdk%2Fatira%2Fpure%2Factivity%2Factivitytypes%2Fattendance%2Fpublic_lecture_debate_seminar&nofollow=true)
+  * [ Publication peer-review (498) ](https://research-portal.uea.ac.uk/en/activities/?type=%2Fdk%2Fatira%2Fpure%2Factivity%2Factivitytypes%2Feditorialwork%2Fpublicationpeerreview&nofollow=true)
+  * [ Participation in workshop or seminar (474) ](https://research-portal.uea.ac.uk/en/activities/?type=%2Fdk%2Fatira%2Fpure%2Factivity%2Factivitytypes%2Fattendance%2Fworkshopseminarcourseparticipation&nofollow=true)
+  * [ Examination (457) ](https://research-portal.uea.ac.uk/en/activities/?type=%2Fdk%2Fatira%2Fpure%2Factivity%2Factivitytypes%2Fexamination%2Fexamination&nofollow=true)
+  * [ Festival/Exhibition/Performance (233) ](https://research-portal.uea.ac.uk/en/activities/?type=%2Fdk%2Fatira%2Fpure%2Factivity%2Factivitytypes%2Fattendance%2Ffestival_exhibition_performance&nofollow=true)
+  * [ P​e​e​r ​r​e​v​i​e​w ​p​a​n​e​l (227) ](https://research-portal.uea.ac.uk/en/activities/?type=%2Fdk%2Fatira%2Fpure%2Factivity%2Factivitytypes%2Fmembership%2Fmembershipofexternalpeerreviewpanel&nofollow=true)
+  * [ Schools engagement (159) ](https://research-portal.uea.ac.uk/en/activities/?type=%2Fdk%2Fatira%2Fpure%2Factivity%2Factivitytypes%2Fattendance%2Fschools_engagement&nofollow=true)
+  * [ Consultancy (135) ](https://research-portal.uea.ac.uk/en/activities/?type=%2Fdk%2Fatira%2Fpure%2Factivity%2Factivitytypes%2Fconsultancy%2Fconsultancy&nofollow=true)
+  * [ Research and teaching at external organisation (123) ](https://research-portal.uea.ac.uk/en/activities/?type=%2Fdk%2Fatira%2Fpure%2Factivity%2Factivitytypes%2Fvisitother%2Fresearch_and_teaching_at_external_organisation&nofollow=true)
+  * [ E​x​t​e​r​n​a​l ​r​e​s​e​a​r​c​h ​o​r​g​a​n​i​s​a​t​i​o​n (118) ](https://research-portal.uea.ac.uk/en/activities/?type=%2Fdk%2Fatira%2Fpure%2Factivity%2Factivitytypes%2Fmembership%2Fexternalresearchorganisation&nofollow=true)
+  * [ Public/government panel or group (114) ](https://research-portal.uea.ac.uk/en/activities/?type=%2Fdk%2Fatira%2Fpure%2Factivity%2Factivitytypes%2Fmembership%2Fmembership_of_public_government_advisory_policy_group_or_panel&nofollow=true)
+  * [ Visiting an external academic institution (67) ](https://research-portal.uea.ac.uk/en/activities/?type=%2Fdk%2Fatira%2Fpure%2Factivity%2Factivitytypes%2Fvisitother%2Fvisitother&nofollow=true)
+  * [ Workshop with external stakeholders/organisations (66) ](https://research-portal.uea.ac.uk/en/activities/?type=%2Fdk%2Fatira%2Fpure%2Factivity%2Factivitytypes%2Fattendance%2Fworkshop_with_external_stakeholders_organisations&nofollow=true)
+  * [ Visiting Appointment (59) ](https://research-portal.uea.ac.uk/en/activities/?type=%2Fdk%2Fatira%2Fpure%2Factivity%2Factivitytypes%2Fvisitother%2Fvisiting_appointment&nofollow=true)
+  * [ Consultation Response (56) ](https://research-portal.uea.ac.uk/en/activities/?type=%2Fdk%2Fatira%2Fpure%2Factivity%2Factivitytypes%2Fotheractivity%2Fconsultation_response&nofollow=true)
+  * [ Participation in external training (53) ](https://research-portal.uea.ac.uk/en/activities/?type=%2Fdk%2Fatira%2Fpure%2Factivity%2Factivitytypes%2Fattendance%2Fparticipation_in_external_training&nofollow=true)
+  * [ Industry panel or group (50) ](https://research-portal.uea.ac.uk/en/activities/?type=%2Fdk%2Fatira%2Fpure%2Factivity%2Factivitytypes%2Fmembership%2Fmembership_of_industry_panel_advisory_group&nofollow=true)
+  * [ Social or cultural organisation (48) ](https://research-portal.uea.ac.uk/en/activities/?type=%2Fdk%2Fatira%2Fpure%2Factivity%2Factivitytypes%2Fmembership%2Fmembership_of_panel_for_social_cultural_organisation&nofollow=true)
+  * [ Hosting an academic visitor (31) ](https://research-portal.uea.ac.uk/en/activities/?type=%2Fdk%2Fatira%2Fpure%2Factivity%2Factivitytypes%2Fhostvisitor%2Fhostvisitor&nofollow=true)
+  * [ Other (28) ](https://research-portal.uea.ac.uk/en/activities/?type=%2Fdk%2Fatira%2Fpure%2Factivity%2Factivitytypes%2Fattendance%2Fother&nofollow=true)
+  * [ External CPD provision or delivery of course (15) ](https://research-portal.uea.ac.uk/en/activities/?type=%2Fdk%2Fatira%2Fpure%2Factivity%2Factivitytypes%2Fattendance%2Fcpd_provision_or_delivery_of_course_for_externals_&nofollow=true)
+  * [ Open day (15) ](https://research-portal.uea.ac.uk/en/activities/?type=%2Fdk%2Fatira%2Fpure%2Factivity%2Factivitytypes%2Fattendance%2Fopen_day&nofollow=true)
+  * [ Fundraising event (5) ](https://research-portal.uea.ac.uk/en/activities/?type=%2Fdk%2Fatira%2Fpure%2Factivity%2Factivitytypes%2Fattendance%2Ffundraising_event&nofollow=true)
+  * [ Internal CPD provision or delivery of course (4) ](https://research-portal.uea.ac.uk/en/activities/?type=%2Fdk%2Fatira%2Fpure%2Factivity%2Factivitytypes%2Fattendance%2Ftraining_delivered_internal_&nofollow=true)
+  * [ Participation in internal training (2) ](https://research-portal.uea.ac.uk/en/activities/?type=%2Fdk%2Fatira%2Fpure%2Factivity%2Factivitytypes%2Fattendance%2Ftraining_attended&nofollow=true)
+  * [ Museum Education (1) ](https://research-portal.uea.ac.uk/en/activities/?type=%2Fdk%2Fatira%2Fpure%2Factivity%2Factivitytypes%2Fattendance%2Fmuseum_education&nofollow=true)
+
+Show more
 Close 
 "Research units" 
 Search concepts    
   
 ---  
 Selected filters  [ Clear all ](https://research-portal.uea.ac.uk/en/activities/?showAdvanced=false&allConcepts=true&inferConcepts=true&originalSearch=&improvedLayoutOrganisationUuid=)  
-  * 1 - 50 out of 8,469 results 
+  * 1 - 50 out of 8,587 results 
   * Start date (descending)
     * [Title](https://research-portal.uea.ac.uk/en/activities/?ordering=title&descending=false)
     * [Start date(ascending)](https://research-portal.uea.ac.uk/en/activities/?ordering=startDate&descending=false)
@@ -46,10 +81,6 @@ Selected filters  [ Clear all ](https://research-portal.uea.ac.uk/en/activities/
 [Rameez Asif](https://research-portal.uea.ac.uk/en/persons/rameez-asif) (Peer reviewer)
 31 Dec 2030
 Activity: Editorial work › Publication peer-review
-  * ### [Springer Nature (Publisher)](https://research-portal.uea.ac.uk/en/activities/springer-nature-publisher-2)
-[Rameez Asif](https://research-portal.uea.ac.uk/en/persons/rameez-asif) (Peer reviewer)
-31 Dec 2028
-Activity: Editorial work › Publication peer-review
   * ### [Frontiers Media S.A. (Publisher)](https://research-portal.uea.ac.uk/en/activities/frontiers-media-sa-publisher-3)
 [Rameez Asif](https://research-portal.uea.ac.uk/en/persons/rameez-asif) (Peer reviewer)
 31 Dec 2028
@@ -59,6 +90,10 @@ Activity: Editorial work › Publication editorial role
 31 Dec 2028
 Activity: Editorial work › Publication editorial role
   * ### [Frontiers Media S.A. (Publisher)](https://research-portal.uea.ac.uk/en/activities/frontiers-media-sa-publisher-4)
+[Rameez Asif](https://research-portal.uea.ac.uk/en/persons/rameez-asif) (Peer reviewer)
+31 Dec 2028
+Activity: Editorial work › Publication peer-review
+  * ### [Springer Nature (Publisher)](https://research-portal.uea.ac.uk/en/activities/springer-nature-publisher-2)
 [Rameez Asif](https://research-portal.uea.ac.uk/en/persons/rameez-asif) (Peer reviewer)
 31 Dec 2028
 Activity: Editorial work › Publication peer-review
@@ -78,6 +113,14 @@ Activity: Membership › N​etwork, W​o​r​k​i​n​g G​r​o​u​p
 [Katharina Huber](https://research-portal.uea.ac.uk/en/persons/katharina-huber) (Organiser)
 24 Aug 2025 → 29 Aug 2025
 Activity: Participating in or organising an event › Participation in conference
+  * ### [British Geophysical Association (External organisation)](https://research-portal.uea.ac.uk/en/activities/british-geophysical-association-external-organisation-2)
+[Jess Johnson](https://research-portal.uea.ac.uk/en/persons/jess-johnson) (Member)
+1 Aug 2025 → …
+Activity: Membership › N​etwork, W​o​r​k​i​n​g G​r​o​u​p or Professional Association
+  * ### [Statistical Atlases and Computational Modeling of the Heart (STACOM) workshop in MICCAI](https://research-portal.uea.ac.uk/en/activities/statistical-atlases-and-computational-modeling-of-the-heart-staco)
+[Yingliang Ma](https://research-portal.uea.ac.uk/en/persons/yingliang-ma) (Speaker)
+27 Jul 2025
+Activity: Participating in or organising an event › Workshop with external stakeholders/organisations
   * ### [The 23rd IEEE International Conference on Industrial Informatics](https://research-portal.uea.ac.uk/en/activities/the-23rd-ieee-international-conference-on-industrial-informatics)
 [Jeannette Chin](https://research-portal.uea.ac.uk/en/persons/jeannette-chin) (Session organiser)
 12 Jul 2025 → 15 Jul 2025
@@ -94,6 +137,10 @@ Activity: Other activity types › Other
 [Katharina Huber](https://research-portal.uea.ac.uk/en/persons/katharina-huber) (Organiser)
 30 Jun 2025 → 1 Jul 2025
 Activity: Participating in or organising an event › Participation in conference
+  * ### [Annals of Combinatorics (Journal)](https://research-portal.uea.ac.uk/en/activities/annals-of-combinatorics-journal)
+[Katharina Huber](https://research-portal.uea.ac.uk/en/persons/katharina-huber) (Guest editor)
+30 Jun 2025
+Activity: Editorial work › Publication editorial role
   * ### [Eastern Arc Postgraduate Research Colloquium 2024](https://research-portal.uea.ac.uk/en/activities/eastern-arc-postgraduate-research-colloquium-2024-3)
 [Patricia De Moraes Paisani Matthey Claudet](https://research-portal.uea.ac.uk/en/persons/patricia-de-moraes-paisani-matthey-claudet) (Speaker)
 25 Jun 2025
@@ -110,138 +157,127 @@ Activity: Participating in or organising an event › Participation in conferenc
 [Melanie Williams](https://research-portal.uea.ac.uk/en/persons/melanie-williams) (Speaker)
 18 Jun 2025 → 20 Jun 2025
 Activity: Participating in or organising an event › Participation in conference
+  * ### [AgriFoRwArdS CDT Summer School](https://research-portal.uea.ac.uk/en/activities/agriforwards-cdt-summer-school)
+[Jeannette Chin](https://research-portal.uea.ac.uk/en/persons/jeannette-chin) (Director)
+16 Jun 2025 → 20 Jun 2025
+Activity: Participating in or organising an event › Other
   * ### [UEA-EMP Big Day](https://research-portal.uea.ac.uk/en/activities/uea-emp-big-day)
 [Eric Nichols](https://research-portal.uea.ac.uk/en/persons/eric-nichols) (Organiser)
 12 Jun 2025
 Activity: Participating in or organising an event › Participation in conference
+  * ### [North British Semigroups and Applications Network (NBSAN) Meeting](https://research-portal.uea.ac.uk/en/activities/north-british-semigroups-and-applications-network-nbsan-meeting)
+[Catherine Reilly](https://research-portal.uea.ac.uk/en/persons/catherine-reilly) (Speaker)
+12 Jun 2025
+Activity: Participating in or organising an event › Invited talk
+  * ### [Nominated Prescribing Areas for Trainee Pharmacists (Event)](https://research-portal.uea.ac.uk/en/activities/nominated-prescribing-areas-for-trainee-pharmacists-event)
+[Lindsay Morgan](https://research-portal.uea.ac.uk/en/persons/lindsay-morgan) (Member)
+10 Jun 2025
+Activity: Membership › N​etwork, W​o​r​k​i​n​g G​r​o​u​p or Professional Association
   * ### [Reimagined Futures: Humanities in Flux](https://research-portal.uea.ac.uk/en/activities/reimagined-futures-humanities-in-flux)
 [Sarah Barrow](https://research-portal.uea.ac.uk/en/persons/sarah-barrow) (Speaker)
 6 Jun 2025
 Activity: Participating in or organising an event › Invited talk
+  * ### [External PhD examiner](https://research-portal.uea.ac.uk/en/activities/external-phd-examiner-14)
+[Maria J. Marin](https://research-portal.uea.ac.uk/en/persons/maria-j-marin) (Examiner)
+6 Jun 2025
+Activity: Examination
   * ### [Corruption and Scandal in the Early Modern World, 1500-1800](https://research-portal.uea.ac.uk/en/activities/corruption-and-scandal-in-the-early-modern-world-1500-1800)
 [Peter Wells](https://research-portal.uea.ac.uk/en/persons/peter-wells) (Speaker)
 5 Jun 2025 → 6 Jun 2025
 Activity: Participating in or organising an event › Participation in conference
+  * ### [One Ocean Science Congress](https://research-portal.uea.ac.uk/en/activities/one-ocean-science-congress)
+[Corinne Le Quéré](https://research-portal.uea.ac.uk/en/persons/corinne-le-quere) (Speaker)
+5 Jun 2025
+Activity: Participating in or organising an event › Invited talk
+File
+  * ### [External PhD examiner](https://research-portal.uea.ac.uk/en/activities/external-phd-examiner-13)
+[Maria J. Marin](https://research-portal.uea.ac.uk/en/persons/maria-j-marin) (Examiner)
+4 Jun 2025
+Activity: Examination
+  * ### [ESRC Peer Review College (External organisation)](https://research-portal.uea.ac.uk/en/activities/esrc-peer-review-college-external-organisation-7)
+[Karen Mc Cullagh](https://research-portal.uea.ac.uk/en/persons/karen-mc-cullagh) (Member)
+4 Jun 2025 → …
+Activity: Membership › P​e​e​r ​r​e​v​i​e​w ​p​a​n​e​l 
+  * ### [Model Theory in the UK](https://research-portal.uea.ac.uk/en/activities/model-theory-in-the-uk)
+[Eric Nichols](https://research-portal.uea.ac.uk/en/persons/eric-nichols) (Organiser)
+4 Jun 2025 → 5 Jun 2025
+Activity: Participating in or organising an event › Participation in conference
+  * ### [Tiago Ribeiro Duarte](https://research-portal.uea.ac.uk/en/activities/tiago-ribeiro-duarte)
+[Martin Mahony](https://research-portal.uea.ac.uk/en/persons/martin-mahony) (Host)
+Jun 2025 → …
+Activity: Hosting a visitor › Hosting an academic visitor
+  * ### [Media for All 11](https://research-portal.uea.ac.uk/en/activities/media-for-all-11)
+[Sharon Black](https://research-portal.uea.ac.uk/en/persons/sharon-black) (Keynote/plenary speaker)
+29 May 2025
+Activity: Participating in or organising an event › Participation in conference
+  * ### [Deep Learning for NMR Chemical Shift Prediction and Structural Verification](https://research-portal.uea.ac.uk/en/activities/deep-learning-for-nmr-chemical-shift-prediction-and-structural-ve)
+[Kate Kemsley](https://research-portal.uea.ac.uk/en/persons/kate-kemsley) (Speaker)
+29 May 2025
+Activity: Participating in or organising an event › Invited talk
+  * ### ["Workshop Talk Shop", panel discussion part of "Write the World 2025: A Day of Translation" organised by the American Literary Translators Association (ALTA)](https://research-portal.uea.ac.uk/en/activities/workshop-talk-shop-panel-discussion-part-of-write-the-world-2025-)
+[Cecilia Rossi](https://research-portal.uea.ac.uk/en/persons/cecilia-rossi) (Speaker)
+27 May 2025
+Activity: Participating in or organising an event › Public lecture/debate/seminar
+  * ### [Division of Cancer Seminar](https://research-portal.uea.ac.uk/en/activities/division-of-cancer-seminar)
+[Abraham Gihawi](https://research-portal.uea.ac.uk/en/persons/abraham-gihawi) (Speaker)
+27 May 2025
+Activity: Participating in or organising an event › Invited talk
+  * ### [Narodowe Centrum Nauki (National Science Centre) (External organisation)](https://research-portal.uea.ac.uk/en/activities/narodowe-centrum-nauki-national-science-centre-external-organisat-8)
+[George McKay](https://research-portal.uea.ac.uk/en/persons/george-mckay) (Member)
+26 May 2025 → 27 May 2025
+Activity: Membership › P​e​e​r ​r​e​v​i​e​w ​p​a​n​e​l 
+  * ### [CAMS Training Event](https://research-portal.uea.ac.uk/en/activities/cams-training-event)
+[Kate Kemsley](https://research-portal.uea.ac.uk/en/persons/kate-kemsley) (Speaker)
+22 May 2025 → 23 May 2025
+Activity: Participating in or organising an event › Workshop with external stakeholders/organisations
+  * ### [Translational Relationships: Embodying Dialogue and Translating with Care](https://research-portal.uea.ac.uk/en/activities/translational-relationships-embodying-dialogue-and-translating-wi)
+[Cecilia Rossi](https://research-portal.uea.ac.uk/en/persons/cecilia-rossi) (Chair)
+21 May 2025
+Activity: Participating in or organising an event › Public lecture/debate/seminar
+  * ### [Visual Pasts, Material Presents, Archival Futures: Postcolonial Temporalities in the Making](https://research-portal.uea.ac.uk/en/activities/visual-pasts-material-presents-archival-futures-postcolonial-temp-2)
+[Clémentine Debrosse](https://research-portal.uea.ac.uk/en/persons/cl%C3%A9mentine-debrosse) (Speaker)
+19 May 2025
+Activity: Participating in or organising an event › Participation in conference
+  * ### [Google IO](https://research-portal.uea.ac.uk/en/activities/google-io)
+[Jeannette Chin](https://research-portal.uea.ac.uk/en/persons/jeannette-chin) (Participant)
+19 May 2025 → 22 May 2025
+Activity: Participating in or organising an event › Other
+  * ### [Visual Pasts, Material Presents, Archival Futures: Postcolonial Temporalities in the Making](https://research-portal.uea.ac.uk/en/activities/visual-pasts-material-presents-archival-futures-postcolonial-temp)
+[Clémentine Debrosse](https://research-portal.uea.ac.uk/en/persons/cl%C3%A9mentine-debrosse) (Organiser), [Enzo Hamel](https://research-portal.uea.ac.uk/en/persons/enzo-hamel) (Organiser) & [Garance Nyssen](https://research-portal.uea.ac.uk/en/persons/garance-nyssen) (Organiser)
+19 May 2025 → 20 May 2025
+Activity: Participating in or organising an event › Other
+  * ### [Norwich Jazz Festival 2025](https://research-portal.uea.ac.uk/en/activities/norwich-jazz-festival-2025)
+[George McKay](https://research-portal.uea.ac.uk/en/persons/george-mckay) (Speaker)
+17 May 2025
+Activity: Participating in or organising an event › Public lecture/debate/seminar
+  * ### [Material Histories: Objects and Objectives ](https://research-portal.uea.ac.uk/en/activities/material-histories-objects-and-objectives)
+[Tim Snelson](https://research-portal.uea.ac.uk/en/persons/tim-snelson) (Speaker)
+16 May 2025
+Activity: Participating in or organising an event › Invited talk
+  * ### [How are the Climate and Nature Crises Reshaping our Curatorial Practice? ](https://research-portal.uea.ac.uk/en/activities/how-are-the-climate-and-nature-crises-reshaping-our-curatorial-pr)
+[Sarah Wade](https://research-portal.uea.ac.uk/en/persons/sarah-wade) (Speaker)
+16 May 2025
+Activity: Participating in or organising an event › Invited talk
+  * ### [AgriFoRwArdS CDT Conference](https://research-portal.uea.ac.uk/en/activities/agriforwards-cdt-conference)
+[Jeannette Chin](https://research-portal.uea.ac.uk/en/persons/jeannette-chin) (Director)
+15 May 2025 → 16 May 2025
+Activity: Participating in or organising an event › Other
+  * ### [Keynote :Swedish Red Cross Humanitarian Journalism Award](https://research-portal.uea.ac.uk/en/activities/keynote-swedish-red-cross-humanitarian-journalism-award)
+[Martin Scott](https://research-portal.uea.ac.uk/en/persons/martin-scott) (Speaker)
+14 May 2025
+Activity: Participating in or organising an event › Public lecture/debate/seminar
+  * ### [PanProstate Cancer Group](https://research-portal.uea.ac.uk/en/activities/panprostate-cancer-group)
+[Abraham Gihawi](https://research-portal.uea.ac.uk/en/persons/abraham-gihawi) (Speaker)
+13 May 2025
+Activity: Participating in or organising an event › Invited talk
   * ### [Norwich: Culture, Community and Church, 1500-1750](https://research-portal.uea.ac.uk/en/activities/norwich-culture-community-and-church-1500-1750)
 [Rebecca Pinner](https://research-portal.uea.ac.uk/en/persons/rebecca-pinner) (Speaker)
 9 May 2025
 Activity: Participating in or organising an event › Invited talk
-  * ### [Fan Studies and True Crime in the New Media Environment](https://research-portal.uea.ac.uk/en/activities/fan-studies-and-true-crime-in-the-new-media-environment)
-[Claire Hines](https://research-portal.uea.ac.uk/en/persons/claire-hines) (Speaker)
-8 May 2025
-Activity: Participating in or organising an event › Participation in workshop or seminar
-  * ### [Hakluyt Society (External organisation)](https://research-portal.uea.ac.uk/en/activities/hakluyt-society-external-organisation-2)
-[Peter Wells](https://research-portal.uea.ac.uk/en/persons/peter-wells) (Member)
-7 May 2025
-Activity: Membership › E​x​t​e​r​n​a​l ​r​e​s​e​a​r​c​h ​o​r​g​a​n​i​s​a​t​i​o​n
-  * ### [UEA-EMP Big Talk Series](https://research-portal.uea.ac.uk/en/activities/uea-emp-big-talk-series)
-[Eric Nichols](https://research-portal.uea.ac.uk/en/persons/eric-nichols) (Organiser)
-1 May 2025 → 1 May 2026
-Activity: Participating in or organising an event › Participation in workshop or seminar
-  * ### [Research expertise - consultation](https://research-portal.uea.ac.uk/en/activities/research-expertise-consultation)
-[David Mead](https://research-portal.uea.ac.uk/en/persons/david-mead) (Presenter)
-May 2025
-Activity: Other activity types › Other
-  * ### [Norwich Arts Trust (External organisation)](https://research-portal.uea.ac.uk/en/activities/norwich-arts-trust-external-organisation)
-[Sarah Barrow](https://research-portal.uea.ac.uk/en/persons/sarah-barrow) (Member)
-May 2025 → …
-Activity: Membership › Committee
-  * ### [Royal Norfolk Show](https://research-portal.uea.ac.uk/en/activities/royal-norfolk-show-4)
-[Denis Lima e Alves](https://research-portal.uea.ac.uk/en/persons/denis-lima-e-alves) (Speaker)
-24 Apr 2025
-Activity: Participating in or organising an event › Invited talk
-  * ### [Exploring the implications of recent competition law challenges in the sport industry](https://research-portal.uea.ac.uk/en/activities/exploring-the-implications-of-recent-competition-law-challenges-i)
-[Andreas Stephan](https://research-portal.uea.ac.uk/en/persons/andreas-stephan) (Consultant) & [Peter Dawson](https://research-portal.uea.ac.uk/en/persons/peter-dawson) (Consultant)
-17 Apr 2025
-Activity: Consultancy
-  * ### [Cath Staincliffe in Conversation with Tom Benn](https://research-portal.uea.ac.uk/en/activities/cath-staincliffe-in-conversation-with-tom-benn)
-[Tom Benn](https://research-portal.uea.ac.uk/en/persons/tom-benn) (Speaker)
-15 Apr 2025
-Activity: Participating in or organising an event › Public lecture/debate/seminar
-  * ### [Plimouth Patuxet Museums](https://research-portal.uea.ac.uk/en/activities/plimouth-patuxet-museums)
-[Rebecca Pinner](https://research-portal.uea.ac.uk/en/persons/rebecca-pinner) (Consultant)
-15 Apr 2025 → …
-Activity: Consultancy
-  * ### [UK Conference for Clinical Communication in Undergraduate Medical Education: Moving towards mastery -Learning from miscommunication](https://research-portal.uea.ac.uk/en/activities/uk-conference-for-clinical-communication-in-undergraduate-medical)
-[Ellen Lowry](https://research-portal.uea.ac.uk/en/persons/ellen-lowry) (Speaker)
-14 Apr 2025
+  * ### [Royal Astronomical Society Specialist Discussion Meeting](https://research-portal.uea.ac.uk/en/activities/royal-astronomical-society-specialist-discussion-meeting)
+[Jess Johnson](https://research-portal.uea.ac.uk/en/persons/jess-johnson) (Organiser)
+9 May 2025
 Activity: Participating in or organising an event › Participation in conference
-  * ### [British Commission for Maritime History 30th Annual Conference](https://research-portal.uea.ac.uk/en/activities/british-commission-for-maritime-history-30th-annual-conference)
-[Peter Wells](https://research-portal.uea.ac.uk/en/persons/peter-wells) (Speaker)
-11 Apr 2025 → 12 Apr 2025
-Activity: Participating in or organising an event › Participation in conference
-  * ### [Lincolnshire Folk Tales and Folklores of Place](https://research-portal.uea.ac.uk/en/activities/lincolnshire-folk-tales-and-folklores-of-place)
-[Rebecca Pinner](https://research-portal.uea.ac.uk/en/persons/rebecca-pinner) (Speaker)
-11 Apr 2025
-Activity: Participating in or organising an event › Participation in conference
-  * ### [The Society of Legal Scholars (SLS) (External organisation)](https://research-portal.uea.ac.uk/en/activities/the-society-of-legal-scholars-sls-external-organisation)
-[David Gibbs-Kneller](https://research-portal.uea.ac.uk/en/persons/david-gibbs-kneller) (Organiser)
-8 Apr 2025 → …
-Activity: Membership › Committee
-  * ### [Expert Systems with Applications (Journal)](https://research-portal.uea.ac.uk/en/activities/expert-systems-with-applications-journal)
-[Farhana Ferdousi Liza](https://research-portal.uea.ac.uk/en/persons/farhana-ferdousi-liza-fhea) (Peer reviewer)
-7 Apr 2025 → 2 May 2025
-Activity: Editorial work › Publication peer-review
-  * ### [BILETA Annual Conference 2025](https://research-portal.uea.ac.uk/en/activities/bileta-annual-conference-2025)
-[Patricia De Moraes Paisani Matthey Claudet](https://research-portal.uea.ac.uk/en/persons/patricia-de-moraes-paisani-matthey-claudet) (Speaker)
-3 Apr 2025
-Activity: Participating in or organising an event › Participation in conference
-  * ### [RSC Local Section Sponsored Science Shows](https://research-portal.uea.ac.uk/en/activities/rsc-local-section-sponsored-science-shows-5)
-[Stephen Ashworth](https://research-portal.uea.ac.uk/en/persons/stephen-ashworth) (Speaker)
-2 Apr 2025
-Activity: Participating in or organising an event › Schools engagement
-  * ### [RSC Local Section Sponsored Science Shows](https://research-portal.uea.ac.uk/en/activities/rsc-local-section-sponsored-science-shows-7)
-[Stephen Ashworth](https://research-portal.uea.ac.uk/en/persons/stephen-ashworth) (Speaker)
-2 Apr 2025
-Activity: Participating in or organising an event › Schools engagement
-  * ### [RSC Local Section Sponsored Science Shows](https://research-portal.uea.ac.uk/en/activities/rsc-local-section-sponsored-science-shows-6)
-[Stephen Ashworth](https://research-portal.uea.ac.uk/en/persons/stephen-ashworth) (Speaker)
-2 Apr 2025
-Activity: Participating in or organising an event › Schools engagement
-  * ### [Consultancy for Holland & Barrett](https://research-portal.uea.ac.uk/en/activities/consultancy-for-holland-amp-barrett)
-[David Vauzour](https://research-portal.uea.ac.uk/en/persons/david-vauzour) (Consultant)
-2 Apr 2025 → 12 May 2025
-Activity: Consultancy
-  * ### [Automata in the Wild 2025](https://research-portal.uea.ac.uk/en/activities/automata-in-the-wild-2025)
-[Laure Daviaud](https://research-portal.uea.ac.uk/en/persons/laure-daviaud) (Invited speaker)
-1 Apr 2025
-Activity: Participating in or organising an event › Invited talk
-  * ### [The Journal of Physical Chemistry A (Journal)](https://research-portal.uea.ac.uk/en/activities/the-journal-of-physical-chemistry-a-journal-2)
-[James Bull](https://research-portal.uea.ac.uk/en/persons/james-bull) (Peer reviewer)
-Apr 2025
-Activity: Editorial work › Publication peer-review
-  * ### [W3 Professorship](https://research-portal.uea.ac.uk/en/activities/w3-professorship)
-[Thomas Mock](https://research-portal.uea.ac.uk/en/persons/thomas-mock) (Consultant)
-Apr 2025
-Activity: Consultancy
-  * ### [Cadernos de Tradução (Journal)](https://research-portal.uea.ac.uk/en/activities/cadernos-de-tradu%C3%A7%C3%A3o-journal)
-[Sharon Black](https://research-portal.uea.ac.uk/en/persons/sharon-black) (Peer reviewer)
-Apr 2025
-Activity: Editorial work › Publication peer-review
-  * ### [Roundtable with UN S/R](https://research-portal.uea.ac.uk/en/activities/roundtable-with-un-sr)
-[David Mead](https://research-portal.uea.ac.uk/en/persons/david-mead) (Speaker)
-Apr 2025
-Activity: Participating in or organising an event › Invited talk
-  * ### [Attending roundtable with UN Special Rapporteur for the Protection of Environmental Defenders on his follow-up country visit](https://research-portal.uea.ac.uk/en/activities/attending-roundtable-with-un-special-rapporteur-for-the-protectio)
-[David Mead](https://research-portal.uea.ac.uk/en/persons/david-mead) (Presenter)
-Apr 2025
-Activity: Other activity types › Other
-  * ### [Women in AI Security Workshop](https://research-portal.uea.ac.uk/en/activities/women-in-ai-security-workshop)
-[Farhana Ferdousi Liza](https://research-portal.uea.ac.uk/en/persons/farhana-ferdousi-liza-fhea) (Speaker)
-28 Mar 2025
-Activity: Participating in or organising an event › Participation in workshop or seminar
-  * ### [UCAS Discovery London 2025](https://research-portal.uea.ac.uk/en/activities/ucas-discovery-london-2025)
-[Jeannette Chin](https://research-portal.uea.ac.uk/en/persons/jeannette-chin) (Invited speaker)
-24 Mar 2025
-Activity: Participating in or organising an event › Invited talk
-  * ### [Fairy-Tale Trouble and the Art of Fluidity: Gender, genre, media](https://research-portal.uea.ac.uk/en/activities/fairy-tale-trouble-and-the-art-of-fluidity-gender-genre-media)
-[Sarah Jessica Darley](https://research-portal.uea.ac.uk/en/persons/sarah-jessica-darley) (Speaker) & Vanessa Joosen (Keynote/plenary speaker)
-21 Mar 2025 → 22 Mar 2025
-Activity: Participating in or organising an event › Participation in conference
-  * ### [CAMS Data Analytics Presents – The Data Analytics Webinar Series](https://research-portal.uea.ac.uk/en/activities/cams-data-analytics-presents-the-data-analytics-webinar-series)
-[Kate Kemsley](https://research-portal.uea.ac.uk/en/persons/kate-kemsley) (Speaker)
-20 Mar 2025
-Activity: Participating in or organising an event › Invited talk
 
 
   * 1

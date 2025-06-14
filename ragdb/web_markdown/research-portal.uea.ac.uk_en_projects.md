@@ -1,4 +1,4 @@
-Search results 1 - 50 out of 6,954 results 
+Search results 1 - 50 out of 6,976 results 
   * [Skip to main navigation](https://research-portal.uea.ac.uk/en/projects#main-navigation)
   * [Skip to search](https://research-portal.uea.ac.uk/en/projects#main-search)
   * [Skip to main content](https://research-portal.uea.ac.uk/en/projects#main-content)
@@ -27,13 +27,20 @@ Search by expertise, name or affiliation
 
 [ ](https://research-portal.uea.ac.uk/en/searchAll/index/?search=)
 ## Filters for Projects
+Status 
+  * [ Finished (6338) ](https://research-portal.uea.ac.uk/en/projects/?status=FINISHED&nofollow=true)
+  * [ Active (601) ](https://research-portal.uea.ac.uk/en/projects/?status=RUNNING&nofollow=true)
+  * [ Not started (36) ](https://research-portal.uea.ac.uk/en/projects/?status=NOT_STARTED&nofollow=true)
+  * [ Curtailed (1) ](https://research-portal.uea.ac.uk/en/projects/?status=CURTAILED&nofollow=true)
+
+
 Close 
 "Research units" 
 Search concepts    
   
 ---  
 Selected filters  [ Clear all ](https://research-portal.uea.ac.uk/en/projects/?showAdvanced=false&allConcepts=true&inferConcepts=true&originalSearch=&improvedLayoutOrganisationUuid=)  
-  * 1 - 50 out of 6,954 results 
+  * 1 - 50 out of 6,976 results 
   * Status, start date (descending)
     * [Title](https://research-portal.uea.ac.uk/en/projects/?ordering=title&descending=false)
     * [Start date](https://research-portal.uea.ac.uk/en/projects/?ordering=startDate&descending=false)
@@ -46,9 +53,79 @@ Selected filters  [ Clear all ](https://research-portal.uea.ac.uk/en/projects/?s
 
 ## Search results
   * Active 
-### [The Wreck of the Gloucester: A Seventeenth-Century Warship Through Time ](https://research-portal.uea.ac.uk/en/projects/the-wreck-of-the-gloucester-a-seventeenth-century-warship-through)
+### [International Visit ](https://research-portal.uea.ac.uk/en/projects/international-visit)
+[Alberello, A.](https://research-portal.uea.ac.uk/en/persons/alberto-alberello)
+[London Mathematical Society (The)](https://research-portal.uea.ac.uk/en/projects)
+9/06/25 → 27/06/25
+Project: Research
+  * ### [Feeling the force of fungi: A novel role for piezo1 in the cellular detection of fungal infection ](https://research-portal.uea.ac.uk/en/projects/feeling-the-force-of-fungi-a-novel-role-for-piezo1-in-the-cellula)
+[Bidula, S.](https://research-portal.uea.ac.uk/en/persons/stefan-bidula)
+[Applied Microbiology International](https://research-portal.uea.ac.uk/en/projects)
+9/06/25 → 27/07/25
+Project: Training
+  * ### [From peptides to small molecules and from binding to proteolysis. Peptides as lead molecules for the development of anti-inflammatory agents ](https://research-portal.uea.ac.uk/en/projects/from-peptides-to-small-molecules-and-from-binding-to-proteolysis-)
+[Searcey, M.](https://research-portal.uea.ac.uk/en/persons/mark-searcey) & [O'Connell, M.](https://research-portal.uea.ac.uk/en/persons/maria-oconnell)
+[Engineering and Physical Sciences Research Council](https://research-portal.uea.ac.uk/en/projects)
+2/06/25 → 1/06/28
+Project: Research
+  * ### [Disability Access in Laboratory Environments (DALE) ](https://research-portal.uea.ac.uk/en/projects/disability-access-in-laboratory-environments-dale)
+[Deane, K.](https://research-portal.uea.ac.uk/en/persons/katherine-deane) & [Semlyen, J.](https://research-portal.uea.ac.uk/en/persons/joanna-semlyen)
+[UK Research & Innovation](https://research-portal.uea.ac.uk/en/projects)
+1/06/25 → 15/12/25
+Project: Research
+  * ### [Menopausal transition and APOE4 mediated Alzheimer’s vulnerability ](https://research-portal.uea.ac.uk/en/projects/menopausal-transition-and-apoe4-mediated-alzheimers-vulnerability)
+[Pontifex, M. G.](https://research-portal.uea.ac.uk/en/persons/matthew-g-pontifex) & [Vauzour, D.](https://research-portal.uea.ac.uk/en/persons/david-vauzour)
+[Academy of Medical Sciences](https://research-portal.uea.ac.uk/en/projects)
+1/06/25 → 31/05/27
+Project: Research
+  * ### [Investigating the role of NAMPT and the age-related changes in macrophage populations in the progression of MGUS to myeloma ](https://research-portal.uea.ac.uk/en/projects/investigating-the-role-of-nampt-and-the-age-related-changes-in-ma)
+[Hellmich, C.](https://research-portal.uea.ac.uk/en/persons/charlotte-hellmich) & [Bowles, K.](https://research-portal.uea.ac.uk/en/persons/kristian-bowles)
+[British Society of Haematology](https://research-portal.uea.ac.uk/en/projects)
+1/06/25 → 31/05/26
+Project: Research
+  * ### [Iron and Manganese Impacts on the Future of Southern Ocean Ecosystems (Iron-Man) ](https://research-portal.uea.ac.uk/en/projects/iron-and-manganese-impacts-on-the-future-of-southern-ocean-ecosys)
+[Baker, A.](https://research-portal.uea.ac.uk/en/persons/alex-baker)
+[Natural Environment Research Council](https://research-portal.uea.ac.uk/en/projects)
+1/06/25 → 31/05/29
+Project: Research
+  * ### [The Azaylia Childhood Cancer PhD for RNA Structure in Fusion Positive Sarcomas](https://research-portal.uea.ac.uk/en/projects/the-azaylia-childhood-cancer-phd-for-rna-structure-in-fusion-posi)
+[Green, D.](https://research-portal.uea.ac.uk/en/persons/darrell-green)
+[The Azaylia Foundation](https://research-portal.uea.ac.uk/en/projects)
+1/06/25 → 31/05/26
+Project: Research
+  * ### [Contract Research to explore the effects of climate and disaster related shocks on long term displacement patterns and migration flows in the context of climate change ](https://research-portal.uea.ac.uk/en/projects/contract-research-to-explore-the-effects-of-climate-and-disaster-)
+[Tebboth, M.](https://research-portal.uea.ac.uk/en/persons/mark-tebboth) & [Kent, A.](https://research-portal.uea.ac.uk/en/persons/avidan-kent)
+[InsuResilience Solutions Fund ](https://research-portal.uea.ac.uk/en/projects)
+26/05/25 → 25/08/26
+Project: Research
+  * ### [2-representation Theory of SoergelBimodules ](https://research-portal.uea.ac.uk/en/projects/2-representation-theory-of-soergelbimodules)
+[Miemietz, V.](https://research-portal.uea.ac.uk/en/persons/vanessa-miemietz)
+[Engineering and Physical Sciences Research Council](https://research-portal.uea.ac.uk/en/projects)
+1/05/25 → 31/10/28
+Project: Research
+  * ### [The Wreck of the Gloucester: A Seventeenth-Century Warship Through Time ](https://research-portal.uea.ac.uk/en/projects/the-wreck-of-the-gloucester-a-seventeenth-century-warship-through)
 [Redding, B.](https://research-portal.uea.ac.uk/en/persons/benjamin-redding) & [Jowitt, C.](https://research-portal.uea.ac.uk/en/persons/claire-jowitt)
 [British Academy](https://research-portal.uea.ac.uk/en/projects)
+1/05/25 → 30/04/26
+Project: Research
+  * ### [Bioacrylic acid from seaweed ](https://research-portal.uea.ac.uk/en/projects/bioacrylic-acid-from-seaweed)
+[Hamilton, C.](https://research-portal.uea.ac.uk/en/persons/christopher-hamilton), [Todd, J.](https://research-portal.uea.ac.uk/en/persons/jonathan-todd) & [Beskeni, R.](https://research-portal.uea.ac.uk/en/persons/rhoda-beskeni)
+[Ceres Agri-Tech](https://research-portal.uea.ac.uk/en/projects)
+1/05/25 → 30/11/25
+Project: Research
+  * ### [Farming for Sustainability, Peace and Planetary Health: A Case Study of Japan (FarmSPP) ](https://research-portal.uea.ac.uk/en/projects/farming-for-sustainability-peace-and-planetary-health-a-case-stud)
+[Schroeder, H.](https://research-portal.uea.ac.uk/en/persons/heike-schroeder)
+[Network for Education and Research on Peace and Sustainability](https://research-portal.uea.ac.uk/en/projects)
+1/05/25 → 31/03/27
+Project: Fellowship
+  * ### [Memory, Temporality and Subjective Experience ](https://research-portal.uea.ac.uk/en/projects/memory-temporality-and-subjective-experience)
+[Renoult, L.](https://research-portal.uea.ac.uk/en/persons/louis-renoult)
+[Economic and Social Research Council](https://research-portal.uea.ac.uk/en/projects)
+1/05/25 → 30/04/30
+Project: Research
+  * ### [Alan Boswell Equipment Donation ](https://research-portal.uea.ac.uk/en/projects/alan-boswell-equipment-donation)
+[Cooper, C.](https://research-portal.uea.ac.uk/en/persons/colin-cooper)
+[The Alan Boswell Group](https://research-portal.uea.ac.uk/en/projects)
 1/05/25 → 30/04/26
 Project: Research
   * ### [Advanced pulmonary flow haemodynamic biomarkers in pulmonary hypertension ](https://research-portal.uea.ac.uk/en/projects/advanced-pulmonary-flow-haemodynamic-biomarkers-in-pulmonary-hype)
@@ -56,40 +133,45 @@ Project: Research
 [British Heart Foundation](https://research-portal.uea.ac.uk/en/projects)
 1/05/25 → 30/04/28
 Project: Research
-  * ### [NMR imaging for the accelerated discovery of drugs and materials ](https://research-portal.uea.ac.uk/en/projects/nmr-imaging-for-the-accelerated-discovery-of-drugs-and-materials-2)
-[Wallace, M.](https://research-portal.uea.ac.uk/en/persons/matthew-wallace), [Koev, T.](https://research-portal.uea.ac.uk/en/persons/trey-koev) & Monaco, S.
-[UK Research & Innovation](https://research-portal.uea.ac.uk/en/projects)
-1/05/25 → 30/04/28
-Project: Fellowship
-  * ### [Memory, Temporality and Subjective Experience ](https://research-portal.uea.ac.uk/en/projects/memory-temporality-and-subjective-experience)
-[Renoult, L.](https://research-portal.uea.ac.uk/en/persons/louis-renoult)
-[Economic and Social Research Council](https://research-portal.uea.ac.uk/en/projects)
-1/05/25 → 30/04/30
-Project: Research
   * ### [Is cognitive segmentation a distinct higher-level process critical for problem solving? ](https://research-portal.uea.ac.uk/en/projects/is-cognitive-segmentation-a-distinct-higher-level-process-critica)
 [Byrne, E.](https://research-portal.uea.ac.uk/en/persons/elizabeth-byrne) & [Holmes, J.](https://research-portal.uea.ac.uk/en/persons/joni-holmes)
 [British Academy](https://research-portal.uea.ac.uk/en/projects)
 1/05/25 → 31/10/26
 Project: Research
-  * ### [Sea-ice surface recovery from bottom pressure data: a mathematical study](https://research-portal.uea.ac.uk/en/projects/sea-ice-surface-recovery-from-bottom-pressure-data-a-mathematical)
-[Blyth, M.](https://research-portal.uea.ac.uk/en/persons/mark-blyth) & [Parau, E.](https://research-portal.uea.ac.uk/en/persons/emilian-parau)
-[Leverhulme Trust](https://research-portal.uea.ac.uk/en/projects)
+  * ### [NMR imaging for the accelerated discovery of drugs and materials ](https://research-portal.uea.ac.uk/en/projects/nmr-imaging-for-the-accelerated-discovery-of-drugs-and-materials-2)
+[Wallace, M.](https://research-portal.uea.ac.uk/en/persons/matthew-wallace), [Koev, T.](https://research-portal.uea.ac.uk/en/persons/trey-koev) & Monaco, S.
+[UK Research & Innovation](https://research-portal.uea.ac.uk/en/projects)
 1/05/25 → 30/04/28
+Project: Fellowship
+  * ### [SLS Research Activities Funding ](https://research-portal.uea.ac.uk/en/projects/sls-research-activities-funding)
+[Gibbs-Kneller, D.](https://research-portal.uea.ac.uk/en/persons/david-gibbs-kneller)
+[The Society of Legal Scholars (SLS)](https://research-portal.uea.ac.uk/en/projects)
+22/04/25 → 21/10/26
 Project: Research
-  * ### [Bioacrylic acid from seaweed ](https://research-portal.uea.ac.uk/en/projects/bioacrylic-acid-from-seaweed)
-[Hamilton, C.](https://research-portal.uea.ac.uk/en/persons/christopher-hamilton), [Todd, J.](https://research-portal.uea.ac.uk/en/persons/jonathan-todd) & [Beskeni, R.](https://research-portal.uea.ac.uk/en/persons/rhoda-beskeni)
-[Ceres Agri-Tech](https://research-portal.uea.ac.uk/en/projects)
-1/05/25 → 30/11/25
+  * ### [International Association for Applied Econometics (IAAE) conference sponsorship ](https://research-portal.uea.ac.uk/en/projects/international-association-for-applied-econometics-iaae-conference)
+[Bruns, M.](https://research-portal.uea.ac.uk/en/persons/martin-bruns)
+[International Association for Applied Econometrics ](https://research-portal.uea.ac.uk/en/projects)
+1/04/25 → 30/06/25
 Project: Research
-  * ### [Resting-state Electroencephalography (rs-EEG) Data Collection Twins Discordant for Chronic Widespread Pain (CWP) ](https://research-portal.uea.ac.uk/en/projects/resting-state-electroencephalography-rs-eeg-data-collection-twins)
-[Tsigarides, J.](https://research-portal.uea.ac.uk/en/persons/jordan-tsigarides)
-[King's College London](https://research-portal.uea.ac.uk/en/projects)
-1/04/25 → 31/03/28
+  * ### [Promoting Accessibility in Clinical Trials (PRACTICALs)](https://research-portal.uea.ac.uk/en/projects/promoting-accessibility-in-clinical-trials-practicals)
+[Ashford, P.](https://research-portal.uea.ac.uk/en/persons/polly-anna-ashford), [Deane, K.](https://research-portal.uea.ac.uk/en/persons/katherine-deane), [Hammond, M.](https://research-portal.uea.ac.uk/en/persons/matt-hammond) & Pond, M.
+[National Institute for Health and Care Research](https://research-portal.uea.ac.uk/en/projects)
+1/04/25 → 29/10/26
 Project: Research
-  * ### [Forecasting Tipping Points In Marine Biogeochemistry and Ecosystem Responses (TIMBER) ](https://research-portal.uea.ac.uk/en/projects/forecasting-tipping-points-in-marine-biogeochemistry-and-ecosyste)
-[Le Quéré, C.](https://research-portal.uea.ac.uk/en/persons/corinne-le-quere), [Le Quéré, C.](https://research-portal.uea.ac.uk/en/persons/corinne-le-quere), [Racault, M.](https://research-portal.uea.ac.uk/en/persons/marie-fanny-racault), [Jarnikova, T.](https://research-portal.uea.ac.uk/en/persons/tereza-jarnikova), [Townsend, P.](https://research-portal.uea.ac.uk/en/persons/philip-townsend), [Wright, R.](https://research-portal.uea.ac.uk/en/persons/rebecca-wright) & [Sayed, A.](https://research-portal.uea.ac.uk/en/persons/amjad-sayed)
-[Advanced Research & Invention Agency](https://research-portal.uea.ac.uk/en/projects)
-1/04/25 → 31/03/30
+  * ### [Danish workshop at the BCLT international literary translation & creative writing summer school 2025 ](https://research-portal.uea.ac.uk/en/projects/danish-workshop-at-the-bclt-international-literary-translation-cr)
+[Goode, A.](https://research-portal.uea.ac.uk/en/persons/anna-goode)
+[Danish Arts Foundation](https://research-portal.uea.ac.uk/en/projects)
+1/04/25 → 31/10/25
+Project: Training
+  * ### [Randomised controlled trial to investigate the effectiveness of online exercise interventions in reducing fatigue and the high burden of mental health symptoms in rheumatology patients ](https://research-portal.uea.ac.uk/en/projects/randomised-controlled-trial-to-investigate-the-effectiveness-of-o)
+[Sloan, M.](https://research-portal.uea.ac.uk/en/persons/melanie-sloan) & [Naughton, F.](https://research-portal.uea.ac.uk/en/persons/felix-naughton)
+[National Institute for Health and Care Research](https://research-portal.uea.ac.uk/en/projects)
+1/04/25 → 31/03/27
+Project: Research
+  * ### [Sparc: Secure Platform for Authenticated and Reliable data exchange in Connected vehicles ](https://research-portal.uea.ac.uk/en/projects/sparc-secure-platform-for-authenticated-and-reliable-data-exchang)
+[Malik, H.](https://research-portal.uea.ac.uk/en/persons/hassan-malik), [Raza, M.](https://research-portal.uea.ac.uk/en/persons/mohsin-raza) & [Shaikh, R. A.](https://research-portal.uea.ac.uk/en/persons/riaz-ahmed-shaikh)
+[Innovate UK](https://research-portal.uea.ac.uk/en/projects)
+1/04/25 → 31/07/25
 Project: Research
   * ### [Functional investigation of Salmonella microbiota-host interactions by using novel organoid models from humans and chickens ](https://research-portal.uea.ac.uk/en/projects/functional-investigation-of-salmonella-microbiota-host-interactio)
 [Schuller, S.](https://research-portal.uea.ac.uk/en/persons/stephanie-schuller) & [Le Gall, G.](https://research-portal.uea.ac.uk/en/persons/gwenaelle-le-gall)
@@ -97,49 +179,34 @@ Project: Research
 1/04/25 → 31/03/28
 Project: Research
   * ### [Using Artificial Intelligence and Machine Learning Algorithms to identify associations between primary care prescriptions and cutaneous squamous cell carcinoma in a retrospective nested case-control study ](https://research-portal.uea.ac.uk/en/projects/using-artificial-intelligence-and-machine-learning-algorithms-to-)
-[Richardson, K.](https://research-portal.uea.ac.uk/en/persons/kathryn-richardson), [Skinner, J.](https://research-portal.uea.ac.uk/en/persons/jane-skinner), [Wang, W.](https://research-portal.uea.ac.uk/en/persons/wenjia-wang) & [Davies, C.](https://research-portal.uea.ac.uk/en/persons/charlotte-davies)
+[Wang, W.](https://research-portal.uea.ac.uk/en/persons/wenjia-wang), [Richardson, K.](https://research-portal.uea.ac.uk/en/persons/kathryn-richardson), [Skinner, J.](https://research-portal.uea.ac.uk/en/persons/jane-skinner), [Wang, W.](https://research-portal.uea.ac.uk/en/persons/wenjia-wang) & [Davies, C.](https://research-portal.uea.ac.uk/en/persons/charlotte-davies)
 [British Skin Foundation (The)](https://research-portal.uea.ac.uk/en/projects)
 1/04/25 → 31/03/26
-Project: Research
-  * ### [International Association for Applied Econometics (IAAE) conference sponsorship ](https://research-portal.uea.ac.uk/en/projects/international-association-for-applied-econometics-iaae-conference)
-[Bruns, M.](https://research-portal.uea.ac.uk/en/persons/martin-bruns)
-[International Association for Applied Econometrics ](https://research-portal.uea.ac.uk/en/projects)
-1/04/25 → 30/06/25
-Project: Research
-  * ### [Randomised controlled trial to investigate the effectiveness of online exercise interventions in reducing fatigue and the high burden of mental health symptoms in rheumatology patients ](https://research-portal.uea.ac.uk/en/projects/randomised-controlled-trial-to-investigate-the-effectiveness-of-o)
-[Sloan, M.](https://research-portal.uea.ac.uk/en/persons/melanie-sloan) & [Naughton, F.](https://research-portal.uea.ac.uk/en/persons/felix-naughton)
-[National Institute for Health and Care Research](https://research-portal.uea.ac.uk/en/projects)
-1/04/25 → 31/03/27
-Project: Research
-  * ### [The implementation of hybrid child protection conferences in England: a scoping and practice development project ](https://research-portal.uea.ac.uk/en/projects/the-implementation-of-hybrid-child-protection-conferences-in-engl)
-[Cook, L.](https://research-portal.uea.ac.uk/en/persons/laura-cook) & [Neil, B.](https://research-portal.uea.ac.uk/en/persons/beth-neil)
-[National Institute for Health and Care Research](https://research-portal.uea.ac.uk/en/projects)
-1/04/25 → 30/09/27
 Project: Research
   * ### [Do LRP receptors protect against drusen formation? ](https://research-portal.uea.ac.uk/en/projects/do-lrp-receptors-protect-against-drusen-formation)
 [Troeberg, L.](https://research-portal.uea.ac.uk/en/persons/linda-troeberg) & [Schuller, S.](https://research-portal.uea.ac.uk/en/persons/stephanie-schuller)
 [Fight for Sight (British Eye Research Foundation)](https://research-portal.uea.ac.uk/en/projects)
 1/04/25 → 31/03/26
 Project: Research
+  * ### [Resting-state Electroencephalography (rs-EEG) Data Collection Twins Discordant for Chronic Widespread Pain (CWP) ](https://research-portal.uea.ac.uk/en/projects/resting-state-electroencephalography-rs-eeg-data-collection-twins)
+[Tsigarides, J.](https://research-portal.uea.ac.uk/en/persons/jordan-tsigarides)
+[King's College London](https://research-portal.uea.ac.uk/en/projects)
+1/04/25 → 31/03/28
+Project: Research
+  * ### [The implementation of hybrid child protection conferences in England: a scoping and practice development project ](https://research-portal.uea.ac.uk/en/projects/the-implementation-of-hybrid-child-protection-conferences-in-engl)
+[Cook, L.](https://research-portal.uea.ac.uk/en/persons/laura-cook) & [Neil, B.](https://research-portal.uea.ac.uk/en/persons/beth-neil)
+[National Institute for Health and Care Research](https://research-portal.uea.ac.uk/en/projects)
+1/04/25 → 30/09/27
+Project: Research
+  * ### [Forecasting Tipping Points In Marine Biogeochemistry and Ecosystem Responses (TIMBER) ](https://research-portal.uea.ac.uk/en/projects/forecasting-tipping-points-in-marine-biogeochemistry-and-ecosyste)
+[Le Quéré, C.](https://research-portal.uea.ac.uk/en/persons/corinne-le-quere), [Le Quéré, C.](https://research-portal.uea.ac.uk/en/persons/corinne-le-quere), [Racault, M.](https://research-portal.uea.ac.uk/en/persons/marie-fanny-racault), [Jarnikova, T.](https://research-portal.uea.ac.uk/en/persons/tereza-jarnikova), [Townsend, P.](https://research-portal.uea.ac.uk/en/persons/philip-townsend), [Wright, R.](https://research-portal.uea.ac.uk/en/persons/rebecca-wright) & [Sayed, A.](https://research-portal.uea.ac.uk/en/persons/amjad-sayed)
+[Advanced Research & Invention Agency](https://research-portal.uea.ac.uk/en/projects)
+1/04/25 → 31/03/30
+Project: Research
   * ### [Clinical Relevance of Right Heart Flow Haemodynamics ](https://research-portal.uea.ac.uk/en/projects/clinical-relevance-of-right-heart-flow-haemodynamics)
 [Garg, P.](https://research-portal.uea.ac.uk/en/persons/pankaj-garg) & [Matthews, G.](https://research-portal.uea.ac.uk/en/persons/gareth-matthews)
 [Edwards Lifesciences Ltd](https://research-portal.uea.ac.uk/en/projects)
 1/04/25 → 31/03/28
-Project: Research
-  * ### [NCAS 2025/26 ](https://research-portal.uea.ac.uk/en/projects/ncas-202526)
-[Oram, D.](https://research-portal.uea.ac.uk/en/persons/david-oram) & [Forster, G.](https://research-portal.uea.ac.uk/en/persons/grant-forster)
-[Natural Environment Research Council](https://research-portal.uea.ac.uk/en/projects)
-1/04/25 → 31/03/28
-Project: Research
-  * ### [Sparc: Secure Platform for Authenticated and Reliable data exchange in Connected vehicles ](https://research-portal.uea.ac.uk/en/projects/sparc-secure-platform-for-authenticated-and-reliable-data-exchang)
-[Malik, H.](https://research-portal.uea.ac.uk/en/persons/hassan-malik), [Raza, M.](https://research-portal.uea.ac.uk/en/persons/mohsin-raza) & [Shaikh, R. A.](https://research-portal.uea.ac.uk/en/persons/riaz-ahmed-shaikh)
-[Innovate UK](https://research-portal.uea.ac.uk/en/projects)
-1/04/25 → 31/05/25
-Project: Research
-  * ### [Promoting Accessibility in Clinical Trials (PRACTICALs)](https://research-portal.uea.ac.uk/en/projects/promoting-accessibility-in-clinical-trials-practicals)
-[Ashford, P.](https://research-portal.uea.ac.uk/en/persons/polly-anna-ashford), [Deane, K.](https://research-portal.uea.ac.uk/en/persons/katherine-deane), [Hammond, M.](https://research-portal.uea.ac.uk/en/persons/matt-hammond) & Pond, M.
-[National Institute for Health and Care Research](https://research-portal.uea.ac.uk/en/projects)
-1/04/25 → 29/10/26
 Project: Research
   * ### [Assessing the clinical usability and feasibility of the EyeFocus app for attention rehabilitation in ABI](https://research-portal.uea.ac.uk/en/projects/assessing-the-clinical-usability-and-feasibility-of-the-eyefocus-)
 [Rossit, S.](https://research-portal.uea.ac.uk/en/persons/stephanie-rossit), [Biggart, L.](https://research-portal.uea.ac.uk/en/persons/laura-biggart) & [Manno, L.](https://research-portal.uea.ac.uk/en/persons/laura-manno)
@@ -151,18 +218,23 @@ Project: Research
 [National Institute for Health and Care Research](https://research-portal.uea.ac.uk/en/projects)
 1/04/25 → 31/03/30
 Project: Research
+  * ### [Open Access Block Grant 2025-26 ](https://research-portal.uea.ac.uk/en/projects/open-access-block-grant-2025-26)
+[Sheldrake, J.](https://research-portal.uea.ac.uk/en/persons/julia-sheldrake)
+[Engineering and Physical Sciences Research Council](https://research-portal.uea.ac.uk/en/projects)
+1/04/25 → 31/03/26
+Project: Other
+  * ### [NCAS 2025/26 ](https://research-portal.uea.ac.uk/en/projects/ncas-202526)
+[Oram, D.](https://research-portal.uea.ac.uk/en/persons/david-oram) & [Forster, G.](https://research-portal.uea.ac.uk/en/persons/grant-forster)
+[Natural Environment Research Council](https://research-portal.uea.ac.uk/en/projects)
+1/04/25 → 31/03/28
+Project: Research
   * ### [POWER: A POpulation Health WEaRables Network in Low- and Middle-income Countries ](https://research-portal.uea.ac.uk/en/projects/power-a-population-health-wearables-network-in-low-and-middle-inc)
 [Atkin, A.](https://research-portal.uea.ac.uk/en/persons/andrew-atkin) & [Milton, K.](https://research-portal.uea.ac.uk/en/persons/karen-milton)
 [Academy of Medical Sciences](https://research-portal.uea.ac.uk/en/projects)
 31/03/25 → 30/03/26
 Project: Research
-  * ### [PROSE: Evidence-policy pathways for Prosopis management in the Horn of Africa ](https://research-portal.uea.ac.uk/en/projects/prose-evidence-policy-pathways-for-prosopis-management-in-the-hor)
-[Few, R.](https://research-portal.uea.ac.uk/en/persons/roger-few), [Rao, N.](https://research-portal.uea.ac.uk/en/persons/nitya-rao) & [Tebboth, M.](https://research-portal.uea.ac.uk/en/persons/mark-tebboth)
-[British Academy](https://research-portal.uea.ac.uk/en/projects)
-31/03/25 → 30/03/26
-Project: Research
-  * ### [Nonlinear waves: from open ocean through marginal ice zone to ice shelf ](https://research-portal.uea.ac.uk/en/projects/nonlinear-waves-from-open-ocean-through-marginal-ice-zone-to-ice-)
-[Parau, E.](https://research-portal.uea.ac.uk/en/persons/emilian-parau)
+  * ### [Is Carbon Dioxide Removal a Neo-Colonial Risk to Biodiversity in South Africa? ](https://research-portal.uea.ac.uk/en/projects/is-carbon-dioxide-removal-a-neo-colonial-risk-to-biodiversity-in-)
+[Warren, R.](https://research-portal.uea.ac.uk/en/persons/rachel-warren)
 [Royal Society](https://research-portal.uea.ac.uk/en/projects)
 31/03/25 → 30/03/27
 Project: Research
@@ -175,10 +247,15 @@ Project: Research
 [Wang, C.](https://research-portal.uea.ac.uk/en/persons/cheng-wang), [Roebuck, T.](https://research-portal.uea.ac.uk/en/persons/thomas-roebuck), [Laycock, S.](https://research-portal.uea.ac.uk/en/persons/stephen-laycock) & [Ma, Y.](https://research-portal.uea.ac.uk/en/persons/yingliang-ma)
 31/03/25 → 31/03/26
 Project: Internal Funding › AHRC IAA Fund
-  * ### [Is Carbon Dioxide Removal a Neo-Colonial Risk to Biodiversity in South Africa? ](https://research-portal.uea.ac.uk/en/projects/is-carbon-dioxide-removal-a-neo-colonial-risk-to-biodiversity-in-)
-[Warren, R.](https://research-portal.uea.ac.uk/en/persons/rachel-warren)
+  * ### [Nonlinear waves: from open ocean through marginal ice zone to ice shelf ](https://research-portal.uea.ac.uk/en/projects/nonlinear-waves-from-open-ocean-through-marginal-ice-zone-to-ice-)
+[Parau, E.](https://research-portal.uea.ac.uk/en/persons/emilian-parau)
 [Royal Society](https://research-portal.uea.ac.uk/en/projects)
 31/03/25 → 30/03/27
+Project: Research
+  * ### [PROSE: Evidence-policy pathways for Prosopis management in the Horn of Africa ](https://research-portal.uea.ac.uk/en/projects/prose-evidence-policy-pathways-for-prosopis-management-in-the-hor)
+[Few, R.](https://research-portal.uea.ac.uk/en/persons/roger-few), [Rao, N.](https://research-portal.uea.ac.uk/en/persons/nitya-rao) & [Tebboth, M.](https://research-portal.uea.ac.uk/en/persons/mark-tebboth)
+[British Academy](https://research-portal.uea.ac.uk/en/projects)
+31/03/25 → 30/03/26
 Project: Research
   * ### [Analysis and verification of the efficacy of a novel low-cost thermal energy storage system](https://research-portal.uea.ac.uk/en/projects/analysis-and-verification-of-the-efficacy-of-a-novel-low-cost-the)
 [Landini, S.](https://research-portal.uea.ac.uk/en/persons/stefano-landini) & [Panter, J.](https://research-portal.uea.ac.uk/en/persons/jack-panter)
@@ -199,99 +276,30 @@ Project: Research
 [Medical Research Council](https://research-portal.uea.ac.uk/en/projects)
 10/03/25 → 6/07/25
 Project: Research
-  * ### [Wind Farms and Substation and Monitoring Captive-bred Released Asian Houbara Bustard to Determine Release Numbers Needed in Compensation ](https://research-portal.uea.ac.uk/en/projects/wind-farms-and-substation-and-monitoring-captive-bred-released-as)
-[Dolman, P.](https://research-portal.uea.ac.uk/en/persons/paul-dolman) & [Somveille, M.](https://research-portal.uea.ac.uk/en/persons/marius-somveille)
-[ACWA Power Dzhankeldy Wind LLC](https://research-portal.uea.ac.uk/en/projects)
-4/03/25 → 3/09/28
-Project: Research
   * ### [Wind Farms and Substation and Monitoring Captive-bred Released Asian Houbara Bustard to Determine Release Numbers Needed in Compensation](https://research-portal.uea.ac.uk/en/projects/wind-farms-and-substation-and-monitoring-captive-bred-released-as-2)
 [Dolman, P.](https://research-portal.uea.ac.uk/en/persons/paul-dolman) & [Somveille, M.](https://research-portal.uea.ac.uk/en/persons/marius-somveille)
 [ACWA Power Bash Wind LLC](https://research-portal.uea.ac.uk/en/projects)
 4/03/25 → 3/09/28
 Project: Research
-  * ### [Identifying novel SNORD116 targets and signalling pathways](https://research-portal.uea.ac.uk/en/projects/identifying-novel-snord116-targets-and-signalling-pathways)
-[Smith, J.](https://research-portal.uea.ac.uk/en/persons/james-smith-2)
-[Foundation for Prader-Willi Research](https://research-portal.uea.ac.uk/en/projects)
-1/03/25 → 31/08/26
+  * ### [Wind Farms and Substation and Monitoring Captive-bred Released Asian Houbara Bustard to Determine Release Numbers Needed in Compensation ](https://research-portal.uea.ac.uk/en/projects/wind-farms-and-substation-and-monitoring-captive-bred-released-as)
+[Dolman, P.](https://research-portal.uea.ac.uk/en/persons/paul-dolman) & [Somveille, M.](https://research-portal.uea.ac.uk/en/persons/marius-somveille)
+[ACWA Power Dzhankeldy Wind LLC](https://research-portal.uea.ac.uk/en/projects)
+4/03/25 → 3/09/28
+Project: Research
+  * ### [Microalgae based ingredients and impacts on mood, cognition and the immune system through gut and microbiota regulation in a mouse model of low-grade inflammation ](https://research-portal.uea.ac.uk/en/projects/microalgae-based-ingredients-and-impacts-on-mood-cognition-and-th)
+[Vauzour, D.](https://research-portal.uea.ac.uk/en/persons/david-vauzour) & [Pontifex, M. G.](https://research-portal.uea.ac.uk/en/persons/matthew-g-pontifex)
+[UK Research & Innovation](https://research-portal.uea.ac.uk/en/projects)
+1/03/25 → 28/02/26
 Project: Research
   * ### [Genetic decline and rescue in the British red squirrel ](https://research-portal.uea.ac.uk/en/projects/genetic-decline-and-rescue-in-the-british-red-squirrel)
 [Bergström, A.](https://research-portal.uea.ac.uk/en/persons/anders-bergstr%C3%B6m)
 [Royal Society](https://research-portal.uea.ac.uk/en/projects)
 1/03/25 → 31/05/26
 Project: Research
-  * ### [ARC Accelerate SHAPE Catalyst - Evolve Workplace Wellbeing ](https://research-portal.uea.ac.uk/en/projects/arc-accelerate-shape-catalyst-evolve-workplace-wellbeing)
-[Fitzhugh, H.](https://research-portal.uea.ac.uk/en/persons/helen-fitzhugh) & [Woodard, R.](https://research-portal.uea.ac.uk/en/persons/ritchie-woodard)
-[Economic and Social Research Council](https://research-portal.uea.ac.uk/en/projects)
-1/03/25 → 28/02/26
-Project: Other
-  * ### [Microalgae based ingredients and impacts on mood, cognition and the immune system through gut and microbiota regulation in a mouse model of low-grade inflammation ](https://research-portal.uea.ac.uk/en/projects/microalgae-based-ingredients-and-impacts-on-mood-cognition-and-th)
-[Vauzour, D.](https://research-portal.uea.ac.uk/en/persons/david-vauzour) & [Pontifex, M. G.](https://research-portal.uea.ac.uk/en/persons/matthew-g-pontifex)
-[UK Research & Innovation](https://research-portal.uea.ac.uk/en/projects)
-1/03/25 → 28/02/26
-Project: Research
-  * ### [Menopause Matters: St Thomas’ Lupus Trust Fund](https://research-portal.uea.ac.uk/en/projects/menopause-matters-st-thomas-lupus-trust-fund)
-[Sloan, M.](https://research-portal.uea.ac.uk/en/persons/melanie-sloan)
-[Guy's & St Thomas' Community Trust](https://research-portal.uea.ac.uk/en/projects)
-1/03/25 → 31/08/26
-Project: Research
   * ### [Microalgae based ingredients and impacts on mood, cognition and the immune system through gut and microbiota regulation in a mouse model of low-grade inflammation - MICROPHYT ](https://research-portal.uea.ac.uk/en/projects/microalgae-based-ingredients-and-impacts-on-mood-cognition-and-th-2)
 [Vauzour, D.](https://research-portal.uea.ac.uk/en/persons/david-vauzour)
 [Microphyt SA ](https://research-portal.uea.ac.uk/en/projects)
 1/03/25 → 28/02/26
-Project: Research
-  * ### [Composite Phase Change Material for Latent-Heat Thermal Energy Storage applications](https://research-portal.uea.ac.uk/en/projects/composite-phase-change-material-for-latent-heat-thermal-energy-st)
-[Landini, S.](https://research-portal.uea.ac.uk/en/persons/stefano-landini)
-[Royal Society](https://research-portal.uea.ac.uk/en/projects)
-1/03/25 → 28/02/26
-Project: Research
-  * ### [PREDICTion of GastroIntestinal malignancy in patients with IRON Deficiency (PREDICT-GI-IRON)](https://research-portal.uea.ac.uk/en/projects/prediction-of-gastrointestinal-malignancy-in-patients-with-iron-d-2)
-[Alexandre, L.](https://research-portal.uea.ac.uk/en/persons/leo-alexandre), [Chan, S.](https://research-portal.uea.ac.uk/en/persons/simon-chan), [Chin, J.](https://research-portal.uea.ac.uk/en/persons/jeannette-chin), [Parretti, H.](https://research-portal.uea.ac.uk/en/persons/helen-parretti), [Richardson, K.](https://research-portal.uea.ac.uk/en/persons/kathryn-richardson), [Steel, N.](https://research-portal.uea.ac.uk/en/persons/nicholas-steel), [Vishwakarma, PhD, R.](https://research-portal.uea.ac.uk/en/persons/ramesh-vishwakarma-phd), [Clark, A.](https://research-portal.uea.ac.uk/en/persons/allan-clark) & [Varley, A.](https://research-portal.uea.ac.uk/en/persons/anna-varley)
-[National Institute for Health and Care Research](https://research-portal.uea.ac.uk/en/projects)
-1/03/25 → 31/08/26
-Project: Research
-  * ### [Assessing the effects of novel non-toxic precursor molecules in biofilms and re-epithelialisation of human skin explant wound healing models ](https://research-portal.uea.ac.uk/en/projects/assessing-the-effects-of-novel-non-toxic-precursor-molecules-in-b)
-[Gavrilovic, J.](https://research-portal.uea.ac.uk/en/persons/jelena-gavrilovic) & [Bevan, D.](https://research-portal.uea.ac.uk/en/persons/damon-bevan)
-[National Biofilms Innovation Centre](https://research-portal.uea.ac.uk/en/projects)
-28/02/25 → 28/02/26
-Project: Research
-  * ### [Developing an AI System to Classify Ultra-Processed Food ](https://research-portal.uea.ac.uk/en/projects/developing-an-ai-system-to-classify-ultra-processed-food)
-[Wang, W.](https://research-portal.uea.ac.uk/en/persons/wenjia-wang) & [Chin, J.](https://research-portal.uea.ac.uk/en/persons/jeannette-chin)
-17/02/25 → 16/05/25
-Project: Internal Funding › Knowledge Exchange +
-  * ### [The role of light-driven proton pumps in sustaining oceanic primary production](https://research-portal.uea.ac.uk/en/projects/the-role-of-light-driven-proton-pumps-in-sustaining-oceanic-prima)
-[Mock, T.](https://research-portal.uea.ac.uk/en/persons/thomas-mock), [Moulton, V.](https://research-portal.uea.ac.uk/en/persons/vincent-moulton) & Utting, R.
-[Natural Environment Research Council](https://research-portal.uea.ac.uk/en/projects)
-16/02/25 → 15/02/28
-Project: Research
-  * ### [Donation for research for the conservation and restoration of the pink pigeon](https://research-portal.uea.ac.uk/en/projects/donation-for-research-for-the-conservation-and-restoration-of-the)
-[van Oosterhout, C.](https://research-portal.uea.ac.uk/en/persons/cock-van-oosterhout)
-[Colossal Foundation](https://research-portal.uea.ac.uk/en/projects)
-16/02/25 → 15/02/26
-Project: Research
-  * ### [BRA(AI)N - Building Resilience and Accountability in Artificial Intelligence Navigation](https://research-portal.uea.ac.uk/en/projects/braain-building-resilience-and-accountability-in-artificial-intel)
-[Liza, F. F.](https://research-portal.uea.ac.uk/en/persons/farhana-ferdousi-liza-fhea) & [Deane, K.](https://research-portal.uea.ac.uk/en/persons/katherine-deane)
-[UK Research & Innovation](https://research-portal.uea.ac.uk/en/projects)
-5/02/25 → 4/02/26
-Project: Research
-  * ### [Investigating microRNAs in metastatic circulating tumour cells at single-cell resolution](https://research-portal.uea.ac.uk/en/projects/investigating-micrornas-in-metastatic-circulating-tumour-cells-at)
-[Green, D.](https://research-portal.uea.ac.uk/en/persons/darrell-green)
-[Sir William Coxon Trust Fund](https://research-portal.uea.ac.uk/en/projects)
-3/02/25 → 2/02/26
-Project: Research
-  * ### [Italian-English workshop at the BCLT Literary Translation Summer School in 2025 ](https://research-portal.uea.ac.uk/en/projects/italian-english-workshop-at-the-bclt-literary-translation-summer--2)
-[Goode, A.](https://research-portal.uea.ac.uk/en/persons/anna-goode)
-[Italian Cultural Institute](https://research-portal.uea.ac.uk/en/projects)
-1/02/25 → 31/12/25
-Project: Training
-  * ### [Development of a microaerobic human intestinal organoid model to determine the role of the gut microbiome in Crohn’s disease ](https://research-portal.uea.ac.uk/en/projects/development-of-a-microaerobic-human-intestinal-organoid-model-to-)
-[Schuller, S.](https://research-portal.uea.ac.uk/en/persons/stephanie-schuller) & [Le Gall, G.](https://research-portal.uea.ac.uk/en/persons/gwenaelle-le-gall)
-[Humane Research Trust (The)](https://research-portal.uea.ac.uk/en/projects)
-1/02/25 → 31/01/28
-Project: Research
-  * ### [UK-India Future Networks Initiative ](https://research-portal.uea.ac.uk/en/projects/uk-india-future-networks-initiative)
-[Parr, G.](https://research-portal.uea.ac.uk/en/persons/gerard-parr)
-[Engineering and Physical Sciences Research Council](https://research-portal.uea.ac.uk/en/projects)
-1/02/25 → 31/01/29
 Project: Research
 
 

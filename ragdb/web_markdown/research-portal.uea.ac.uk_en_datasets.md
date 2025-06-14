@@ -1,4 +1,4 @@
-Search results 1 - 25 out of 213 results 
+Search results 1 - 25 out of 219 results 
   * [Skip to main navigation](https://research-portal.uea.ac.uk/en/datasets#main-navigation)
   * [Skip to search](https://research-portal.uea.ac.uk/en/datasets#main-search)
   * [Skip to main content](https://research-portal.uea.ac.uk/en/datasets#main-content)
@@ -29,13 +29,13 @@ Search by expertise, name or affiliation
 ## Filters for Datasets
 Publication Year 
   * [ 2923 (1) ](https://research-portal.uea.ac.uk/en/datasets/?publicationYear=2923&nofollow=true)
-  * [ 2025 (4) ](https://research-portal.uea.ac.uk/en/datasets/?publicationYear=2025&nofollow=true)
-  * [ 2024 (46) ](https://research-portal.uea.ac.uk/en/datasets/?publicationYear=2024&nofollow=true)
-  * [ 2023 (41) ](https://research-portal.uea.ac.uk/en/datasets/?publicationYear=2023&nofollow=true)
-  * [ 2022 (22) ](https://research-portal.uea.ac.uk/en/datasets/?publicationYear=2022&nofollow=true)
+  * [ 2025 (5) ](https://research-portal.uea.ac.uk/en/datasets/?publicationYear=2025&nofollow=true)
+  * [ 2024 (47) ](https://research-portal.uea.ac.uk/en/datasets/?publicationYear=2024&nofollow=true)
+  * [ 2023 (42) ](https://research-portal.uea.ac.uk/en/datasets/?publicationYear=2023&nofollow=true)
+  * [ 2022 (23) ](https://research-portal.uea.ac.uk/en/datasets/?publicationYear=2022&nofollow=true)
   * [ 2021 (14) ](https://research-portal.uea.ac.uk/en/datasets/?publicationYear=2021&nofollow=true)
-  * [ 2020 (15) ](https://research-portal.uea.ac.uk/en/datasets/?publicationYear=2020&nofollow=true)
-  * [ 2019 (13) ](https://research-portal.uea.ac.uk/en/datasets/?publicationYear=2019&nofollow=true)
+  * [ 2020 (16) ](https://research-portal.uea.ac.uk/en/datasets/?publicationYear=2020&nofollow=true)
+  * [ 2019 (14) ](https://research-portal.uea.ac.uk/en/datasets/?publicationYear=2019&nofollow=true)
   * [ 2018 (17) ](https://research-portal.uea.ac.uk/en/datasets/?publicationYear=2018&nofollow=true)
   * [ 2017 (17) ](https://research-portal.uea.ac.uk/en/datasets/?publicationYear=2017&nofollow=true)
   * [ 2016 (13) ](https://research-portal.uea.ac.uk/en/datasets/?publicationYear=2016&nofollow=true)
@@ -54,6 +54,7 @@ Person
   * [ Toby James (6) ](https://research-portal.uea.ac.uk/en/datasets/?person=7a23cd21-7a7b-4274-9610-6389db9f4023&nofollow=true)
   * [ Timothy Osborn (6) ](https://research-portal.uea.ac.uk/en/datasets/?person=aff39320-6660-4b01-a2bc-8af0165e4236&nofollow=true)
   * [ Cock van Oosterhout (6) ](https://research-portal.uea.ac.uk/en/datasets/?person=c4fc36ae-97c9-4325-a8eb-f66016a8a1d4&nofollow=true)
+  * [ Dorothee Bakker (6) ](https://research-portal.uea.ac.uk/en/datasets/?person=ca7b3f3c-7c66-414a-8aba-dcb02dab2bef&nofollow=true)
   * [ Corinne Le Quéré (5) ](https://research-portal.uea.ac.uk/en/datasets/?person=08de4eb2-a0d6-49ff-95dc-1b1b2e5f10b7&nofollow=true)
   * [ Tom Clarke (5) ](https://research-portal.uea.ac.uk/en/datasets/?person=211bb148-6d83-4952-ac5f-c1ccf4a40f5f&nofollow=true)
   * [ Jessica van Wonderen (5) ](https://research-portal.uea.ac.uk/en/datasets/?person=22354545-1d05-42e5-aafa-84c39715d184&nofollow=true)
@@ -79,7 +80,6 @@ Person
   * [ Richard Davies (3) ](https://research-portal.uea.ac.uk/en/datasets/?person=8504d1b4-dc7f-4685-8f15-30f2a836633e&nofollow=true)
   * [ Helen Pallett (3) ](https://research-portal.uea.ac.uk/en/datasets/?person=b1a74de2-e5d7-44cf-b500-745f5f67ede9&nofollow=true)
   * [ Gareth Lee (3) ](https://research-portal.uea.ac.uk/en/datasets/?person=f7227d25-1c21-409f-b5ad-df770300f33e&nofollow=true)
-  * [ Giuseppe Baio (2) ](https://research-portal.uea.ac.uk/en/datasets/?person=1337e629-1f71-4e8c-999d-eefa0a34cc5b&nofollow=true)
   * [ Benjamin Nash (2) ](https://research-portal.uea.ac.uk/en/datasets/?person=1480f4b7-869d-44e0-acd3-c8778d230d21&nofollow=true)
   * [ Valerie Pomeroy (2) ](https://research-portal.uea.ac.uk/en/datasets/?person=2e2311d6-63e8-4267-9262-a53c271a6217&nofollow=true)
   * [ Nicole Forstenhaeusler (2) ](https://research-portal.uea.ac.uk/en/datasets/?person=2f50aa58-6045-4b05-af7b-4718ca8290d1&nofollow=true)
@@ -99,14 +99,14 @@ Person
 
 Show more
 Research units 
-  * [ University of East Anglia (213) ](https://research-portal.uea.ac.uk/en/datasets/?organisationIds=33b7bb5b-d59d-41fa-8499-083dfdc2eec2&nofollow=true)
-  * [ Faculty of Science (156) ](https://research-portal.uea.ac.uk/en/datasets/?organisationIds=51542a61-d795-4a52-b385-8959032aa80d&nofollow=true)
+  * [ University of East Anglia (219) ](https://research-portal.uea.ac.uk/en/datasets/?organisationIds=33b7bb5b-d59d-41fa-8499-083dfdc2eec2&nofollow=true)
+  * [ Faculty of Science (162) ](https://research-portal.uea.ac.uk/en/datasets/?organisationIds=51542a61-d795-4a52-b385-8959032aa80d&nofollow=true)
+  * [ School of Environmental Sciences (73) ](https://research-portal.uea.ac.uk/en/datasets/?organisationIds=c5e3b37e-1d84-4189-a048-da9c0be6cd8f&nofollow=true)
   * [ School of Biological Sciences (71) ](https://research-portal.uea.ac.uk/en/datasets/?organisationIds=cd59935c-4beb-4aed-bd5d-7b559f520101&nofollow=true)
-  * [ School of Environmental Sciences (67) ](https://research-portal.uea.ac.uk/en/datasets/?organisationIds=c5e3b37e-1d84-4189-a048-da9c0be6cd8f&nofollow=true)
   * [ Faculty of Social Sciences (43) ](https://research-portal.uea.ac.uk/en/datasets/?organisationIds=b3ed8a62-8e87-438f-bea2-97dd52b54461&nofollow=true)
-  * [ Centre for Ocean and Atmospheric Sciences (33) ](https://research-portal.uea.ac.uk/en/datasets/?organisationIds=5d55a5e7-787d-48a7-a9e6-0e277298a7df&nofollow=true)
+  * [ Centre for Ocean and Atmospheric Sciences (38) ](https://research-portal.uea.ac.uk/en/datasets/?organisationIds=5d55a5e7-787d-48a7-a9e6-0e277298a7df&nofollow=true)
+  * [ ClimateUEA (36) ](https://research-portal.uea.ac.uk/en/datasets/?organisationIds=679d4939-692d-48db-a05a-c496c07cba12&nofollow=true)
   * [ Centre for Ecology, Evolution and Conservation (33) ](https://research-portal.uea.ac.uk/en/datasets/?organisationIds=c8a89a24-917f-4d25-b62a-09ae11c0f66d&nofollow=true)
-  * [ ClimateUEA (31) ](https://research-portal.uea.ac.uk/en/datasets/?organisationIds=679d4939-692d-48db-a05a-c496c07cba12&nofollow=true)
   * [ Organisms and the Environment (26) ](https://research-portal.uea.ac.uk/en/datasets/?organisationIds=49a438cd-e4bd-489e-b183-a524741b9e6d&nofollow=true)
   * [ School of Chemistry, Pharmacy and Pharmacology (25) ](https://research-portal.uea.ac.uk/en/datasets/?organisationIds=6c3596a8-da1b-4c9e-9318-e0fbd0f124ef&nofollow=true)
   * [ Faculty of Medicine and Health Sciences (19) ](https://research-portal.uea.ac.uk/en/datasets/?organisationIds=816409c3-6085-4b7a-ae59-49de03993dbf&nofollow=true)
@@ -157,7 +157,7 @@ Search concepts
   
 ---  
 Selected filters  [ Clear all ](https://research-portal.uea.ac.uk/en/datasets/?showAdvanced=false&allConcepts=true&inferConcepts=true&originalSearch=&improvedLayoutOrganisationUuid=)  
-  * 1 - 25 out of 213 results 
+  * 1 - 25 out of 219 results 
   * Start date (descending)
     * [Title](https://research-portal.uea.ac.uk/en/datasets/?ordering=title&descending=false)
     * [Start date(ascending)](https://research-portal.uea.ac.uk/en/datasets/?ordering=startDate&descending=false)
@@ -174,22 +174,22 @@ File
 Andela, N. (Creator) & [Jones, M.](https://research-portal.uea.ac.uk/en/persons/matthew-jones) (Creator), Zenodo, 31 May 2024
 DOI: [10.5281/zenodo.11400061](https://doi.org/10.5281/zenodo.11400061)
 Dataset
-  * ### [Genetic Code Expansion in Shewanella oneidensis MR-1 allows Site-Specific Incorporation of Bioorthogonal Functional Groups into a c-type Cytochrome: Data sets for this study](https://research-portal.uea.ac.uk/en/datasets/genetic-code-expansion-in-shewanella-oneidensis-mr-1-allows-site-)
-[Lockwood, C.](https://research-portal.uea.ac.uk/en/persons/colin-lockwood) (Creator), [Nash, B.](https://research-portal.uea.ac.uk/en/persons/benjamin-nash) (Creator), [Whiting, K.](https://research-portal.uea.ac.uk/en/persons/keir-whiting) (Creator), Connolly, A. (Creator), [Sutton-Cook, A.](https://research-portal.uea.ac.uk/en/persons/alexander-sutton-cook) (Creator), Crook, A. (Creator), Edwards, M. J. (Creator), [Clarke, T.](https://research-portal.uea.ac.uk/en/persons/tom-clarke) (Supervisor), [Sachdeva, A.](https://research-portal.uea.ac.uk/en/persons/amit-sachdeva) (Supervisor) & [Butt, J.](https://research-portal.uea.ac.uk/en/persons/julea-butt) (Supervisor), American Chemical Society, 2024
-Dataset
-File
-  * ### [Nash et al Datasets for 'Tethered heme domains in a triheme cytochrome allow for increased electron transport distances.'](https://research-portal.uea.ac.uk/en/datasets/nash-et-al-datasets-for-tethered-heme-domains-in-a-triheme-cytoch)
-[Clarke, T.](https://research-portal.uea.ac.uk/en/persons/tom-clarke) (Creator), [Nash, B.](https://research-portal.uea.ac.uk/en/persons/benjamin-nash) (Creator), Edwards, M. J. (Creator), Svistunenko, D. A. (Creator), Fernandez, T. (Creator), Morgado, L. (Creator), [van Wonderen, J.](https://research-portal.uea.ac.uk/en/persons/jessica-van-wonderen) (Creator), [Butt, J.](https://research-portal.uea.ac.uk/en/persons/julea-butt) (Creator) & Salgueiro, C. A. (Creator), University of East Anglia, 19 Feb 2024
-Dataset
-File
-  * ### [NAPv1.0: A seasonal hydrographic gridded data set for the Northern Antarctic Peninsula, Southern Ocean](https://research-portal.uea.ac.uk/en/datasets/napv10-a-seasonal-hydrographic-gridded-data-set-for-the-northern-)
-Segabinazzi Dotto, T. (Creator), Kerr, R. (Creator), Mata, M. M. (Creator) & Garcia, C. A. E. (Creator), Zenodo, 5 Jan 2021
-DOI: [10.5281/zenodo.4420006](https://doi.org/10.5281/zenodo.4420006), [https://zenodo.org/record/4420006#.YP5_jhNKhqs](https://zenodo.org/record/4420006#.YP5_jhNKhqs)
-Dataset
   * ### [UK Adaptation Inventory Database](https://research-portal.uea.ac.uk/en/datasets/uk-adaptation-inventory-database)
 [Jenkins, K.](https://research-portal.uea.ac.uk/en/persons/katie-jenkins) (Creator), Tyndall Centre for Climate Change Research, 1 Sept 2021
 [https://www.nismod.ac.uk/openclim/adaptation_inventory](https://www.nismod.ac.uk/openclim/adaptation_inventory)[ and one more link](https://research-portal.uea.ac.uk/en/datasets), [https://osf.io/4z9n3/](https://osf.io/4z9n3/)[ (show fewer)](https://research-portal.uea.ac.uk/en/datasets)
 Dataset
+  * ### [NAPv1.0: A seasonal hydrographic gridded data set for the Northern Antarctic Peninsula, Southern Ocean](https://research-portal.uea.ac.uk/en/datasets/napv10-a-seasonal-hydrographic-gridded-data-set-for-the-northern-)
+Segabinazzi Dotto, T. (Creator), Kerr, R. (Creator), Mata, M. M. (Creator) & Garcia, C. A. E. (Creator), Zenodo, 5 Jan 2021
+DOI: [10.5281/zenodo.4420006](https://doi.org/10.5281/zenodo.4420006), [https://zenodo.org/record/4420006#.YP5_jhNKhqs](https://zenodo.org/record/4420006#.YP5_jhNKhqs)
+Dataset
+  * ### [Nash et al Datasets for 'Tethered heme domains in a triheme cytochrome allow for increased electron transport distances.'](https://research-portal.uea.ac.uk/en/datasets/nash-et-al-datasets-for-tethered-heme-domains-in-a-triheme-cytoch)
+[Clarke, T.](https://research-portal.uea.ac.uk/en/persons/tom-clarke) (Creator), [Nash, B.](https://research-portal.uea.ac.uk/en/persons/benjamin-nash) (Creator), Edwards, M. J. (Creator), Svistunenko, D. A. (Creator), Fernandez, T. (Creator), Morgado, L. (Creator), [van Wonderen, J.](https://research-portal.uea.ac.uk/en/persons/jessica-van-wonderen) (Creator), [Butt, J.](https://research-portal.uea.ac.uk/en/persons/julea-butt) (Creator) & Salgueiro, C. A. (Creator), University of East Anglia, 19 Feb 2024
+Dataset
+File
+  * ### [Genetic Code Expansion in Shewanella oneidensis MR-1 allows Site-Specific Incorporation of Bioorthogonal Functional Groups into a c-type Cytochrome: Data sets for this study](https://research-portal.uea.ac.uk/en/datasets/genetic-code-expansion-in-shewanella-oneidensis-mr-1-allows-site-)
+[Lockwood, C.](https://research-portal.uea.ac.uk/en/persons/colin-lockwood) (Creator), [Nash, B.](https://research-portal.uea.ac.uk/en/persons/benjamin-nash) (Creator), [Whiting, K.](https://research-portal.uea.ac.uk/en/persons/keir-whiting) (Creator), Connolly, A. (Creator), [Sutton-Cook, A.](https://research-portal.uea.ac.uk/en/persons/alexander-sutton-cook) (Creator), Crook, A. (Creator), Edwards, M. J. (Creator), [Clarke, T.](https://research-portal.uea.ac.uk/en/persons/tom-clarke) (Supervisor), [Sachdeva, A.](https://research-portal.uea.ac.uk/en/persons/amit-sachdeva) (Supervisor) & [Butt, J.](https://research-portal.uea.ac.uk/en/persons/julea-butt) (Supervisor), American Chemical Society, 2024
+Dataset
+File
   * ### [Idealised baroclinic eddy forced by wind stress](https://research-portal.uea.ac.uk/en/datasets/idealised-baroclinic-eddy-forced-by-wind-stress)
 Wilder, T. (Creator), [Zhai, X.](https://research-portal.uea.ac.uk/en/persons/xiaoming-zhai) (Supervisor), [Joshi, M.](https://research-portal.uea.ac.uk/en/persons/manoj-joshi) (Supervisor) & Munday, D. R. (Supervisor), American Meteorological Society, 2022
 [https://github.com/thomaswilder/jpo_eddy-scripts](https://github.com/thomaswilder/jpo_eddy-scripts)
@@ -209,18 +209,27 @@ Dataset
   * ### [Mapping Career Patterns in Research: A Sequence Analysis of Career Histories of ERC Applicants](https://research-portal.uea.ac.uk/en/datasets/mapping-career-patterns-in-research-a-sequence-analysis-of-career)
 Connolly, S. (Creator), Fuchs, S. (Creator), Herschberg, C. (Creator), Schels, B. (Creator) & Vinkenburg, C. (Creator), University of East Anglia, 2020
 Dataset
+  * ### [Spin diffusion transfer difference (SDTD) NMR: an advanced method for the characterisation of water structuration within particle networks](https://research-portal.uea.ac.uk/en/datasets/spin-diffusion-transfer-difference-sdtd-nmr-an-advanced-method-fo-2)
+Muñoz-García, J. C. (Creator), Elsevier, 9 Mar 2021
+Dataset
+File
   * ### [Spin diffusion transfer difference (SDTD) NMR: an advanced method for the characterisation of water structuration within particle networks](https://research-portal.uea.ac.uk/en/datasets/spin-diffusion-transfer-difference-sdtd-nmr-an-advanced-method-fo)
 Muñoz-García, J. C. (Creator), Elsevier, 9 Mar 2021
 DOI: [10.1016/j.jcis.2021.02.094](https://doi.org/10.1016/j.jcis.2021.02.094)
 Dataset
 File
-  * ### [Spin diffusion transfer difference (SDTD) NMR: an advanced method for the characterisation of water structuration within particle networks](https://research-portal.uea.ac.uk/en/datasets/spin-diffusion-transfer-difference-sdtd-nmr-an-advanced-method-fo-2)
-Muñoz-García, J. C. (Creator), Elsevier, 9 Mar 2021
+  * ### [UKCP18 RCM climate projections bias-corrected using non-parametric quantile mapping: precipitation and temperature](https://research-portal.uea.ac.uk/en/datasets/ukcp18-rcm-climate-projections-bias-corrected-using-non-parametri)
+Zha, Q. (Creator), Reyniers, N. (Creator), Addor, N. (Creator), [Osborn, T.](https://research-portal.uea.ac.uk/en/persons/timothy-osborn) (Creator), [He, H.](https://research-portal.uea.ac.uk/en/persons/helen-he) (Creator) & [Forstenhaeusler, N.](https://research-portal.uea.ac.uk/en/persons/nicole-forstenhaeusler) (Creator), Zenodo, 7 Aug 2023
+DOI: [10.5281/zenodo.8223023](https://doi.org/10.5281/zenodo.8223023)
+Dataset
+  * ### [Surface Ocean CO2 Atlas Database version 2025 (NCEI Accession 0293257)](https://research-portal.uea.ac.uk/en/datasets/surface-ocean-co2-atlas-database-version-2025-ncei-accession-0293)
+[Bakker, D.](https://research-portal.uea.ac.uk/en/persons/dorothee-bakker) (Contributor) & All SOCAT contributors (Contributor), NOAA National Centers for Environmental Information, 5 Jun 2025
+DOI: [10.25921/9wpn-th28](https://doi.org/10.25921/9wpn-th28), [http://www.socat.info](http://www.socat.info)
 Dataset
 File
-  * ### [UKCP18 RCM climate projections bias-corrected using non-parametric quantile mapping: precipitation and temperature](https://research-portal.uea.ac.uk/en/datasets/ukcp18-rcm-climate-projections-bias-corrected-using-non-parametri)
-[Zha, Q.](https://research-portal.uea.ac.uk/en/persons/qianyu-zha) (Creator), Reyniers, N. (Creator), Addor, N. (Creator), [Osborn, T.](https://research-portal.uea.ac.uk/en/persons/timothy-osborn) (Creator), [He, H.](https://research-portal.uea.ac.uk/en/persons/helen-he) (Creator) & [Forstenhaeusler, N.](https://research-portal.uea.ac.uk/en/persons/nicole-forstenhaeusler) (Creator), Zenodo, 7 Aug 2023
-DOI: [10.5281/zenodo.8223023](https://doi.org/10.5281/zenodo.8223023)
+  * ### [Dataset for a systematic review and thematic synthesis of the experiences of living within PFAS-polluted environs](https://research-portal.uea.ac.uk/en/datasets/dataset-for-a-systematic-review-and-thematic-synthesis-of-the-exp)
+[Onencan, A. M.](https://research-portal.uea.ac.uk/en/persons/abby-muricho-onencan) (Creator), Open Science Framework, 2023
+DOI: [10.17605/OSF.IO/HNZQ6](https://doi.org/10.17605/OSF.IO/HNZQ6)
 Dataset
   * ### [Integrated Constructed Wetlands (ICW): Water Quality Data for the River Ingol and River Mun ICWs](https://research-portal.uea.ac.uk/en/datasets/integrated-constructed-wetlands-icw-water-quality-data-for-the-ri)
 [Cooper, R.](https://research-portal.uea.ac.uk/en/persons/richard-cooper) (Creator), School of Environmental Sciences, University of East Anglia, 2020
@@ -259,17 +268,9 @@ DOI: [10.5281/zenodo.8325538](https://doi.org/10.5281/zenodo.8325538)
 Dataset
 File
   * ### [INTEGRATE: climate model simulations data to study the Asian climate response to Atlantic Multidecadal Oscillation (AMO) using the Intermediate General Circulation Model version 4 (IGCM4)](https://research-portal.uea.ac.uk/en/datasets/integrate-climate-model-simulations-data-to-study-the-asian-clima)
-[Ratna, S.](https://research-portal.uea.ac.uk/en/persons/satyaban-ratna) (Creator), [Osborn, T.](https://research-portal.uea.ac.uk/en/persons/timothy-osborn) (Contributor) & [Joshi, M.](https://research-portal.uea.ac.uk/en/persons/manoj-joshi) (Contributor), Centre for Environmental Data Analysis (CEDA), 25 Feb 2020
+Bishoyi Ratna, S. (Creator), [Osborn, T.](https://research-portal.uea.ac.uk/en/persons/timothy-osborn) (Contributor) & [Joshi, M.](https://research-portal.uea.ac.uk/en/persons/manoj-joshi) (Contributor), Centre for Environmental Data Analysis (CEDA), 25 Feb 2020
 DOI: [10.5285/3f2f92ad04f84e65a2399deeafd8bbbc](https://doi.org/10.5285/3f2f92ad04f84e65a2399deeafd8bbbc), [http://data.ceda.ac.uk/badc/deposited2020/integrate/data/v1/](http://data.ceda.ac.uk/badc/deposited2020/integrate/data/v1/)
 Dataset
-  * ### [Just Public Algorithms project database of cases](https://research-portal.uea.ac.uk/en/datasets/just-public-algorithms-project-database-of-cases)
-[Pallett, H.](https://research-portal.uea.ac.uk/en/persons/helen-pallett) (Creator), Figshare, 16 Apr 2021
-DOI: [10.6084/m9.figshare.14438777.v1](https://doi.org/10.6084/m9.figshare.14438777.v1), [https://figshare.com/articles/dataset/Just_Public_Algorithms_project_database_of_cases/14438777](https://figshare.com/articles/dataset/Just_Public_Algorithms_project_database_of_cases/14438777)
-Dataset
-  * ### [River Wensum Demonstration Test Catchment (DTC): Borehole Groundwater Data for the Blackwater Drain (Merrisons Lane)](https://research-portal.uea.ac.uk/en/datasets/river-wensum-demonstration-test-catchment-dtc-borehole-groundwate)
-[Cooper, R.](https://research-portal.uea.ac.uk/en/persons/richard-cooper) (Creator), School of Environmental Sciences, University of East Anglia, 2020
-Dataset
-File
 
 
   * 1

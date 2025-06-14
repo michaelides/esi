@@ -1,4 +1,5 @@
 import os
+import streamlit as st # Import streamlit to access session state
 from llama_index.core import Settings
 from llama_index.llms.gemini import Gemini
 from llama_index.embeddings.google_genai import GoogleGenAIEmbedding
@@ -8,7 +9,7 @@ from llama_index.core.tools import FunctionTool # Ensure FunctionTool is importe
 from llama_index.core.llms import LLM # Import base LLM type for type hinting
 
 from tools import (
-    get_search_tools, 
+    get_search_tools,
     get_semantic_scholar_tool_for_agent,
     get_web_scraper_tool_for_agent,
     get_rag_tool_for_agent,
@@ -88,15 +89,17 @@ def generate_llm_greeting() -> str:
 
 
 # --- Comprehensive Agent Definition ---
-def create_orchestrator_agent(dynamic_tools: List[FunctionTool] = None) -> AgentRunner:
+def create_orchestrator_agent(dynamic_tools: List[FunctionTool] = None, max_search_results: int = 10) -> AgentRunner:
     """
     Creates a single comprehensive agent that has access to all specialized tools.
     This agent will act as the primary interface, leveraging various tools as needed.
-    
+
     Args:
         dynamic_tools (List[FunctionTool], optional): A list of FunctionTool instances
             to be added to the agent's available tools. These are typically created
             dynamically based on user session (e.g., uploaded files). Defaults to None.
+        max_search_results (int, optional): The maximum number of results to request
+            from search tools (DuckDuckGo, Tavily, Semantic Scholar). Defaults to 10.
     """
     # Ensure settings are initialized if not already
     if not Settings.llm or not _settings_initialized:

@@ -83,12 +83,14 @@ def safe_code_interpreter(code: str) -> str:
 def get_duckduckgo_tool(max_results: int = 5):
     """Initializes the DuckDuckGo search tool."""
     try:
-        return DuckDuckGoSearchToolSpec(max_results=max_results).to_tool_list()[0]
+        # Removed max_results from constructor, it's applied during query
+        return DuckDuckGoSearchToolSpec().to_tool_list()[0]
     except NameError:
         print("Error: DuckDuckGoSearchToolSpec not found. Trying DuckDuckGoToolSpec.")
         try:
             from llama_index.tools.duckduckgo import DuckDuckGoToolSpec
-            return DuckDuckGoToolSpec(max_results=max_results).to_tool_list()[0]
+            # Removed max_results from constructor, it's applied during query
+            return DuckDuckGoToolSpec().to_tool_list()[0]
         except Exception as e_fallback:
             print(f"Error initializing DuckDuckGo Tool (fallback failed): {e_fallback}")
             return None
@@ -103,7 +105,8 @@ def get_tavily_tool(max_results: int = 5):
         print("Warning: TAVILY_API_KEY not found in environment variables.")
         return None
     try:
-        return TavilyToolSpec(api_key=tavily_api_key, max_results=max_results).to_tool_list()[0]
+        # Removed max_results from constructor, it's applied during query
+        return TavilyToolSpec(api_key=tavily_api_key).to_tool_list()[0]
     except Exception as e:
         print(f"Error initializing Tavily Tool: {e}")
         return None
@@ -292,8 +295,9 @@ def get_rag_tool_for_agent():
 def get_search_tools(max_results: int = 5):
     """Initializes and returns a list of search-related tools."""
     tools = []
-    ddg_tool = get_duckduckgo_tool(max_results=max_results)
-    tavily_tool = get_tavily_tool(max_results=max_results)
+    # Pass max_results to the tool's query method if needed, not the constructor
+    ddg_tool = get_duckduckgo_tool() 
+    tavily_tool = get_tavily_tool()
     wiki_tool = get_wikipedia_tool()
 
     if ddg_tool: tools.append(ddg_tool)

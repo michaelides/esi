@@ -156,7 +156,7 @@ def _get_or_create_user_id(long_term_memory_enabled_param: bool) -> tuple[str, s
         else:
             new_user_id = str(uuid.uuid4())
             return new_user_id, "SET_COOKIE"
-    else: # Long-term memory is disabled
+    else:  # Long-term memory is disabled
         temporary_user_id = str(uuid.uuid4())
         if existing_user_id:
             return temporary_user_id, "DELETE_COOKIE"
@@ -191,7 +191,7 @@ def _initialize_user_session_data(long_term_memory_enabled_param: bool) -> tuple
 
 def _load_user_data_from_hf(user_id: str) -> Dict[str, Any]:
     """
-    Loads all chat metadata and histories for a user from the Hugging Face dataset.
+    Loads all chat metadata and histories for a user from JSON files on Hugging Face.
     This function is NOT cached by Streamlit.
     """
     hf_token = os.getenv("HF_TOKEN")
@@ -203,29 +203,33 @@ def _load_user_data_from_hf(user_id: str) -> Dict[str, Any]:
     all_chat_messages = {}
 
     try:
-        dataset = load_dataset(HF_USER_MEMORIES_DATASET_ID, split="train", token=hf_token)
-        user_data_rows = dataset.filter(lambda row: row["user_id"] == user_id)
+        api = HfApi(token=hf_token)
+        metadata_filename = f"user_memories/{user_id}_metadata.json"
+        messages_filename = f"user_memories/{user_id}_messages.json"
 
-        for row in user_data_rows:
-            chat_id = row.get("chat_id")
-            role = row.get("role")
-            content = row.get("content")
+        try:
+            metadata_content = api.get_file_content(
+                repo_id=HF_USER_MEMORIES_DATASET_ID,
+                filename=metadata_filename,
+                repo_type="dataset",
+                revision="main",
+            ).decode("utf-8")
+            all_chat_metadata = json.loads(metadata_content)
+        except Exception as e:
+            print(f"Error loading metadata for user {user_id} from {metadata_filename}: {e}. Metadata will be empty.")
+            all_chat_metadata = {}
 
-            if chat_id == "global_metadata" and role == "metadata":
-                try:
-                    all_chat_metadata = json.loads(content)
-                except json.JSONDecodeError as e:
-                    print(f"Error decoding metadata for user {user_id}: {e}. Metadata will be empty.")
-                    all_chat_metadata = {}
-            elif chat_id and role and content is not None:
-                if chat_id not in all_chat_messages:
-                    all_chat_messages[chat_id] = []
-                all_chat_messages[chat_id].append({"role": role, "content": content})
-        
-        chats_to_remove_from_metadata = [cid for cid in all_chat_metadata if cid not in all_chat_messages]
-        for cid in chats_to_remove_from_metadata:
-            print(f"Chat {cid} found in metadata but no messages. Removing from metadata.")
-            del all_chat_metadata[cid]
+        try:
+            messages_content = api.get_file_content(
+                repo_id=HF_USER_MEMORIES_DATASET_ID,
+                filename=messages_filename,
+                repo_type="dataset",
+                revision="main",
+            ).decode("utf-8")
+            all_chat_messages = json.loads(messages_content)
+        except Exception as e:
+            print(f"Error loading messages for user {user_id} from {messages_filename}: {e}. Messages will be empty.")
+            all_chat_messages = {}
 
         return {"metadata": all_chat_metadata, "messages": all_chat_messages}
 
@@ -235,7 +239,7 @@ def _load_user_data_from_hf(user_id: str) -> Dict[str, Any]:
 
 def save_chat_history(user_id: str, chat_id: str, messages: List[Dict[str, Any]]):
     """
-    Saves a specific chat history for a given user ID to the Hugging Face dataset.
+    Saves a specific chat history for a given user ID to a JSON file on Hugging Face.
     """
     if not st.session_state.long_term_memory_enabled:
         return
@@ -246,36 +250,39 @@ def save_chat_history(user_id: str, chat_id: str, messages: List[Dict[str, Any]]
         return
 
     try:
-        existing_dataset = load_dataset(HF_USER_MEMORIES_DATASET_ID, split="train", token=hf_token)
-        
-        filtered_dataset = existing_dataset.filter(
-            lambda row: not (row["user_id"] == user_id and row["chat_id"] == chat_id),
-            num_proc=os.cpu_count()
+        api = HfApi(token=hf_token)
+        messages_filename = f"user_memories/{user_id}_messages.json"
+
+        # Load existing messages, append the new chat, and save
+        try:
+            existing_messages_content = api.get_file_content(
+                repo_id=HF_USER_MEMORIES_DATASET_ID,
+                filename=messages_filename,
+                repo_type="dataset",
+                revision="main",
+            ).decode("utf-8")
+            existing_messages = json.loads(existing_messages_content)
+        except Exception as e:
+            print(f"Error loading existing messages from {messages_filename}: {e}. Starting with empty messages.")
+            existing_messages = {}
+
+        existing_messages[chat_id] = messages
+
+        # Upload the combined messages
+        api.upload_file(
+            repo_id=HF_USER_MEMORIES_DATASET_ID,
+            path_in_repo=messages_filename,
+            repo_type="dataset",
+            content=io.StringIO(json.dumps(existing_messages, indent=2)).getvalue().encode("utf-8"),
         )
-
-        new_chat_data = []
-        for msg in messages:
-            new_chat_data.append({
-                "user_id": user_id,
-                "chat_id": chat_id,
-                "role": msg.get("role", "unknown"),
-                "content": msg.get("content", "")
-            })
-        new_chat_df = pd.DataFrame(new_chat_data)
-        new_chat_dataset = Dataset.from_pandas(new_chat_df)
-
-        combined_df = pd.concat([filtered_dataset.to_pandas(), new_chat_dataset.to_pandas()], ignore_index=True)
-        combined_dataset = Dataset.from_pandas(combined_df)
-
-        combined_dataset.push_to_hub(HF_USER_MEMORIES_DATASET_ID, private=True, token=hf_token)
-        print(f"Chat history for chat {chat_id} saved to Hugging Face.")
+        print(f"Chat history for chat {chat_id} saved to {messages_filename} on Hugging Face.")
 
     except Exception as e:
         print(f"Error saving chat history to Hugging Face for chat {chat_id} (user {user_id}): {e}")
         st.error(f"Error saving chat history to cloud: {e}")
 
 def save_chat_metadata(user_id: str, chat_metadata: Dict[str, str]):
-    """Saves the chat metadata (ID to name mapping) for a user to Hugging Face."""
+    """Saves the chat metadata (ID to name mapping) for a user to a JSON file on Hugging Face."""
     if not st.session_state.long_term_memory_enabled:
         return
 
@@ -285,27 +292,16 @@ def save_chat_metadata(user_id: str, chat_metadata: Dict[str, str]):
         return
 
     try:
-        existing_dataset = load_dataset(HF_USER_MEMORIES_DATASET_ID, split="train", token=hf_token)
+        api = HfApi(token=hf_token)
+        metadata_filename = f"user_memories/{user_id}_metadata.json"
 
-        filtered_dataset = existing_dataset.filter(
-            lambda row: not (row["user_id"] == user_id and row["chat_id"] == "global_metadata" and row["role"] == "metadata"),
-            num_proc=os.cpu_count()
+        api.upload_file(
+            repo_id=HF_USER_MEMORIES_DATASET_ID,
+            path_in_repo=metadata_filename,
+            repo_type="dataset",
+            content=io.StringIO(json.dumps(chat_metadata, indent=2)).getvalue().encode("utf-8"),
         )
-
-        new_metadata_data = [{
-            "user_id": user_id,
-            "chat_id": "global_metadata", # Special chat_id for metadata
-            "role": "metadata",
-            "content": json.dumps(chat_metadata)
-        }]
-        new_metadata_df = pd.DataFrame(new_metadata_data)
-        new_metadata_dataset = Dataset.from_pandas(new_metadata_df)
-
-        combined_df = pd.concat([filtered_dataset.to_pandas(), new_metadata_dataset.to_pandas()], ignore_index=True)
-        combined_dataset = Dataset.from_pandas(combined_df)
-
-        combined_dataset.push_to_hub(HF_USER_MEMORIES_DATASET_ID, private=True, token=hf_token)
-        print(f"Chat metadata for user {user_id} saved to Hugging Face.")
+        print(f"Chat metadata for user {user_id} saved to {metadata_filename} on Hugging Face.")
 
     except Exception as e:
         print(f"Error saving chat metadata to Hugging Face for user {user_id}: {e}")
@@ -787,11 +783,13 @@ def main():
 
     # --- Apply cookie actions based on _initialize_user_session_data result ---
     if cookie_action == "SET_COOKIE":
-        cookies.set(cookie="user_id", val=user_id_val)
+        import datetime
+        expires = datetime.datetime.now() + datetime.timedelta(days=365)
+        cookies.set(cookie="user_id", val=user_id_val, expires_at=expires)
         print(f"Set user_id cookie: {user_id_val}")
     elif cookie_action == "DELETE_COOKIE":
         cookies.delete(cookie="user_id")
-        print(f"Deleted user_id cookie.")
+        print("Deleted user_id cookie.")
 
     # --- Agent Initialization (runs once per session) ---
     if AGENT_SESSION_KEY not in st.session_state:

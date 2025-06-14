@@ -1,0 +1,39 @@
+/* Global styles */
+body {
+  font-family: sans-serif;
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden; /* Prevent scrollbars on the body */
+}
+
+/* Layout component styles are in Layout.svelte */
+/* Sidebar component styles are in Sidebar.svelte */
+/* ChatArea component styles are in ChatArea.svelte */
+
+/* Basic visual distinction for App.svelte's main container if needed */
+main {
+  /*
+  If you need to style the <main> element in App.svelte specifically,
+  you can add styles here. For now, Layout.svelte handles the overall structure.
+  */
+  height: 100%;
+  width: 100%;
+}
+
+/* Example of how you might style scrollbars if needed later */
+/*
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+*/

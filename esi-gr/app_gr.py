@@ -1,10 +1,11 @@
 import gradio as gr
+import gradio.themes as gr_themes # Added for theme
 import os
 import sys
 import uuid
 import json
 from datetime import datetime, timedelta
-from huggingface_hub import HfFileSystem, hf_hub_delete
+from huggingface_hub import HfFileSystem # Removed hf_hub_delete
 from llama_index.core.llms import ChatMessage, MessageRole
 from llama_index.core.tools import FunctionTool
 from llama_index.core import Settings as LlamaSettings # For LLM temperature
@@ -100,20 +101,25 @@ def _load_user_data_from_hf(user_id: str) -> dict:
     except Exception as e: print(f"Error loading user data from HF for user {user_id}: {e}")
     return {"metadata": all_chat_metadata, "messages": all_chat_messages_li_format}
 
-def save_chat_history_gr(user_id: str, chat_id: str, messages_li_format: list, ltm_enabled: bool):
-    # ... (implementation from previous step, ensure path is correct for HfFileSystem) ...
-    if not ltm_enabled or not fs.token : return
+def save_chat_history_gr(user_id: str, all_messages_for_user: dict, ltm_enabled: bool):
+    if not ltm_enabled or not fs.token or not HF_USER_MEMORIES_DATASET_ID or HF_USER_MEMORIES_DATASET_ID == "dummy/user_memories":
+        # print("Skipping save_chat_history_gr due to LTM disabled or missing HF config/token.") # Less verbose
+        return
     try:
-        messages_hf_path = f"{HF_USER_MEMORIES_DATASET_ID}/user_memories/{user_id}_messages.json"
-        # Ensure directory exists (HfFileSystem might not auto-create parent dirs for datasets)
-        fs.makedirs(f"{HF_USER_MEMORIES_DATASET_ID}/user_memories", exist_ok=True)
-        existing_messages_data = {}
-        if fs.exists(messages_hf_path):
-            with fs.open(messages_hf_path, "r") as f: existing_messages_data = json.load(f)
-        existing_messages_data[chat_id] = messages_li_format
-        with fs.open(messages_hf_path, "w") as f: json.dump(existing_messages_data, f, indent=2)
-    except Exception as e: print(f"Error saving chat history to HF: {e}")
+        # Path within the dataset repo, e.g., "user_memories/USER_ID_messages.json"
+        messages_filename_in_repo = f"user_memories/{user_id}_messages.json"
+        # Full HfFileSystem path: <dataset_id>/<path_in_repo>
+        messages_hf_path = f"{HF_USER_MEMORIES_DATASET_ID}/{messages_filename_in_repo}"
 
+        # Ensure parent directory exists in the Hugging Face dataset repository
+        fs.makedirs(os.path.dirname(messages_hf_path), exist_ok=True)
+
+        # Overwrite the whole file with the current state of all_messages_for_user
+        with fs.open(messages_hf_path, "w") as f:
+            json.dump(all_messages_for_user, f, indent=2)
+        # print(f"Full chat history for user {user_id} saved/overwritten on Hugging Face at {messages_hf_path}") # Less verbose
+    except Exception as e:
+        print(f"Error saving full chat history to HF for user {user_id}: {e}")
 
 def save_chat_metadata_gr(user_id: str, chat_metadata: dict, ltm_enabled: bool):
     # ... (implementation from previous step, ensure path is correct for HfFileSystem) ...
@@ -246,7 +252,50 @@ def get_current_chat_docx(chat_messages_li_format: list) -> io.BytesIO:
     return bio
 
 # --- Gradio App UI and Logic ---
-with gr.Blocks(title="ESI-GR", theme=gr.themes.Soft()) as demo:
+
+custom_css = """
+.gradio-container { font-family: 'Source Sans Pro', sans-serif; }
+#chat_input_textbox textarea { font-size: 1em; line-height: 1.4; }
+#sidebar {
+    border-right: 1px solid #E0E0E0;
+    padding-right: 15px; /* Space between border and content */
+    padding-left: 5px;   /* Space from left edge */
+}
+#suggested_prompts_row button {
+    min-width: 100px; /* Ensure buttons are not too small */
+    font-size: 0.9em;
+    padding: 5px 8px; /* Adjust padding for a tighter look */
+}
+.gr-accordion { /* Style accordions for better visual separation */
+    border: 1px solid #E0E0E0 !important;
+    border-radius: 8px !important;
+    margin-bottom: 10px !important;
+}
+.gr-button { /* Consistent button margins */
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+"""
+
+# Attempt to use a customized Default theme, fallback if .light() is an issue
+try:
+    applied_theme = gr_themes.Default(
+        primary_hue=gr_themes.colors.blue,
+        secondary_hue=gr_themes.colors.sky
+    ).light()
+except AttributeError:
+    print("Warning: Theme's .light() method not available. Using base Default theme with color customization.")
+    applied_theme = gr_themes.Default(
+        primary_hue=gr_themes.colors.blue,
+        secondary_hue=gr_themes.colors.sky
+    )
+
+
+with gr.Blocks(
+    title="ESI-GR: Your AI Dissertation Partner",
+    theme=applied_theme,
+    css=custom_css
+) as demo:
     # --- States ---
     user_id_state = gr.State()
     long_term_memory_enabled_state = gr.State(True)
@@ -264,9 +313,9 @@ with gr.Blocks(title="ESI-GR", theme=gr.themes.Soft()) as demo:
     verbosity_state = gr.State(3) # Default verbosity
     search_results_state = gr.State(10) # Default search results for agent
 
-    gr.Markdown("# 🎓 ESI-GR: ESI Scholarly Instructor (Gradio)")
+    gr.Markdown("## 🎓 ESI Scholarly Instructor") # Changed to H2
     # Display current chat name - could be a gr.Textbox or gr.Markdown
-    current_chat_name_display_ui = gr.Markdown(f"### Current Chat: {active_chat_display_name_state.value}")
+    current_chat_name_display_ui = gr.Markdown(f"### Current Chat: {active_chat_display_name_state.value}") # This will be updated by callbacks
 
 
     if not LLM_SETTINGS_OK:
@@ -297,7 +346,7 @@ with gr.Blocks(title="ESI-GR", theme=gr.themes.Soft()) as demo:
 
                 with gr.Accordion("📁 File Management", open=False):
                     file_uploader = gr.File(label="Upload Documents/Datasets", file_count="multiple", type="filepath")
-                    upload_button = gr.Button("Process Uploaded Files")
+                    upload_button = gr.Button("Process Files") # Changed label
                     upload_status_display = gr.Markdown()
                     uploaded_files_display = gr.JSON(label="Uploaded & Processed Files") # Shows {filename: type/shape}
                     remove_files_cbg = gr.CheckboxGroup(label="Select files to remove", choices=[], interactive=True)
@@ -312,9 +361,15 @@ with gr.Blocks(title="ESI-GR", theme=gr.themes.Soft()) as demo:
                 with gr.Accordion("🗑️ Forget Me", open=False):
                     gr.Markdown("⚠️ **Warning**: This action will delete all your conversation history and associated data from the server (if long-term memory was enabled). This cannot be undone.")
                     forget_me_btn = gr.Button("Forget Me and Reset All Data", variant="stop")
-
+                    forget_me_status_display = gr.Markdown() # Added for status messages
                 with gr.Accordion("ℹ️ About ESI", open=False):
-                    gr.Markdown("ESI (ESI Scholarly Instructor) is an AI-powered assistant designed to help with scholarly research tasks, data analysis, and understanding complex topics. \n\nVersion: 0.2.0 (Gradio)")
+                    gr.Markdown("""
+                    **ESI (ESI Scholarly Instructor)** is an AI-powered assistant designed to help with scholarly research tasks, data analysis, and understanding complex topics.
+
+                    It leverages Large Language Models and information retrieval techniques to provide comprehensive support throughout your research journey.
+
+                    *Version: 0.2.1 (Gradio Interface)*
+                    """) # Enhanced About text
 
     # --- Event Handlers ---
     # Chat Submission & Suggested Prompts (same as before, but ensure verbosity_state is passed to get_agent_response_gr)
@@ -337,8 +392,8 @@ with gr.Blocks(title="ESI-GR", theme=gr.themes.Soft()) as demo:
         current_internal_history.append({"role": "assistant", "content": final_assistant_response})
         all_chat_msgs_li_format[current_chat_id] = current_internal_history
 
-        if ltm_enabled and HF_USER_MEMORIES_DATASET_ID and HF_USER_MEMORIES_DATASET_ID != "dummy/user_memories":
-            save_chat_history_gr(user_id, current_chat_id, current_internal_history, ltm_enabled)
+        if ltm_enabled: # save_chat_history_gr now handles HF_USER_MEMORIES_DATASET_ID check
+            save_chat_history_gr(user_id, all_chat_msgs_li_format, ltm_enabled) # Pass all messages for user
 
         updated_gradio_chat_display = convert_to_gradio_chat_format(current_internal_history)
         new_prompts = generate_suggested_prompts(current_internal_history, SUGGESTED_PROMPT_COUNT)
@@ -456,23 +511,10 @@ with gr.Blocks(title="ESI-GR", theme=gr.themes.Soft()) as demo:
             save_chat_metadata_gr(user_id, chat_meta_s, ltm_enabled) # Save updated metadata (removes deleted one)
             # To delete specific chat messages from the _messages.json, we'd need to re-save the whole file without it.
             # The current save_chat_history_gr saves all messages for a user.
-            # So, effectively, all_chat_msgs_s no longer having it means it won't be re-saved next time for that user.
-            # Or, if _messages.json is {user_id: {chat_id: messages}}, then this is fine.
-            # The current structure is {user_id}_messages.json containing {chat_id: messages}.
-            # So, we need to save the all_chat_msgs_s which now excludes the deleted chat.
-            save_chat_history_gr(user_id, "placeholder_chat_id_for_saving_all_user_messages", all_chat_msgs_s, ltm_enabled) # A bit hacky, implies save_chat_history needs to handle this structure.
-            # Let's assume save_chat_history_gr(user_id, chat_id, messages,...) actually saves messages[chat_id] = messages for that user.
-            # A better approach for deleting history on HF: delete the user's entire message file if all chats are gone,
-            # or re-save the all_chat_msgs_s object.
-            # For now, let's assume `save_chat_history_gr` is smart enough if we pass `all_chat_msgs_s` as the "messages" for a "user".
-            # This needs clarification in `save_chat_history_gr`.
-            # Simpler: just save metadata. History for deleted chat remains in file but inaccessible via UI.
-            # Best: modify save_chat_history_gr to take all_chat_msgs_s for a user_id and overwrite.
-            # For this subtask, current save_chat_history_gr will simply not re-save the deleted chat_id if it's not in all_chat_msgs_s.
-            # However, it expects a single chat_id and its messages.
-            # So, after deleting from all_chat_msgs_s, we can't use current save_chat_history_gr to reflect deletion on HF.
-            # This is a limitation for now. We'll remove from HF if possible or mark as "to be improved".
-            # For now, it's deleted from current session. Re-saving metadata is key.
+        if ltm_enabled:
+            save_chat_metadata_gr(user_id, chat_meta_s, ltm_enabled) # Save updated metadata (removes deleted one)
+            # Save the entire updated message history for the user, which now excludes the deleted chat.
+            save_chat_history_gr(user_id, all_chat_msgs_s, ltm_enabled)
 
         # Switch to another chat or create a new one if no chats are left
         new_current_chat_id = next(iter(chat_meta_s.keys()), None)
@@ -607,24 +649,33 @@ with gr.Blocks(title="ESI-GR", theme=gr.themes.Soft()) as demo:
     def forget_me_action_fn(user_id, request: gr.Request): # request: gr.Request for potential full page reload
         global _GLOBAL_UPLOADED_DOCS, _GLOBAL_UPLOADED_DFS
         print(f"Forget Me action triggered for user_id: {user_id}")
+
+        # Deleting files from Hugging Face Hub
         if user_id and HF_USER_MEMORIES_DATASET_ID and HF_USER_MEMORIES_DATASET_ID != "dummy/user_memories" and fs.token:
+            metadata_filename_in_repo = f"user_memories/{user_id}_metadata.json"
+            messages_filename_in_repo = f"user_memories/{user_id}_messages.json"
+
+            # HfFileSystem paths are typically <dataset_id>/<path_in_repo>
+            metadata_hf_fs_path = f"{HF_USER_MEMORIES_DATASET_ID}/{metadata_filename_in_repo}"
+            messages_hf_fs_path = f"{HF_USER_MEMORIES_DATASET_ID}/{messages_filename_in_repo}"
+
             try:
-                metadata_repo_path = f"user_memories/{user_id}_metadata.json" # Path within the dataset repo
-                messages_repo_path = f"user_memories/{user_id}_messages.json"
+                if fs.exists(metadata_hf_fs_path):
+                    fs.rm(metadata_hf_fs_path) # fs.rm can take the full path like this
+                    print(f"Deleted metadata file from Hugging Face: {metadata_hf_fs_path}")
+                else:
+                    print(f"Metadata file not found on Hugging Face, skipping deletion: {metadata_hf_fs_path}")
 
-                # Construct full paths for hf_hub_delete
-                full_metadata_path = f"datasets/{HF_USER_MEMORIES_DATASET_ID}/{metadata_repo_path}"
-                full_messages_path = f"datasets/{HF_USER_MEMORIES_DATASET_ID}/{messages_repo_path}"
-
-                if fs.exists(f"{HF_USER_MEMORIES_DATASET_ID}/{metadata_repo_path}"): # fs.exists uses relative path to dataset root
-                    hf_hub_delete(repo_id=HF_USER_MEMORIES_DATASET_ID, path_in_repo=metadata_repo_path, repo_type="dataset", token=fs.token)
-                    print(f"Deleted metadata for user {user_id} from Hugging Face.")
-                if fs.exists(f"{HF_USER_MEMORIES_DATASET_ID}/{messages_repo_path}"):
-                    hf_hub_delete(repo_id=HF_USER_MEMORIES_DATASET_ID, path_in_repo=messages_repo_path, repo_type="dataset", token=fs.token)
-                    print(f"Deleted messages for user {user_id} from Hugging Face.")
+                if fs.exists(messages_hf_fs_path):
+                    fs.rm(messages_hf_fs_path)
+                    print(f"Deleted messages file from Hugging Face: {messages_hf_fs_path}")
+                else:
+                    print(f"Messages file not found on Hugging Face, skipping deletion: {messages_hf_fs_path}")
             except Exception as e:
-                print(f"Error deleting user data from Hugging Face for user {user_id}: {e}")
+                print(f"Error deleting files from Hugging Face for user {user_id}: {e}")
                 # Continue with local reset anyway
+        else:
+            print(f"Skipping Hugging Face deletion for user {user_id}: Missing user_id, dataset_id, or token.")
 
         # Clear local global stores
         _GLOBAL_UPLOADED_DOCS.clear()
@@ -724,7 +775,9 @@ with gr.Blocks(title="ESI-GR", theme=gr.themes.Soft()) as demo:
             _chat_metadata[_current_chat_id] = _active_chat_name
             greeting = generate_llm_greeting() if LLM_SETTINGS_OK else "Hello!"
             _all_chat_messages_li_format[_current_chat_id] = [{"role": "assistant", "content": greeting}]
-            if _long_term_memory_enabled: save_chat_metadata_gr(_user_id, _chat_metadata, _long_term_memory_enabled)
+            if _long_term_memory_enabled: # Save metadata and initial history for the new chat
+                save_chat_metadata_gr(_user_id, _chat_metadata, _long_term_memory_enabled)
+                save_chat_history_gr(_user_id, _all_chat_messages_li_format, _long_term_memory_enabled)
 
         _current_messages_li_format = _all_chat_messages_li_format.get(_current_chat_id, [])
         initial_gradio_chat_display = convert_to_gradio_chat_format(_current_messages_li_format)

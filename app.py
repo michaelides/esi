@@ -35,6 +35,8 @@ RAG_SOURCE_MARKER_PREFIX = "---RAG_SOURCE---"
 
 # Import UI_ACCESSIBLE_WORKSPACE from tools.py
 from tools import UI_ACCESSIBLE_WORKSPACE
+# Import HF_USER_MEMORIES_DATASET_ID from config.py
+from config import HF_USER_MEMORIES_DATASET_ID
 
 # Constant to control the maximum number of messages sent in chat history to the LLM
 MAX_CHAT_HISTORY_MESSAGES = 15 # Keep the last N messages to manage context length
@@ -197,14 +199,13 @@ def _load_user_data_from_hf(user_id: str) -> Dict[str, Any]:
     all_chat_messages = {}
 
     try:
-        from config import HF_DATASET_ID # Re-import HF_DATASET_ID from config
-
+        # Use HF_USER_MEMORIES_DATASET_ID for user memories
         metadata_filename_in_repo = f"user_memories/{user_id}_metadata.json"
         messages_filename_in_repo = f"user_memories/{user_id}_messages.json"
 
         # Construct the full HfFileSystem path
-        metadata_hf_path = f"datasets/{HF_DATASET_ID}/{metadata_filename_in_repo}"
-        messages_hf_path = f"datasets/{HF_DATASET_ID}/{messages_filename_in_repo}"
+        metadata_hf_path = f"datasets/{HF_USER_MEMORIES_DATASET_ID}/{metadata_filename_in_repo}"
+        messages_hf_path = f"datasets/{HF_USER_MEMORIES_DATASET_ID}/{messages_filename_in_repo}"
 
         # Try to download and load metadata using HfFileSystem
         try:
@@ -247,9 +248,9 @@ def save_chat_history(user_id: str, chat_id: str, messages: List[Dict[str, Any]]
         return
 
     try:
-        from config import HF_DATASET_ID # Re-import HF_DATASET_ID from config
+        # Use HF_USER_MEMORIES_DATASET_ID for user memories
         messages_filename_in_repo = f"user_memories/{user_id}_messages.json"
-        messages_hf_path = f"datasets/{HF_DATASET_ID}/{messages_filename_in_repo}"
+        messages_hf_path = f"datasets/{HF_USER_MEMORIES_DATASET_ID}/{messages_filename_in_repo}"
 
         # Load existing messages, append the new chat, and save
         try:
@@ -286,9 +287,9 @@ def save_chat_metadata(user_id: str, chat_metadata: Dict[str, str]):
         return
 
     try:
-        from config import HF_DATASET_ID # Re-import HF_DATASET_ID from config
+        # Use HF_USER_MEMORIES_DATASET_ID for user memories
         metadata_filename_in_repo = f"user_memories/{user_id}_metadata.json"
-        metadata_hf_path = f"datasets/{HF_DATASET_ID}/{metadata_filename_in_repo}"
+        metadata_hf_path = f"datasets/{HF_USER_MEMORIES_DATASET_ID}/{metadata_filename_in_repo}"
 
         # Use fs.open to write the content
         with fs.open(metadata_hf_path, "w", token=hf_token) as f:
@@ -441,19 +442,10 @@ def delete_chat_session(chat_id: str):
         # Save updated metadata and messages to Hugging Face
         # This effectively removes the chat from the JSON files
         save_chat_metadata(st.session_state.user_id, st.session_state.chat_metadata)
-        # Note: save_chat_history is designed to update a specific chat_id.
-        # To "delete" a chat's messages, we rely on the metadata being updated and the messages file
-        # being overwritten without that chat_id.
-        # A more explicit deletion would be to load the messages file, remove the chat_id entry, and save.
-        # For now, the metadata update is sufficient to make the chat "disappear" from the UI.
-        # The actual messages JSON file for the user will still contain the deleted chat's messages
-        # until the user's *entire* messages file is overwritten by a save_chat_history call
-        # that *doesn't* include the deleted chat_id.
-        # For a full deletion, we'd need to reload all messages, remove the specific chat_id, and then save the *entire* messages dict.
-        # Let's refine this:
-        from config import HF_DATASET_ID
+        
+        # For a full deletion, we need to reload all messages, remove the specific chat_id, and then save the *entire* messages dict.
         messages_filename_in_repo = f"user_memories/{st.session_state.user_id}_messages.json"
-        messages_hf_path = f"datasets/{HF_DATASET_ID}/{messages_filename_in_repo}"
+        messages_hf_path = f"datasets/{HF_USER_MEMORIES_DATASET_ID}/{messages_filename_in_repo}"
         
         # Load current messages, remove the specific chat_id, then save the whole thing back
         try:
@@ -640,9 +632,9 @@ def forget_me_and_reset():
 
     if user_id_to_delete and hf_token:
         try:
-            from config import HF_DATASET_ID # Re-import HF_DATASET_ID from config
-            metadata_hf_path = f"datasets/{HF_DATASET_ID}/user_memories/{user_id_to_delete}_metadata.json"
-            messages_hf_path = f"datasets/{HF_DATASET_ID}/user_memories/{user_id_to_delete}_messages.json"
+            # Use HF_USER_MEMORIES_DATASET_ID for user memories
+            metadata_hf_path = f"datasets/{HF_USER_MEMORIES_DATASET_ID}/user_memories/{user_id_to_delete}_metadata.json"
+            messages_hf_path = f"datasets/{HF_USER_MEMORIES_DATASET_ID}/user_memories/{user_id_to_delete}_messages.json"
 
             # Attempt to delete both files
             deleted_any = False

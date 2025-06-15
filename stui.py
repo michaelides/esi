@@ -9,8 +9,11 @@ from PyPDF2 import PdfReader # Added for PDF processing in stui.py
 from docx import Document # Added for DOCX processing in stui.py
 import io # Added for BytesIO in stui.py
 import pyreadstat # Ensure pyreadstat is imported if read_spss is used
+import app # Import the app module to access process_user_prompt_and_get_response
+import extra_streamlit_components as esc # Added for cookies
 
 PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
+cookies = esc.CookieManager(key="esi_cookie_manager") # Added cookies manager
 
 # Import UI_ACCESSIBLE_WORKSPACE from tools.py
 from tools import UI_ACCESSIBLE_WORKSPACE
@@ -257,9 +260,58 @@ def display_chat():
 
             if can_regenerate:
                 with col_regen:
-                    if st.button("🔄", key=f"regenerate_{msg_idx}", help="Regenerate Response"):
-                        st.session_state.do_regenerate = True
-                        st.rerun()
+                    # The button now directly calls handle_regenerate_button_click
+                    col_regen.button(
+                        "🔄",
+                        key=f"regenerate_{msg_idx}",
+                        help="Regenerate Response",
+                        on_click=handle_regenerate_button_click # No args needed as it reads from session_state
+                    )
+
+def handle_regenerate_button_click():
+    """
+    Handles the button click for regenerating the last assistant response.
+    Retrieves necessary state from session_state, calls the app logic,
+    and updates session_state with the results.
+    """
+    print("Regenerate button clicked in stui.py")
+    user_id = st.session_state.user_id
+    current_chat_id = st.session_state.get("current_chat_id")
+    messages = st.session_state.messages # Current list of messages
+    long_term_memory_enabled = st.session_state.long_term_memory_enabled
+    llm_temperature = st.session_state.get("llm_temperature", 0.7) # Default if not set
+    llm_verbosity = st.session_state.get("llm_verbosity", 3) # Default if not set
+
+    try:
+        result = app.regenerate_last_response(
+            user_id=user_id,
+            current_chat_id=current_chat_id,
+            messages_input=messages,
+            long_term_memory_enabled=long_term_memory_enabled,
+            llm_temperature=llm_temperature,
+            llm_verbosity=llm_verbosity
+        )
+    except Exception as e:
+        st.error(f"An unexpected error occurred during regeneration: {e}")
+        print(f"Critical error in call to app.regenerate_last_response: {e}")
+        return
+
+    st.session_state.messages = result.get("updated_messages", messages)
+    st.session_state.suggested_prompts = result.get("updated_suggested_prompts", st.session_state.suggested_prompts)
+
+    # Update all_chat_messages if a valid current_chat_id exists
+    if current_chat_id and current_chat_id in st.session_state.all_chat_messages:
+        st.session_state.all_chat_messages[current_chat_id] = st.session_state.messages
+
+    status_message = result.get("status_message")
+    if status_message:
+        if "error" in status_message.lower() or "warning" in status_message.lower() or "not from assistant" in status_message.lower() or "no preceding user query" in status_message.lower() :
+            st.warning(status_message)
+        else:
+            st.info(status_message)
+        print(f"Status from app.regenerate_last_response: {status_message}")
+
+    st.rerun()
 
 def remove_uploaded_file(file_name: str, file_type: str):
     """Removes an uploaded file from session state and from the workspace."""
@@ -469,6 +521,7 @@ def create_interface(
                                     # Clear any active editing state if the chat being edited is deleted
                                     if st.session_state.editing_chat_id == chat_id:
                                         st.session_state.editing_chat_id = None
+                                    # delete_chat_callback is now stui.handle_delete_chat_session, passed from app.main
                                     delete_chat_callback(chat_id)
                 else:
                     st.info("No saved chats yet. Start a new conversation!")
@@ -601,21 +654,582 @@ def create_interface(
     st.html(f"<style>{CSS}</style>")
 
     display_chat()
+    # The handle_user_input_callback is now handle_user_input_submission from this file (stui.py)
+    # It will internally call app.process_user_prompt_and_get_response
     display_main_chat_area(suggested_prompts_list, handle_user_input_callback)
+
+def handle_user_input_submission(chat_input_value: str | None):
+    """
+    Handles submission from chat input or suggested prompts.
+    It retrieves necessary state, calls the core processing logic in app.py,
+    and then updates session_state with the results.
+    """
+    prompt_to_process = None
+    source_of_prompt = "chat_input" # Default
+
+    if hasattr(st.session_state, 'prompt_to_use') and st.session_state.prompt_to_use:
+        prompt_to_process = st.session_state.prompt_to_use
+        st.session_state.prompt_to_use = None # Clear after use
+        source_of_prompt = "suggested_prompt"
+        print(f"Processing suggested_prompt: '{prompt_to_process[:50]}...'")
+    elif chat_input_value:
+        prompt_to_process = chat_input_value
+        print(f"Processing chat_input_value: '{prompt_to_process[:50]}...'")
+
+    if prompt_to_process:
+        # Retrieve all necessary current state from st.session_state
+        user_id = st.session_state.user_id
+        current_chat_id = st.session_state.get("current_chat_id") # Can be None
+        messages = st.session_state.messages # Current list of messages
+        chat_metadata = st.session_state.chat_metadata
+        long_term_memory_enabled = st.session_state.long_term_memory_enabled
+
+        result = None
+        try:
+            with st.spinner("ESI is thinking..."):
+                result = app.process_user_prompt_and_get_response(
+                    prompt_to_process=prompt_to_process,
+                    user_id=user_id,
+                    current_chat_id=current_chat_id,
+                    messages_input=messages,
+                    chat_metadata_input=chat_metadata,
+                    long_term_memory_enabled=long_term_memory_enabled
+                )
+        except Exception as e:
+            st.error(f"An unexpected error occurred while processing your request: {e}")
+            print(f"Critical error in call to app.process_user_prompt_and_get_response: {e}")
+            return
+
+        if result is None: # Should not happen if exception handling is correct
+            st.error("Failed to get a response from the assistant.")
+            return
+
+        # Update st.session_state based on the dictionary returned
+        st.session_state.messages = result.get("updated_messages", messages)
+        st.session_state.chat_metadata = result.get("updated_chat_metadata", chat_metadata)
+        st.session_state.suggested_prompts = result.get("updated_suggested_prompts", st.session_state.suggested_prompts)
+        st.session_state.chat_modified = result.get("chat_modified_flag", st.session_state.chat_modified)
+
+        new_chat_id_returned = result.get("new_chat_id")
+        processed_chat_id = result.get("current_chat_id_processed")
+
+        if new_chat_id_returned and new_chat_id_returned != current_chat_id:
+            st.session_state.current_chat_id = new_chat_id_returned
+            # Ensure all_chat_messages is updated for this new chat
+            st.session_state.all_chat_messages[new_chat_id_returned] = result.get("updated_messages", [])
+            print(f"UI updated to new chat ID: {new_chat_id_returned}")
+        elif processed_chat_id and processed_chat_id == current_chat_id :
+            # Update messages for the existing current_chat_id in all_chat_messages
+             st.session_state.all_chat_messages[current_chat_id] = result.get("updated_messages", messages)
+        elif processed_chat_id and processed_chat_id != current_chat_id and new_chat_id_returned is None:
+            # This case implies the current_chat_id might have been None, and process_user_prompt created one.
+            # This should ideally be covered by new_chat_id_returned logic.
+            # However, as a safeguard:
+            st.session_state.current_chat_id = processed_chat_id
+            st.session_state.all_chat_messages[processed_chat_id] = result.get("updated_messages", [])
+            print(f"UI updated to processed chat ID (safeguard): {processed_chat_id}")
+
+
+        status_message = result.get("status_message")
+        if status_message:
+            # For now, just print. Could use st.info/st.error if refined.
+            print(f"Status from process_user_prompt_and_get_response: {status_message}")
+            if "error" in status_message.lower():
+                st.error(status_message)
+            else:
+                st.info(status_message)
+
+        print(f"Rerunning Streamlit after processing prompt '{prompt_to_process[:50]}...' from {source_of_prompt}")
+        st.rerun()
+    elif source_of_prompt == "chat_input" and not chat_input_value:
+        # This handles the case where chat_input is cleared, which causes a rerun.
+        # We don't want to do anything here if there's no actual input.
+        print("Chat input cleared, no action taken by handle_user_input_submission.")
+        pass
+
 
 def display_main_chat_area(suggested_prompts_list: Optional[List[str]], handle_user_input_callback: Callable):
     """
     Displays the main chat area including suggested prompts and the chat input field.
+    The handle_user_input_callback is now stui.handle_user_input_submission.
     """
     if suggested_prompts_list:
         cols = st.columns(len(suggested_prompts_list))
         for i, prompt in enumerate(suggested_prompts_list):
             with cols[i]:
+                # When a suggested prompt button is clicked:
+                # 1. Set 'prompt_to_use' in session_state.
+                # 2. Call the handle_user_input_callback (which is handle_user_input_submission).
+                #    handle_user_input_submission will then pick up 'prompt_to_use'.
                 if st.button(prompt, key=f"suggested_prompt_btn_{i}"):
                     st.session_state.prompt_to_use = prompt
-                    st.rerun() 
+                    # Call the callback directly. It will handle the rerun.
+                    # No separate chat_input_value is provided here as prompt_to_use takes precedence.
+                    handle_user_input_callback(None)
     else:
-        pass
+        pass # No suggested prompts to display
 
-    chat_input_value = st.chat_input("Ask me about dissertations, research methods, academic writing, etc.")
-    st.session_state.chat_input_value_from_stui = chat_input_value
+    # The st.chat_input widget itself triggers a rerun when the user submits text.
+    # The value entered by the user is returned by st.chat_input().
+    # This value is then passed to the handle_user_input_callback.
+    chat_input_value = st.chat_input(
+        "Ask me about dissertations, research methods, academic writing, etc.",
+        key="main_chat_input" # Added a key for stability
+    )
+
+    # If chat_input_value has content (i.e., user submitted something),
+    # call the callback. This happens on the rerun triggered by chat_input.
+    if chat_input_value:
+        # st.session_state.chat_input_value_from_stui is no longer needed here
+        # as we directly pass chat_input_value to the callback.
+        handle_user_input_callback(chat_input_value)
+
+def perform_chat_reset():
+    """
+    Called when the reset chat button (or new chat for temporary LTM off) is pressed.
+    Uses app.create_new_chat_session_in_memory and updates session state
+    based on the values returned by it.
+    """
+    print("Performing chat reset via stui.perform_chat_reset...")
+
+    # This function in app.py returns (new_chat_id, new_chat_name, initial_messages)
+    # AND also updates several st.session_state keys directly:
+    # current_chat_id, messages, chat_metadata[new_chat_id], all_chat_messages[new_chat_id], chat_modified
+    new_chat_id, new_chat_name, initial_messages = app.create_new_chat_session_in_memory()
+
+    # The call above already updated st.session_state.current_chat_id,
+    # st.session_state.messages, st.session_state.chat_metadata,
+    # st.session_state.all_chat_messages, and st.session_state.chat_modified.
+    # So, we just need to ensure suggested prompts are also updated based on the new initial messages.
+    st.session_state.suggested_prompts = app._cached_generate_suggested_prompts(initial_messages)
+
+    print(f"Chat reset performed by stui. New active chat ID: {st.session_state.current_chat_id}. UI will now update.")
+    st.rerun()
+
+def handle_delete_chat_session(chat_id: str):
+    """
+    Handles the UI part of deleting a chat session.
+    Calls the core deletion logic in app.py and then handles UI updates.
+    """
+    print(f"handle_delete_chat_session called in stui.py for chat_id: {chat_id}")
+    error_message = app.delete_chat_session(chat_id) # This now returns str | None
+
+    if error_message:
+        st.error(error_message)
+
+    # Always rerun because the list of chats in the sidebar needs to be updated,
+    # or the current chat might have changed if the active one was deleted.
+    # app.delete_chat_session itself no longer calls rerun.
+    st.rerun()
+
+def handle_forget_me_button_click():
+    """
+    Handles the logic for the "Forget Me" button click.
+    Calls data deletion in app.py, then clears cookies and session state.
+    """
+    print("Forget Me button clicked.")
+    user_id_to_delete = st.session_state.get("user_id")
+    hf_token = os.getenv("HF_TOKEN")
+
+    if not user_id_to_delete:
+        st.warning("No user ID found in session to forget.")
+        return
+
+    if not hf_token:
+        st.warning("Hugging Face token not configured. Cannot delete cloud data, but will clear local data.")
+        # Proceed to clear local data even if cloud deletion isn't possible
+    else:
+        # Call app.py function to delete data from Hugging Face
+        # app.fs should be accessible as it's a global in app.py
+        deletion_result = app.perform_forget_me_data_deletion(user_id_to_delete, hf_token, app.fs)
+        if not deletion_result["success"]:
+            st.warning(f"Cloud data deletion issues: {deletion_result['message']}")
+        else:
+            st.info(f"Cloud data deletion attempt: {deletion_result['message']}")
+
+    # Delete the user ID cookie using stui's cookie manager
+    try:
+        cookies.delete(cookie="user_id") # stui.cookies
+        print(f"Deleted user ID cookie for '{user_id_to_delete}'")
+    except Exception as e:
+        error_msg = f"ERROR: Failed to delete user_id cookie for {user_id_to_delete}: {e}"
+        print(error_msg)
+        st.error(f"Failed to delete user ID cookie: {e}") # Show error in UI
+
+    # Reset session state extensively
+    keys_to_clear = [
+        "chat_metadata", "all_chat_messages", "current_chat_id",
+        "messages", "chat_modified", "suggested_prompts",
+        "renaming_chat_id", "uploaded_documents", "uploaded_dataframes",
+        "session_control_flags_initialized",
+        "_greeting_logic_log_shown_for_current_state",
+        "agent_initialized_with_search_count", # ensure agent re-init
+        "_last_memory_state_was_enabled",
+        "_last_memory_state_changed_by_toggle",
+        "initial_greeting_shown_for_session"
+    ]
+    for key in keys_to_clear:
+        if key in st.session_state:
+            # More robust clearing for different types might be needed,
+            # but for now, del is generally effective.
+            del st.session_state[key]
+            # if isinstance(st.session_state[key], (list, dict)):
+            #     st.session_state[key].clear()
+            # else:
+            #     st.session_state[key] = None
+
+    if "user_id" in st.session_state: # Should be gone if del worked
+        del st.session_state.user_id
+
+    # After clearing, some keys might need to be re-initialized to default states
+    # for the app to continue running before reload, though reload is imminent.
+    # st.session_state.messages = [] # app.main will handle this on reload via session_control_flags_initialized=False
+    # st.session_state.suggested_prompts = app.DEFAULT_PROMPTS # app.main will handle
+    st.session_state.session_control_flags_initialized = False # Force full re-init in app.py
+
+    print("Local session state and cookies cleared. Triggering page reload.")
+
+    # Use JavaScript to clear all cookies from the browser and force a full page reload
+    js_code = """
+    <script>
+        function deleteAllCookies() {
+            const cookies_array = document.cookie.split(';');
+            for (let i = 0; i < cookies_array.length; i++) {
+                const cookie = cookies_array[i];
+                const eqPos = cookie.indexOf('=');
+                const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+                document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/';
+            }
+            console.log("All cookies cleared by JS.");
+        }
+        deleteAllCookies();
+        window.location.reload(true); // Force a hard reload from the server
+    </script>
+    """
+    st.components.v1.html(js_code, height=0, width=0)
+    # No st.rerun() here as JS handles the reload.
+
+def handle_new_chat_button_click():
+    """
+    Handles the "New Chat" button click.
+    Calls app.create_new_chat_session_in_memory and updates session state.
+    """
+    print("New chat button clicked in stui.py")
+    # app.create_new_chat_session_in_memory updates st.session_state directly for:
+    # current_chat_id, messages, chat_metadata[new_chat_id], all_chat_messages[new_chat_id], chat_modified
+    new_chat_id, new_chat_name, initial_messages = app.create_new_chat_session_in_memory()
+
+    # Ensure suggested prompts are updated for the new greeting
+    st.session_state.suggested_prompts = app._cached_generate_suggested_prompts(initial_messages)
+
+    # Other session state keys like current_chat_id, messages, etc., are already set by
+    # app.create_new_chat_session_in_memory() as per its current implementation.
+    # If app.create_new_chat_session_in_memory were purely functional, we'd set them here:
+    # st.session_state.current_chat_id = new_chat_id
+    # st.session_state.messages = initial_messages
+    # st.session_state.chat_metadata[new_chat_id] = new_chat_name
+    # st.session_state.all_chat_messages[new_chat_id] = initial_messages
+    # st.session_state.chat_modified = False
+
+    print(f"New chat session '{new_chat_name}' ({new_chat_id}) created and UI updated by stui.")
+    st.rerun()
+
+def handle_rename_chat(chat_id: str, new_name: str):
+    """
+    Handles renaming a chat.
+    Calls app.core_rename_chat and updates session state.
+    """
+    print(f"handle_rename_chat called in stui.py for chat_id: {chat_id}, new_name: {new_name}")
+    user_id = st.session_state.user_id
+    current_chat_metadata = st.session_state.chat_metadata
+    long_term_memory_enabled = st.session_state.long_term_memory_enabled
+
+    # Assuming app.core_rename_chat exists and is correctly defined in app.py
+    # It should return: (updated_metadata_copy_or_none, error_message_str_or_none)
+    updated_metadata, error_msg = app.core_rename_chat(
+        user_id=user_id,
+        chat_id=chat_id,
+        new_name=new_name,
+        current_chat_metadata=current_chat_metadata,
+        long_term_memory_enabled=long_term_memory_enabled
+    )
+
+    if updated_metadata is not None:
+        st.session_state.chat_metadata = updated_metadata
+        print(f"Chat '{chat_id}' renamed to '{new_name}' in session state by stui.")
+
+    if error_msg:
+        st.error(error_msg) # Display error in UI
+        print(f"Error renaming chat: {error_msg}")
+
+    # The text_input's on_change in create_interface usually handles clearing editing_chat_id and rerunning.
+    # If not, st.rerun() might be needed here. For now, assume on_change is sufficient.
+
+def handle_switch_chat(chat_id_to_switch: str):
+    """
+    Handles switching to a different chat.
+    Calls app.core_switch_chat_logic and updates session state.
+    """
+    print(f"handle_switch_chat called in stui.py for chat_id: {chat_id_to_switch}")
+
+    # Assuming app.core_switch_chat_logic exists and is correctly defined in app.py
+    # It returns a dict with keys like: messages_to_display, current_chat_id_to_set, etc.
+    result = app.core_switch_chat_logic(
+        chat_id_to_switch=chat_id_to_switch,
+        current_long_term_memory_enabled=st.session_state.long_term_memory_enabled,
+        current_chat_metadata=st.session_state.chat_metadata,
+        all_chat_messages_from_session=st.session_state.all_chat_messages
+    )
+
+    st.session_state.messages = result.get("messages_to_display", st.session_state.messages)
+    st.session_state.current_chat_id = result.get("current_chat_id_to_set", st.session_state.current_chat_id)
+    st.session_state.suggested_prompts = result.get("suggested_prompts_to_set", st.session_state.suggested_prompts)
+    st.session_state.chat_modified = result.get("chat_modified_to_set", st.session_state.chat_modified)
+
+    # Handle cases where a new temporary chat might have been created by core_switch_chat_logic
+    # (e.g., when LTM is off and create_new_chat_session_in_memory was called by core_switch_chat_logic)
+    if result.get("chat_metadata_to_set") is not None:
+         st.session_state.chat_metadata = result["chat_metadata_to_set"]
+    if result.get("all_chat_messages_to_set") is not None:
+         st.session_state.all_chat_messages = result["all_chat_messages_to_set"]
+
+    status_message = result.get("status_message")
+    if status_message:
+        if "Error" in status_message:
+            st.warning(status_message)
+        else:
+            st.info(status_message)
+        print(f"Status from core_switch_chat_logic: {status_message}")
+
+    st.rerun()
+
+def handle_set_long_term_memory_preference():
+    """
+    Handles the toggle for long-term memory.
+    Calls app._set_long_term_memory_preference to save the cookie.
+    """
+    value_to_set = st.session_state.long_term_memory_enabled
+    print(f"LTM toggle changed in UI. New value: {value_to_set}. Saving preference via app function.")
+
+    # Assuming app._set_long_term_memory_preference has the signature (cookies_manager, value_to_set) -> str | None
+    error_msg = app._set_long_term_memory_preference(cookies, value_to_set) # stui.cookies
+
+    if error_msg:
+        st.error(error_msg) # Display error in UI
+        print(f"Error setting LTM preference cookie: {error_msg}")
+
+    # This flag is used by app.main to detect if a full session re-initialization is needed
+    st.session_state._last_memory_state_changed_by_toggle = True
+    # The toggle widget itself causes a rerun, so no explicit st.rerun() here.
+    # app.main() will handle the consequences of the memory state change on the next run.
+
+def handle_new_chat_button_click():
+    """
+    Handles the "New Chat" button click.
+    Calls app.create_new_chat_session_in_memory and updates session state.
+    Relies on app.create_new_chat_session_in_memory to update relevant
+    st.session_state keys like current_chat_id, messages, chat_metadata,
+    all_chat_messages, and chat_modified.
+    """
+    print("New chat button clicked in stui.py")
+    new_chat_id, new_chat_name, initial_messages = app.create_new_chat_session_in_memory()
+
+    # create_new_chat_session_in_memory in app.py should have already set:
+    # st.session_state.current_chat_id = new_chat_id
+    # st.session_state.messages = initial_messages
+    # st.session_state.chat_metadata[new_chat_id] = new_chat_name
+    # st.session_state.all_chat_messages[new_chat_id] = initial_messages
+    # st.session_state.chat_modified = False
+
+    # Ensure suggested prompts are updated for the new greeting
+    st.session_state.suggested_prompts = app._cached_generate_suggested_prompts(initial_messages)
+
+    print(f"New chat session '{new_chat_name}' ({new_chat_id}) created and UI updated by stui.")
+    st.rerun()
+
+def handle_rename_chat(chat_id: str, new_name: str):
+    """
+    Handles renaming a chat.
+    Calls app.core_rename_chat and updates session state.
+    """
+    print(f"handle_rename_chat called in stui.py for chat_id: {chat_id}, new_name: {new_name}")
+    user_id = st.session_state.user_id
+    current_chat_metadata = st.session_state.chat_metadata
+    long_term_memory_enabled = st.session_state.long_term_memory_enabled
+
+    # Assuming app.core_rename_chat exists and is correctly defined in app.py
+    updated_metadata, error_msg = app.core_rename_chat(
+        user_id=user_id,
+        chat_id=chat_id,
+        new_name=new_name,
+        current_chat_metadata=current_chat_metadata,
+        long_term_memory_enabled=long_term_memory_enabled
+    )
+
+    if updated_metadata is not None:
+        st.session_state.chat_metadata = updated_metadata
+        print(f"Chat '{chat_id}' renamed to '{new_name}' in session state by stui.")
+
+    if error_msg:
+        st.error(error_msg)
+        print(f"Error renaming chat: {error_msg}")
+
+    # The text_input's on_change in create_interface handles clearing editing_chat_id and rerunning.
+    # No explicit st.rerun() here is needed if that on_change behavior is confirmed.
+
+def handle_switch_chat(chat_id_to_switch: str):
+    """
+    Handles switching to a different chat.
+    Calls app.core_switch_chat_logic and updates session state.
+    """
+    print(f"handle_switch_chat called in stui.py for chat_id: {chat_id_to_switch}")
+
+    # Assuming app.core_switch_chat_logic exists and is correctly defined in app.py
+    result = app.core_switch_chat_logic(
+        chat_id_to_switch=chat_id_to_switch,
+        current_long_term_memory_enabled=st.session_state.long_term_memory_enabled,
+        current_chat_metadata=st.session_state.chat_metadata,
+        all_chat_messages_from_session=st.session_state.all_chat_messages
+    )
+
+    st.session_state.messages = result.get("messages_to_display", st.session_state.messages)
+    st.session_state.current_chat_id = result.get("current_chat_id_to_set", st.session_state.current_chat_id)
+    st.session_state.suggested_prompts = result.get("suggested_prompts_to_set", st.session_state.suggested_prompts)
+    st.session_state.chat_modified = result.get("chat_modified_to_set", st.session_state.chat_modified)
+
+    # Handle cases where a new temporary chat might have been created by core_switch_chat_logic
+    if result.get("chat_metadata_to_set") is not None:
+         st.session_state.chat_metadata = result["chat_metadata_to_set"]
+    if result.get("all_chat_messages_to_set") is not None:
+         st.session_state.all_chat_messages = result["all_chat_messages_to_set"]
+
+    status_message = result.get("status_message")
+    if status_message:
+        if "Error" in status_message:
+            st.warning(status_message)
+        else:
+            st.info(status_message)
+        print(f"Status from core_switch_chat_logic: {status_message}")
+
+    st.rerun()
+
+def handle_set_long_term_memory_preference():
+    """
+    Handles the toggle for long-term memory.
+    Calls app._set_long_term_memory_preference to save the cookie.
+    """
+    value_to_set = st.session_state.long_term_memory_enabled
+    print(f"LTM toggle changed in UI. New value: {value_to_set}. Saving preference via app function.")
+
+    # Assuming app._set_long_term_memory_preference has the signature (cookies_manager, value_to_set)
+    error_msg = app._set_long_term_memory_preference(cookies, value_to_set) # stui.cookies
+
+    if error_msg:
+        st.error(error_msg)
+        print(f"Error setting LTM preference cookie: {error_msg}")
+
+    st.session_state._last_memory_state_changed_by_toggle = True
+    # The toggle widget itself causes a rerun.
+
+def handle_new_chat_button_click():
+    """
+    Handles the "New Chat" button click.
+    Calls app.create_new_chat_session_in_memory and updates session state.
+    """
+    print("New chat button clicked in stui.py")
+    # app.create_new_chat_session_in_memory updates st.session_state directly for:
+    # chat_metadata, all_chat_messages, current_chat_id, messages, chat_modified
+    new_chat_id, new_chat_name, initial_messages = app.create_new_chat_session_in_memory()
+
+    # Ensure suggested prompts are updated for the new greeting
+    st.session_state.suggested_prompts = app._cached_generate_suggested_prompts(initial_messages)
+
+    print(f"New chat created by stui. Active chat ID: {new_chat_id}. UI will now update.")
+    st.rerun()
+
+def handle_rename_chat(chat_id: str, new_name: str):
+    """
+    Handles renaming a chat.
+    Calls app.core_rename_chat and updates session state.
+    """
+    print(f"handle_rename_chat called in stui.py for chat_id: {chat_id}, new_name: {new_name}")
+    user_id = st.session_state.user_id
+    current_chat_metadata = st.session_state.chat_metadata
+    long_term_memory_enabled = st.session_state.long_term_memory_enabled
+
+    updated_metadata, error_msg = app.core_rename_chat(
+        user_id=user_id,
+        chat_id=chat_id,
+        new_name=new_name,
+        current_chat_metadata=current_chat_metadata,
+        long_term_memory_enabled=long_term_memory_enabled
+    )
+
+    if updated_metadata is not None:
+        st.session_state.chat_metadata = updated_metadata
+        print(f"Chat '{chat_id}' renamed to '{new_name}' in session state.")
+
+    if error_msg:
+        st.error(error_msg)
+        print(f"Error renaming chat: {error_msg}")
+
+    # The text_input's on_change in create_interface already handles clearing editing_chat_id and rerunning.
+    # No explicit st.rerun() needed here unless further state changes dependent on this need immediate reflection
+    # before the natural rerun from the on_change event.
+
+def handle_switch_chat(chat_id_to_switch: str):
+    """
+    Handles switching to a different chat.
+    Calls app.core_switch_chat_logic and updates session state.
+    """
+    print(f"handle_switch_chat called in stui.py for chat_id: {chat_id_to_switch}")
+
+    result = app.core_switch_chat_logic(
+        chat_id_to_switch=chat_id_to_switch,
+        current_long_term_memory_enabled=st.session_state.long_term_memory_enabled,
+        current_chat_metadata=st.session_state.chat_metadata,
+        all_chat_messages_from_session=st.session_state.all_chat_messages
+        # app._get_initial_greeting_text() is not needed by core_switch_chat_logic anymore
+    )
+
+    st.session_state.messages = result.get("messages_to_display", st.session_state.messages)
+    st.session_state.current_chat_id = result.get("current_chat_id_to_set", st.session_state.current_chat_id)
+    st.session_state.suggested_prompts = result.get("suggested_prompts_to_set", st.session_state.suggested_prompts)
+    st.session_state.chat_modified = result.get("chat_modified_to_set", st.session_state.chat_modified)
+
+    # If LTM was off and a new temporary chat was effectively created by core_switch_chat_logic (via create_new_chat_session_in_memory)
+    if result.get("chat_metadata_to_set") is not None:
+         st.session_state.chat_metadata = result["chat_metadata_to_set"]
+    if result.get("all_chat_messages_to_set") is not None:
+         st.session_state.all_chat_messages = result["all_chat_messages_to_set"]
+
+    status_message = result.get("status_message")
+    if status_message:
+        # Using st.info for status, could be st.warning/error if the message indicates that
+        if "Error" in status_message:
+            st.warning(status_message) # Using warning for non-critical errors like chat not found
+        else:
+            st.info(status_message)
+        print(f"Status from core_switch_chat_logic: {status_message}")
+
+    st.rerun()
+
+def handle_set_long_term_memory_preference():
+    """
+    Handles the toggle for long-term memory.
+    Calls app._set_long_term_memory_preference to save the cookie.
+    """
+    value_to_set = st.session_state.long_term_memory_enabled # This is the new value from the toggle
+    print(f"LTM toggle changed in UI. New value: {value_to_set}. Saving preference via app function.")
+
+    # Call the app function, passing the cookie manager and the value to set
+    error_msg = app._set_long_term_memory_preference(cookies, value_to_set) # stui.cookies
+
+    if error_msg:
+        st.error(error_msg)
+        print(f"Error setting LTM preference cookie: {error_msg}")
+
+    # This flag is used by app.main to detect if a full session re-initialization is needed
+    st.session_state._last_memory_state_changed_by_toggle = True
+    # The toggle widget itself causes a rerun, so no explicit st.rerun() here.
+    # app.main() will handle the consequences of the memory state change on the next run.

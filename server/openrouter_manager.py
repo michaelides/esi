@@ -7,10 +7,13 @@ including validation, configuration, and error handling.
 
 import json
 import logging
+import os
 from pathlib import Path
 from typing import Dict, Any, Optional, List
+from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
-from config import settings
+
+load_dotenv()
 
 logger = logging.getLogger(__name__)
 
@@ -117,7 +120,7 @@ class OpenRouterModelManager:
         Raises:
             ValueError: If model is not supported or API key is missing
         """
-        if not settings.OPENROUTER_API_KEY:
+        if not os.getenv("OPENROUTER_API_KEY"):
             raise ValueError(
                 "OPENROUTER_API_KEY environment variable is required for OpenRouter models"
             )
@@ -134,7 +137,7 @@ class OpenRouterModelManager:
         llm_params = {
             "model": model_id,
             "temperature": constrained_temp,
-            "openai_api_key": settings.OPENROUTER_API_KEY,
+            "openai_api_key": os.getenv("OPENROUTER_API_KEY"),
             "base_url": "https://openrouter.ai/api/v1",
             "request_timeout": 30,
             "max_retries": 3,

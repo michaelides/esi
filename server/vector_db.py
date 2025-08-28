@@ -3,13 +3,16 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import DocArrayInMemorySearch
 from pypdf import PdfReader
 import io
-from config import settings
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 class VectorDB:
     def __init__(self):
         self.embeddings = GoogleGenerativeAIEmbeddings(
             model="models/text-embedding-004",
-            google_api_key=settings.GOOGLE_API_KEY
+            google_api_key=os.getenv("GOOGLE_API_KEY")
         )
         self.text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
         self.vector_store = None
@@ -39,7 +42,7 @@ _vector_db_instance = None
 def get_vector_db():
     global _vector_db_instance
     if _vector_db_instance is None:
-        if settings.GOOGLE_API_KEY:
+        if os.getenv("GOOGLE_API_KEY"):
             try:
                 _vector_db_instance = VectorDB()
             except Exception as e:

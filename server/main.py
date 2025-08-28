@@ -22,7 +22,8 @@ import os
 import re
 from pathlib import Path
 
-from agent import create_agent, get_captured_figures, clear_captured_figures, is_mistral_model
+
+from agent import create_agent, get_captured_figures, clear_captured_figures, is_mistral_model, MISTRAL_MODEL_MAPPING
 from vector_db import get_vector_db
 from openrouter_manager import constrain_temperature_for_model
 
@@ -279,11 +280,12 @@ async def chat_stream(
                 streaming=True,
             )
         elif is_mistral_model(model):
+            official_model_name = MISTRAL_MODEL_MAPPING.get(model, model)
             llm = ChatMistralAI(
-                model=model,
+                model=official_model_name,
                 temperature=temperature,
                 streaming=True,
-                mistral_api_key=os.getenv("MISTRAL_API_KEY"),
+                mistral_api_key=settings.MISTRAL_API_KEY,
             )
         else:
             # Use OpenRouter manager for consistent model handling

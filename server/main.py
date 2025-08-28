@@ -287,6 +287,13 @@ async def chat_stream(
                 streaming=True,
                 mistral_api_key=settings.MISTRAL_API_KEY,
             )
+        elif is_mistral_model(model):
+            llm = ChatMistralAI(
+                model=model,
+                temperature=temperature,
+                streaming=True,
+                mistral_api_key=os.getenv("MISTRAL_API_KEY"),
+            )
         else:
             # Use OpenRouter manager for consistent model handling
             from openrouter_manager import get_openrouter_manager, is_openrouter_model

@@ -5,6 +5,8 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 from google.auth.exceptions import DefaultCredentialsError
+from dotenv import load_dotenv
+load_dotenv()
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_openai import ChatOpenAI
 from langchain.callbacks.base import BaseCallbackHandler, AsyncCallbackHandler
@@ -273,8 +275,15 @@ async def chat_stream(
             llm = ChatGoogleGenerativeAI(
                 model=model,
                 temperature=temperature,
-                google_api_key=settings.GOOGLE_API_KEY,
+                google_api_key=os.getenv("GOOGLE_API_KEY"),
                 streaming=True,
+            )
+        elif is_mistral_model(model):
+            llm = ChatMistralAI(
+                model=model,
+                temperature=temperature,
+                streaming=True,
+                mistral_api_key=os.getenv("MISTRAL_API_KEY"),
             )
         else:
             # Use OpenRouter manager for consistent model handling
@@ -300,7 +309,7 @@ async def chat_stream(
                     model=model,
                     temperature=temperature,
                     streaming=True,
-                    openai_api_key=settings.OPENROUTER_API_KEY,
+                    openai_api_key=os.getenv("OPENROUTER_API_KEY"),
                     base_url="https://openrouter.ai/api/v1",
                 )
         

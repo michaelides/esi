@@ -18,9 +18,9 @@ const MODEL_CATEGORIES = {
   mistral: {
     label: "Mistral AI",
     models: [
-      { id: "mistral-large-2411", name: "Mistral Large", description: "Top-tier large model for high-complexity tasks", maxTemperature: 1.0, pricing: "premium", provider: "Mistral AI" },
-      { id: "mistral-medium-2508", name: "Mistral Medium", description: "Medium model with excellent performance", maxTemperature: 1.0, pricing: "standard", provider: "Mistral AI" },
-      { id: "magistral-medium-2507", name: "Magistral Medium", description: "Medium sized reasoning model", maxTemperature: 1.0, pricing: "standard", provider: "Mistral AI" },
+      { id: "mistral-large-latest", name: "Mistral Large", description: "Top-tier large model for high-complexity tasks", maxTemperature: 1.0, pricing: "premium", provider: "Mistral AI" },
+      { id: "mistral-medium-latest", name: "Mistral Medium", description: "Medium model with excellent performance", maxTemperature: 1.0, pricing: "standard", provider: "Mistral AI" },
+      { id: "magistral-medium-latest", name: "Magistral Medium", description: "Medium sized reasoning model", maxTemperature: 1.0, pricing: "standard", provider: "Mistral AI" },
       { id: "mistral-small-latest", name: "Mistral Small", description: "Updated small model with excellent performance", maxTemperature: 1.0, pricing: "standard", provider: "Mistral AI" },
       { id: "codestral-latest", name: "Codestral", description: "Specialized model for coding tasks", maxTemperature: 1.0, pricing: "standard", provider: "Mistral AI" },
       { id: "open-mistral-nemo", name: "Mistral Nemo 12B", description: "Best multilingual open source model", maxTemperature: 1.0, pricing: "free", provider: "Mistral AI" },

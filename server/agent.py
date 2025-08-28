@@ -1,8 +1,10 @@
 import os
 from typing import List, Dict, Any, Optional
-from langgraph.prebuilt import create_react_agent
 from langchain_core.runnables import Runnable
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain.agents import AgentExecutor
+from langchain.agents.format_scratchpad.tools import format_to_tool_messages
+from langchain.agents.output_parsers.tools import ToolsAgentOutputParser
 from langchain.tools import Tool
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_openai import ChatOpenAI
@@ -37,20 +39,17 @@ MISTRAL_MODEL_MAPPING = {
 
 # Helper function to check if a model is a Mistral model
 def is_mistral_model(model_id: str) -> bool:
-    """Check if a model ID is a Mistral model.
+    """Check if a model ID is a native Mistral model.
     
     Args:
         model_id: Model identifier to check
         
     Returns:
-        True if it's a Mistral model, False otherwise
+        True if it's a native Mistral model, False otherwise
     """
     if not model_id:
         return False
-    return (model_id.startswith("mistral") or 
-            model_id.startswith("open-mistral") or 
-            model_id.startswith("codestral") or
-            model_id.startswith("ministral"))
+    return model_id in MISTRAL_MODEL_MAPPING
 
 # Import RAG tools
 import asyncio
@@ -411,17 +410,32 @@ def create_agent(temperature: float = 0.5, model: str = "gemini-2.5-flash", verb
     elif verbosity == 5:
         system_prompt += "\n\nYour responses should be extremely verbose, comprehensive, and elaborate on all points."
     
-    # Create the React agent
-    agent = create_react_agent(
-        llm,
-        tools=tools,
-        debug=is_debug_enabled,
+    # Define the prompt template
+    prompt = ChatPromptTemplate.from_messages(
+        [
+            MessagesPlaceholder(variable_name="messages"),
+            MessagesPlaceholder(variable_name="agent_scratchpad"),
+        ]
     )
-    
-    # Add system_prompt to the agent for use in main.py
-    agent.system_prompt = system_prompt
 
-    return agent
+    llm_with_tools = llm.bind_tools(tools)
+    
+    agent = (
+        {
+            "messages": lambda x: x["messages"],
+            "agent_scratchpad": lambda x: format_to_tool_messages(x.get("intermediate_steps", [])),
+        }
+        | prompt
+        | llm_with_tools
+        | ToolsAgentOutputParser()
+    )
+
+    agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=is_debug_enabled)
+
+    # For compatibility with main.py
+    # agent_executor.system_prompt = system_prompt
+
+    return agent_executor
 
 if __name__ == "__main__":
     # Test the agent creation
@@ -448,6 +462,35 @@ if __name__ == "__main__":
         # Check if figures were captured
         # figures = get_captured_figures()
         # print(f"Captured {len(figures)} figures during test")
+
+        print("\n--- Testing agent with chat history ---")
+        # Use a free model for testing to avoid dependency on paid API keys
+        agent_with_history = create_agent(model="mistralai/mistral-7b-instruct:free", debug=True)
+
+        # Create a system prompt message, as main.py would
+        system_prompt = load_system_prompt()
+        system_message = {"role": "system", "content": system_prompt}
+
+        chat_history = [
+            {"role": "user", "content": "My name is Claude."},
+            {"role": "assistant", "content": "Nice to meet you, Claude!"},
+        ]
+
+        # The user's new input
+        payload = {
+            "messages": [
+                system_message,
+                *chat_history,
+                {"role": "user", "content": "What is my name?"},
+            ]
+        }
+
+        print(f"\nInvoking agent with payload:\n{json.dumps(payload, indent=2)}\n")
+
+        result = agent_with_history.invoke(payload)
+        print(f"\n--- Test result with history ---")
+        print(result)
+        print("--- End of history test ---\n")
         
     except Exception as e:
         print(f"Error creating agent: {e}")

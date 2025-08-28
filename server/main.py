@@ -23,7 +23,7 @@ import re
 from pathlib import Path
 
 
-from agent import create_agent, get_captured_figures, clear_captured_figures, is_mistral_model, MISTRAL_MODEL_MAPPING
+from agent import create_agent, get_captured_figures, clear_captured_figures, is_mistral_model, MISTRAL_MODEL_MAPPING, load_system_prompt
 from vector_db import get_vector_db
 from openrouter_manager import constrain_temperature_for_model
 
@@ -90,32 +90,23 @@ async def chat(
     except Exception as e:
         return {"text": f"Server not configured: {e}", "artifacts": artifacts}
 
-    # Separate history and input for the agent
-    if messages_data:
-        chat_history = messages_data[:-1]
-        input_text = messages_data[-1].get("content", "")
-    else:
-        chat_history = []
-        input_text = ""
-    
     # Build messages array for the agent
-    messages = []
-    
-    # Add system prompt
-    messages.append({"role": "system", "content": agent.system_prompt})
-    
-    # Add chat history if available
-    if chat_history:
-        messages.extend(chat_history)
-    
-    # Add the current user input
-    messages.append({"role": "user", "content": input_text})
-    
-    # Add file content to the user message if available
+    system_prompt = load_system_prompt()
+    final_messages = [{"role": "system", "content": system_prompt}]
+
+    if messages_data:
+        if messages_data[0].get("role") == "system":
+            final_messages = messages_data
+        else:
+            final_messages.extend(messages_data)
+
     if file_content:
-        messages[-1]["content"] = f"{input_text}\n\nFile content:\n{file_content}"
+        for i in reversed(range(len(final_messages))):
+            if final_messages[i].get("role") == "user":
+                final_messages[i]["content"] = f"{final_messages[i]['content']}\n\nFile content:\n{file_content}"
+                break
     
-    payload = {"messages": messages}
+    payload = {"messages": final_messages}
     
     async with agent_lock:
         clear_captured_figures()
@@ -339,32 +330,23 @@ async def chat_stream(
             yield f"data: {json.dumps({'type': 'done'})}\n\n"
             return
         
-        # Separate history and input for the agent
+        # Build the messages array for the agent
+        system_prompt = load_system_prompt()
+        final_messages = [{"role": "system", "content": system_prompt}]
+
         if messages_data:
-            chat_history = messages_data[:-1]
-            input_text = messages_data[-1].get("content", "")
-        else:
-            chat_history = []
-            input_text = ""
-        
-        # Build messages array for the agent
-        messages = []
-        
-        # Add system prompt
-        messages.append({"role": "system", "content": agent_local.system_prompt})
-        
-        # Add chat history if available
-        if chat_history:
-            messages.extend(chat_history)
-        
-        # Add the current user input
-        messages.append({"role": "user", "content": input_text})
-        
-        # Add file content to the user message if available
+            if messages_data[0].get("role") == "system":
+                final_messages = messages_data
+            else:
+                final_messages.extend(messages_data)
+
         if file_content:
-            messages[-1]["content"] = f"{input_text}\n\nFile content:\n{file_content}"
+            for i in reversed(range(len(final_messages))):
+                if final_messages[i].get("role") == "user":
+                    final_messages[i]["content"] = f"{final_messages[i]['content']}\n\nFile content:\n{file_content}"
+                    break
         
-        payload = {"messages": messages}
+        payload = {"messages": final_messages}
         
         async with agent_lock:
             clear_captured_figures()

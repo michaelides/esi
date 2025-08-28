@@ -73,7 +73,7 @@
       }
     },    
     "mistral-medium-2508": {
-      "display_name": "Mistral Small",
+      "display_name": "Mistral Medium",
       "description": "Efficient, cost-effective model for most tasks",
       "provider": "Mistral",
       "max_temperature": 1.0,

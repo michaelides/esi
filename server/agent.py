@@ -24,6 +24,17 @@ from dotenv import load_dotenv
 from pydantic import BaseModel, Field  # Import Pydantic at the top for BaseModel usage
 load_dotenv()
 
+# Mapping for custom Mistral model IDs to official API names
+MISTRAL_MODEL_MAPPING = {
+    "mistral-large-2411": "mistral-large-latest",
+    "mistral-medium-2508": "mistral-medium-latest",
+    "magistral-medium-2507": "magistral-medium-latest",
+    "mistral-small-latest": "mistral-small-latest",
+    "codestral-latest": "codestral-latest",
+    "open-mistral-nemo": "open-mistral-nemo",
+    "ministral-8b-latest": "ministral-8b-latest",
+}
+
 # Helper function to check if a model is a Mistral model
 def is_mistral_model(model_id: str) -> bool:
     """Check if a model ID is a Mistral model.
@@ -214,8 +225,12 @@ def create_agent(temperature: float = 0.5, model: str = "gemini-2.5-flash", verb
             # Use official ChatMistralAI from langchain-mistralai
             if not mistral_api_key:
                 raise ValueError("MISTRAL_API_KEY environment variable is required for Mistral models")
+
+            # Get the official model name from the mapping
+            official_model_name = MISTRAL_MODEL_MAPPING.get(model, model)
+
             llm = ChatMistralAI(
-                model=model,
+                model=official_model_name,
                 temperature=temperature,
                 mistral_api_key=mistral_api_key,
                 max_retries=2,

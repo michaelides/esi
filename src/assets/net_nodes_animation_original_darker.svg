@@ -1,0 +1,55 @@
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Central node with more aggressive pulsing animation -->
+  <circle cx="100" cy="100" fill="#7c3aed">
+    <animate attributeName="r" values="18;26;18" dur="2s" repeatCount="indefinite"/>
+  </circle>
+  
+  <!-- 5 outer nodes with more aggressive size and position changes -->
+  <circle fill="#7c3aed">
+    <animate attributeName="r" values="6;2;6" dur="1.8s" repeatCount="indefinite"/>
+    <animate attributeName="cx" values="100;100;100" dur="2.1s" repeatCount="indefinite"/>
+    <animate attributeName="cy" values="30;60;30" dur="2.1s" repeatCount="indefinite"/>
+  </circle>
+  <circle fill="#7c3aed">
+    <animate attributeName="r" values="14;3;14" dur="2.2s" repeatCount="indefinite"/>
+    <animate attributeName="cx" values="155;125;155" dur="1.7s" repeatCount="indefinite"/>
+    <animate attributeName="cy" values="85;92;85" dur="1.7s" repeatCount="indefinite"/>
+  </circle>
+  <circle fill="#7c3aed">
+    <animate attributeName="r" values="9;2;9" dur="1.6s" repeatCount="indefinite"/>
+    <animate attributeName="cx" values="120;108;120" dur="2.3s" repeatCount="indefinite"/>
+    <animate attributeName="cy" values="150;125;150" dur="2.3s" repeatCount="indefinite"/>
+  </circle>
+  <circle fill="#7c3aed">
+    <animate attributeName="r" values="12;3;12" dur="2.4s" repeatCount="indefinite"/>
+    <animate attributeName="cx" values="60;82;60" dur="1.5s" repeatCount="indefinite"/>
+    <animate attributeName="cy" values="160;128;160" dur="1.5s" repeatCount="indefinite"/>
+  </circle>
+  <circle fill="#7c3aed">
+    <animate attributeName="r" values="7;2;7" dur="1.9s" repeatCount="indefinite"/>
+    <animate attributeName="cx" values="35;70;35" dur="2.0s" repeatCount="indefinite"/>
+    <animate attributeName="cy" values="75;88;75" dur="2.0s" repeatCount="indefinite"/>
+  </circle>
+  
+  <!-- Connection lines with more aggressive length changes -->
+  <line x1="100" y1="100" stroke="#7c3aed" stroke-width="3">
+    <animate attributeName="x2" values="100;100;100" dur="2.1s" repeatCount="indefinite"/>
+    <animate attributeName="y2" values="30;60;30" dur="2.1s" repeatCount="indefinite"/>
+  </line>
+  <line x1="100" y1="100" stroke="#7c3aed" stroke-width="3">
+    <animate attributeName="x2" values="155;125;155" dur="1.7s" repeatCount="indefinite"/>
+    <animate attributeName="y2" values="85;92;85" dur="1.7s" repeatCount="indefinite"/>
+  </line>
+  <line x1="100" y1="100" stroke="#7c3aed" stroke-width="3">
+    <animate attributeName="x2" values="120;108;120" dur="2.3s" repeatCount="indefinite"/>
+    <animate attributeName="y2" values="150;125;150" dur="2.3s" repeatCount="indefinite"/>
+  </line>
+  <line x1="100" y1="100" stroke="#7c3aed" stroke-width="3">
+    <animate attributeName="x2" values="60;82;60" dur="1.5s" repeatCount="indefinite"/>
+    <animate attributeName="y2" values="160;128;160" dur="1.5s" repeatCount="indefinite"/>
+  </line>
+  <line x1="100" y1="100" stroke="#7c3aed" stroke-width="3">
+    <animate attributeName="x2" values="35;70;35" dur="2.0s" repeatCount="indefinite"/>
+    <animate attributeName="y2" values="75;88;75" dur="2.0s" repeatCount="indefinite"/>
+  </line>
+</svg>

@@ -1,0 +1,587 @@
+.main{
+    flex: 1;
+    min-height: 100vh;
+    padding-bottom: 0px; /* fixed separation below content */
+    position: relative;
+}
+
+@keyframes fadeIn {
+    0%{ opacity: 0; }
+    100%{ opacity: 1; }
+}
+
+.main .nav{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+    padding: 20px;
+    color: var(--text-secondary)
+}
+
+.main .nav img{
+    width: 40px;
+    border-radius: 50%;
+}
+
+.esi-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transform: translateY(-5px) translateX(-10px); /* Combine both transformations */
+}
+
+.esi-logo img {
+    width: 30px;
+    height: 30px;
+}
+
+.esi-text {
+    font-weight: 500; /* Bold font */
+    font-size: 18px;
+    margin-left: 5px;
+    color: var(--text);
+}
+
+.esi-logo.hidden {
+    display: none !important;
+}
+
+
+.main-container{
+    max-width: 900px;
+    margin: auto;
+}
+
+.main-container.landing{
+
+}
+
+.landing-content{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: auto;
+}
+
+.main-container.chat{
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 80px);
+}
+
+.chat .main-bottom{
+    position: absolute;
+    bottom: 10px;
+}
+
+.result{
+    padding: 0 0px;
+    /* breathing room so bubbles don't sit under input */
+    padding-bottom: 5px;
+    max-height: 90vh;
+    overflow-y: scroll;
+}
+
+.main .greet{
+/*    margin: 50px 0px;*/
+    margin: 25% 0px 5px 0px; /* Adjusted for better visibility */
+    font-size: 40px;
+    background: linear-gradient(135deg, #a855f7, #c084fc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 500;
+    padding: 20px;
+    animation: fadeIn 5s !important;
+    text-align: center;
+}
+
+.main .greet span{
+    background: linear-gradient(135deg, var(--text), #a855f7);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.research-text {
+    background: linear-gradient(135deg, var(--text), #a855f7);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-size: 40px;
+    font-weight: 500;
+    margin: 5px 0px;
+}
+
+.main .cards{
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 15px;
+    padding:20px;
+    width: 100%;
+}
+.main .card{
+    height: 100px;
+    padding: 15px;
+    background: linear-gradient(135deg, var(--panel-bg), rgba(168, 85, 247, 0.1));
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    position: relative;
+    cursor: pointer;
+}
+
+.main .card img{
+    width: 25px;
+    padding: 5px;
+    position: absolute;
+    background-color: white;
+    border-radius: 20px;
+    bottom: 10px;
+    right: 10px;
+}
+
+.main .card p{
+    color: #585858;
+    font-size: 14px;
+}
+
+/* Dark mode card text - brighter text */
+[data-theme="dark"] .main .card p{
+    color: #e0e0e0;
+}
+
+.main .card:hover{
+    background: linear-gradient(135deg, var(--panel-bg), rgba(168, 85, 247, 0.2));
+}
+
+/* Dark mode hover for cards */
+[data-theme="dark"] .main .card{
+    background: linear-gradient(135deg, var(--panel-bg), rgba(168, 85, 247, 0.15));
+}
+
+[data-theme="dark"] .main .card:hover{
+    background: linear-gradient(135deg, var(--panel-bg), rgba(168, 85, 247, 0.3));
+}
+
+.main-bottom{
+    width: 100%;
+    max-width: 900px;
+    padding: 0 20px 0px 20px; /* Add bottom padding for bottom-info */
+    margin: auto;
+    z-index: 100; /* keep above scrollable content */
+    position: relative; /* for absolute positioning of children */
+}
+
+.input-box{
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    background-color: var(--panel-bg);
+    border: 1px solid var(--border);
+    padding: 20px; /* Reduced from 60px to prevent overflow */
+    border-radius: 20px;
+    margin-bottom: 10px; /* Space for bottom-info */
+}
+
+.input-box img{
+    width: 24px;
+    cursor: pointer;
+}
+
+.stop-button {
+    width: 24px;
+    cursor: pointer;
+    animation: pulse 2s infinite;
+    color: #ff0000; /* Red color */
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        color: #ff0000; /* Red color */
+    }
+    50% {
+        transform: scale(1.1);
+        color: #cc0000; /* Darker red color */
+    }
+    100% {
+        transform: scale(1);
+        color: #ff0000; /* Red color */
+    }
+}
+
+.input-box textarea{
+    flex: 1;
+    max-height: 60px;
+    border: none;
+    background: transparent;
+    outline: none;
+    padding: 0;
+    margin: 0;
+    resize: none;
+    overflow: auto;
+    line-height: normal;
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-size: 14px;
+    color: var(--text);
+}
+
+.input-box textarea::-webkit-scrollbar {
+    display: none;
+}
+
+.input-box input{
+    flex: 1;
+    border: none;
+    background: transparent;
+    outline: none;
+    padding: 8px;
+    font-size: 14px;
+    color: var(--text);
+}
+
+.input-box div{
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.main .bottom-info{
+     font-size: 9px; /* Increased from 9px for better visibility */
+     position: relative;
+     bottom: 0;
+     left: 0;
+     right: 0;
+     text-align: center;
+     font-weight: 300;
+     color: var(--text-secondary);
+     line-height: 1.3;
+     padding: 0 5px;
+}
+
+.result{
+    padding: 0 5px;
+    /* breathing room so bubbles don't sit under input */
+    padding-bottom: 20px;
+    max-height: 80vh;
+    overflow-y: scroll;
+}
+
+.result::-webkit-scrollbar{
+    display: none;
+}
+
+.result-title{
+    margin: 20px 0px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.result img{
+    width: 40px;
+    border-radius: 50%;
+}
+
+.result-data{
+    display: flex;
+    align-items: start;
+    gap: 20px;
+}
+
+/* Row container alignment helpers */
+.msg-row{ display:flex; width:100%; }
+.msg-row.user{ justify-content:flex-end; }
+.msg-row.assistant{ justify-content:flex-start; }
+
+/* Bubble width rules */
+.msg-row.assistant .assistant-bubble{ max-width:100%; width:100%; }
+.msg-row.user .user-bubble{ max-width:100%; width:fit-content; align-self:flex-end; }
+
+/* Utility to force full width inside message column */
+.full-width{
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: 1 1 auto !important;
+}
+.msg-row .user-bubble.full-width,
+.msg-row .user-bubble .input-box.full-width{
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: 1 1 auto !important;
+}
+
+/* Optional larger bubble styling for better readability original colout = f7f9fc*/
+.user-bubble, .assistant-bubble{
+    padding: 14px 16px;
+    background: #ffffff;
+    border-radius: 12px;
+}
+.user-bubble{
+    background: #f7f5ff;
+}
+
+/* Dark mode bubble styling: black bubbles with white text */
+[data-theme="dark"] .assistant-bubble{
+    background: #08090c !important; /* near-black bubble */
+    color: #ffffff !important;
+}
+[data-theme="dark"] .assistant-bubble *{ color: inherit !important; }
+
+[data-theme="dark"] .user-bubble{
+    background: #3c4046 !important; /* dark grey bubble */
+    color: #ffffff !important;      /* keep text white */
+}
+[data-theme="dark"] .user-bubble *{ color: inherit !important; }
+
+/* Normalize conversation text and editing textarea to same typography */
+.result .user-bubble,
+.result .assistant-bubble{
+    font-size: 14px;
+    line-height: 1.8;
+}
+.result .input-box,
+.result .input-box textarea{
+    font-family: inherit !important;
+    font-size: inherit !important;
+    line-height: inherit !important;
+}
+
+/* Normalize assistant-rendered HTML */
+.result .assistant-bubble,
+.result .assistant-bubble *{
+    font-family: inherit !important;
+    color: inherit !important;
+}
+
+.result .assistant-bubble {
+    font-size: 14px !important;
+    line-height: 1.8 !important;
+}
+
+/* Specific styling for block elements to maintain proper spacing */
+.result .assistant-bubble p {
+    margin: 12px 0 !important;
+    display: block !important;
+    font-size: 14px !important;
+    line-height: 1.6 !important;
+}
+
+.result .assistant-bubble p:first-child {
+    margin-top: 0 !important;
+}
+
+.result .assistant-bubble p:last-child {
+    margin-bottom: 0 !important;
+}
+
+/* Ensure line breaks are respected */
+.result .assistant-bubble br {
+    display: block !important;
+    margin: 4px 0 !important;
+    content: "" !important;
+}
+.result .assistant-bubble h1,
+.result .assistant-bubble h2,
+.result .assistant-bubble h3,
+.result .assistant-bubble h4,
+.result .assistant-bubble h5,
+.result .assistant-bubble h6{
+    margin: 10px 0 6px;
+    line-height: 1.3;
+    font-weight: 600;
+}
+.result .assistant-bubble h1{ font-size: 1.6em; }
+.result .assistant-bubble h2{ font-size: 1.4em; }
+.result .assistant-bubble h3{ font-size: 1.25em; }
+.result .assistant-bubble h4{ font-size: 1.15em; }
+.result .assistant-bubble h5{ font-size: 1.05em; }
+.result .assistant-bubble h6{ font-size: 1em; }
+
+.result .assistant-bubble ul,
+.result .assistant-bubble ol{
+    margin: 8px 0 8px 20px;
+    padding: 0;
+}
+.result .assistant-bubble li{ margin: 4px 0; }
+.result .assistant-bubble code{
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
+    background: rgba(0,0,0,0.05);
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-size: 0.9em;
+}
+.result .assistant-bubble pre {
+    background: rgba(0,0,0,0.05);
+    border-radius: 6px;
+    margin: 10px 0;
+    overflow-x: auto;
+}
+.result .assistant-bubble pre code{
+    display: block;
+    padding: 12px;
+    border-radius: 6px;
+    background: transparent;
+    overflow-x: auto;
+}
+.result .assistant-bubble blockquote {
+    border-left: 4px solid #e5e7eb;
+    padding-left: 12px;
+    margin: 10px 0;
+    color: #6b7280;
+    font-style: italic;
+}
+.result .assistant-bubble table {
+    border-collapse: collapse;
+    margin: 10px 0;
+    width: 100%;
+}
+.result .assistant-bubble th,
+.result .assistant-bubble td {
+    border: 1px solid #e5e7eb;
+    padding: 8px 12px;
+    text-align: left;
+}
+.result .assistant-bubble th {
+    background: rgba(0,0,0,0.05);
+    font-weight: 600;
+}
+.result .assistant-bubble strong {
+    font-weight: 600;
+}
+.result .assistant-bubble em {
+    font-style: italic;
+}
+/* Dark mode adjustments for markdown elements */
+[data-theme="dark"] .result .assistant-bubble code {
+    background: rgba(255,255,255,0.1);
+}
+[data-theme="dark"] .result .assistant-bubble pre {
+    background: rgba(255,255,255,0.1);
+}
+[data-theme="dark"] .result .assistant-bubble blockquote {
+    border-left-color: #374151;
+    color: #9ca3af;
+}
+[data-theme="dark"] .result .assistant-bubble th,
+[data-theme="dark"] .result .assistant-bubble td {
+    border-color: #374151;
+}
+[data-theme="dark"] .result .assistant-bubble th {
+    background: rgba(255,255,255,0.1);
+}
+.result .assistant-bubble a{
+    color: #1e6fff;
+    text-decoration: none;
+}
+.result .assistant-bubble a:hover{ text-decoration: underline; }
+
+/*
+.loader{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap:10px;
+}
+
+.loader hr{
+    border-radius: 4px;
+    border: none;
+    background-color: #f6f7f8;
+    background: linear-gradient(to right, #9ed7ff, #ffffff, #9ed7ff);
+    background-size: 800px 50px;
+    height: 20px;
+    animation: loader 3s infinite linear;
+}
+*/
+
+/* Action bar icons */
+.msg-row.user .action-icon {
+    align-self: flex-end;
+    margin-bottom: 5px; /* Adjust as needed */
+}
+
+.action-bar .action-icon{
+    font-size: 14px;
+    cursor: pointer;
+    opacity: 0.85;
+    color: var(--text);  
+    transition: 0.15s ease, opacity 0.15s ease;
+}
+.action-bar .action-icon:hover{
+    opacity: 1;
+    color:  #a855f7; /* purple on hover */
+}
+
+@keyframes loader {
+    0%{ background-position: -800px 0px; }
+    100%{ background-position: 800px 0px; }
+}
+
+/* Bouncing dots loader used before thinking phrase */
+.dotloader { display:inline-flex; gap:4px; margin-right:8px; vertical-align:middle; }
+.dotloader span { width:.20em; height:.20em; border-radius:40%; background: currentColor; animation: dotbounce 0.9s infinite; display:inline-block; }
+.dotloader span:nth-child(2){ animation-delay: .15s; }
+.dotloader span:nth-child(3){ animation-delay: .3s; }
+@keyframes dotbounce {
+  0%, 80%, 100% { transform: translateY(0); opacity: .6; }
+  40% { transform: translateY(-4px); opacity: 1; }
+}
+
+.result-data p{
+    font-size: 14px;
+    font-weight: 300;
+    line-height: 1.7;
+}
+
+@media (max-width:600px){
+    .main-bottom textarea{
+        flex:none;
+        width: 150px;
+    }
+    .main-bottom img{
+        width: 20px;
+    }
+    .input-box{
+        padding: 5px 10px;
+    }
+    .input-box{
+        gap: 5px;
+    }
+    /* slightly more room on small screens due to tighter layout */
+    .result{ padding-bottom: 140px; }
+}
+
+[data-theme="dark"] .input-box img {
+    filter: invert(1);
+}
+
+[data-theme="dark"] .input-box img.stop-button {
+    filter: none;
+}
+
+[data-theme="dark"] .msg-row.user img[src*="edit_icon"] {
+    filter: invert(1);
+/* Settings icon styling */
+.settings-icon {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+  margin-left: 15px;
+}
+
+.settings-icon:hover {
+  opacity: 1;
+}
+
+/* Dark mode support for settings icon */
+[data-theme="dark"] .settings-icon {
+  filter: invert(1);
+}
+}

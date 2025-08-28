@@ -1,0 +1,17 @@
+#root{ display:flex; flex-direction:row; align-items:stretch; overflow:visible; }
+.app{ display:flex; flex-direction:row; width:100%; min-height:100vh; overflow:visible; }
+.app .main-wrap{ flex:1 1 auto; min-width:0; overflow:visible; }
+
+/* Settings Modal Backdrop */
+.settings-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}

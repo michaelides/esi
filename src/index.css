@@ -1,0 +1,49 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap');
+
+*
+{
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+html, body, #root{
+  font-family: "Roboto", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+}
+
+:root{
+  --bg: #ffffff;
+  --text: #141414;
+  --text-secondary: #5a5a5a;
+  --panel-bg:  #f7f5ff; /* #bcbbbd; */ /* light purple */
+  --border: #e3e3e3;
+}
+
+[data-theme="dark"]{
+  --bg: #08090c;              /* pure black background */
+  --text: #f5f6f8;            /* light text */
+  --text-secondary: #f0f1f3;  /* secondary light grey */
+  --panel-bg: #24262c;        /* near-black panels */
+  --border: #222930;          /* subtle dark border */
+}
+
+body{ background: var(--bg); color: var(--text); }
+
+#root{
+  min-height: 100vh;
+  display: flex;
+  animation: fadeIn 1.5s;
+}
+
+
+
+@keyframes fadeIn {
+  0%
+  {
+    opacity: 0;
+  }
+  100%
+  {
+    opacity: 1;
+  }
+}

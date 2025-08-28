@@ -1,0 +1,128 @@
+.temperature-slider {
+  margin-bottom: 15px;
+  position: relative;
+  width: 100%;
+}
+
+.temperature-slider label {
+  display: block;
+  font-size: 12px;
+  color: var(--text-color);
+  margin-bottom: 8px;
+  font-weight: 500;
+  position: relative;
+  cursor: pointer;
+}
+
+.temperature-slider .slider {
+  width: 100% !important;
+  height: 4px;
+  border-radius: 2px;
+  background: #ddd;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+  margin-bottom: 5px;
+}
+
+.temperature-slider .slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #a855f7;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.temperature-slider .slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+  background: #9333ea;
+}
+
+.temperature-slider .slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #a855f7;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+}
+
+.temperature-slider .slider::-moz-range-thumb:hover {
+  transform: scale(1.2);
+  background: #9333ea;
+}
+
+.temperature-slider .slider-value {
+  font-size: 11px;
+  color: var(--text-color-secondary);
+  text-align: right;
+}
+
+.tooltip {
+  position: absolute;
+  top: -50px;
+  left: 0;
+  background: #333;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 11px;
+  width: 200px;
+  z-index: 1000;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  pointer-events: none;
+}
+
+.tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 20px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #333 transparent transparent transparent;
+}
+
+/* Dark mode support */
+[data-theme="dark"] .temperature-slider label {
+  color: #fff;
+}
+
+[data-theme="dark"] .temperature-slider .slider {
+  background: #444;
+}
+
+[data-theme="dark"] .temperature-slider .slider-value {
+  color: #ccc;
+}
+
+[data-theme="dark"] .tooltip {
+  background: #555;
+}
+
+[data-theme="dark"] .tooltip::after {
+  border-color: #555 transparent transparent transparent;
+}
+
+/* Sidebar specific styling */
+.sidebar .temperature-slider {
+  margin-bottom: 10px;
+  width: 100%;
+}
+
+.sidebar .temperature-slider label {
+  font-size: 11px;
+  margin-bottom: 6px;
+}
+
+.sidebar .temperature-slider .slider {
+  width: 100% !important;
+}
+
+.sidebar .temperature-slider .slider-value {
+  font-size: 10px;
+}

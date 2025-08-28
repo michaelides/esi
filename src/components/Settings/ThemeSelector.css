@@ -1,0 +1,87 @@
+.theme-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  padding: 5px 0;
+}
+
+.theme-toggle-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.theme-label {
+  font-size: 12px;
+  color: var(--text-color, #333);
+  margin: 0;
+  font-weight: 500;
+}
+
+.theme-toggle-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+  border-radius: 6px;
+  background: var(--input-bg);
+  color: var(--text-color);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 11px;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.theme-toggle-button:hover {
+  background: var(--hover-bg, rgba(255, 255, 255, 0.05));
+  border-color: var(--accent-color, #a855f7);
+  transform: translateY(-1px);
+}
+
+.theme-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.theme-name {
+  font-weight: 500;
+}
+
+/* Dark theme specific styles */
+[data-theme="dark"] .theme-toggle-button {
+  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="dark"] .theme-toggle-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: #a855f7;
+}
+
+/* Light theme specific styles */
+[data-theme="light"] .theme-toggle-button {
+  border-color: rgba(0, 0, 0, 0.1);
+  background: rgba(0, 0, 0, 0.02);
+}
+
+[data-theme="light"] .theme-toggle-button:hover {
+  background: rgba(0, 0, 0, 0.05);
+  border-color: #a855f7;
+}
+
+/* Remove old styles that are no longer needed */
+.theme-selector-label {
+  display: none;
+}
+
+.theme-options {
+  display: none;
+}
+
+.theme-option {
+  display: none;
+}

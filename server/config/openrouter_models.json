@@ -1,0 +1,139 @@
+{
+  "models": {
+    "openai/gpt-4o": {
+      "display_name": "GPT-4o",
+      "description": "Latest OpenAI model with advanced reasoning",
+      "provider": "OpenAI",
+      "max_temperature": 2.0,
+      "context_window": 128000,
+      "supports_streaming": true,
+      "pricing_tier": "premium",
+      "model_kwargs": {
+        "top_p": 1.0
+      }
+    },
+    "openai/gpt-4o-mini": {
+      "display_name": "GPT-4o Mini",
+      "description": "Faster, cost-effective GPT-4o variant",
+      "provider": "OpenAI",
+      "max_temperature": 2.0,
+      "context_window": 128000,
+      "supports_streaming": true,
+      "pricing_tier": "standard",
+      "model_kwargs": {
+        "top_p": 1.0
+      }
+    },
+    "anthropic/claude-3.5-sonnet": {
+      "display_name": "Claude 3.5 Sonnet",
+      "description": "Advanced reasoning and analysis capabilities",
+      "provider": "Anthropic",
+      "max_temperature": 1.0,
+      "context_window": 200000,
+      "supports_streaming": true,
+      "pricing_tier": "premium",
+      "model_kwargs": {
+        "top_p": 1.0
+      }
+    },
+    "anthropic/claude-3.5-haiku": {
+      "display_name": "Claude 3.5 Haiku",
+      "description": "Fast and efficient Claude model",
+      "provider": "Anthropic",
+      "max_temperature": 1.0,
+      "context_window": 200000,
+      "supports_streaming": true,
+      "pricing_tier": "standard",
+      "model_kwargs": {
+        "top_p": 1.0
+      }
+    },
+    "mistralai/mistral-7b-instruct:free": {
+      "display_name": "Mistral 7B Instruct (Free)",
+      "description": "Free, efficient instruction-following model",
+      "provider": "Mistral AI",
+      "max_temperature": 1.0,
+      "context_window": 32768,
+      "supports_streaming": true,
+      "pricing_tier": "free",
+      "model_kwargs": {
+        "top_p": 1.0
+      }
+    },
+    "mistralai/mistral-small": {
+      "display_name": "Mistral Small",
+      "description": "Efficient, cost-effective model for most tasks",
+      "provider": "Mistral AI",
+      "max_temperature": 1.0,
+      "context_window": 32768,
+      "supports_streaming": true,
+      "pricing_tier": "standard",
+      "model_kwargs": {
+        "top_p": 1.0
+      }
+    },
+    "mistralai/mistral-large": {
+      "display_name": "Mistral Large",
+      "description": "High-performance model for complex tasks",
+      "provider": "Mistral AI", 
+      "max_temperature": 1.0,
+      "context_window": 32768,
+      "supports_streaming": true,
+      "pricing_tier": "premium",
+      "model_kwargs": {
+        "top_p": 1.0
+      }
+    },
+    "google/gemma-2-9b-it:free": {
+      "display_name": "Gemma 2 9B (Free)",
+      "description": "Free Google Gemma model",
+      "provider": "Google",
+      "max_temperature": 1.0,
+      "context_window": 8192,
+      "supports_streaming": true,
+      "pricing_tier": "free",
+      "model_kwargs": {
+        "top_p": 1.0
+      }
+    },
+    "meta-llama/llama-3.1-8b-instruct:free": {
+      "display_name": "Llama 3.1 8B (Free)",
+      "description": "Free Meta Llama model for general use",
+      "provider": "Meta",
+      "max_temperature": 1.0,
+      "context_window": 32768,
+      "supports_streaming": true,
+      "pricing_tier": "free",
+      "model_kwargs": {
+        "top_p": 1.0
+      }
+    }
+  },
+  "providers": {
+    "OpenAI": {
+      "base_url": "https://openrouter.ai/api/v1",
+      "default_temperature": 1.0,
+      "max_temperature": 2.0
+    },
+    "Anthropic": {
+      "base_url": "https://openrouter.ai/api/v1",
+      "default_temperature": 1.0,
+      "max_temperature": 1.0
+    },
+    "Mistral AI": {
+      "base_url": "https://openrouter.ai/api/v1",
+      "default_temperature": 0.7,
+      "max_temperature": 1.0
+    },
+    "Google": {
+      "base_url": "https://openrouter.ai/api/v1", 
+      "default_temperature": 0.7,
+      "max_temperature": 1.0
+    },
+    "Meta": {
+      "base_url": "https://openrouter.ai/api/v1",
+      "default_temperature": 0.7,
+      "max_temperature": 1.0
+    }
+  }
+}

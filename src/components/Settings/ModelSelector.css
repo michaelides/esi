@@ -1,0 +1,163 @@
+.model-selector {
+    margin-bottom: 10px;
+}
+
+.model-selector-header {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 8px;
+}
+
+.model-selector-header label {
+    font-size: 12px;
+    color: var(--text-color);
+    margin-bottom: 4px;
+    font-weight: 500;
+}
+
+.selected-model-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.model-name {
+    font-size: 11px;
+    color: var(--text-color);
+    font-weight: 600;
+}
+
+.model-description {
+    font-size: 10px;
+    color: var(--text-color-secondary);
+    opacity: 0.7;
+}
+
+.model-dropdown {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--border-color, #ddd);
+    border-radius: 6px;
+    background-color: var(--input-bg, #fff);
+    color: var(--text-color);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 16px;
+    padding-right: 32px;
+}
+
+.model-dropdown:hover {
+    border-color: var(--accent-color, #a855f7);
+    background-color: var(--input-hover-bg, #f9f9f9);
+}
+
+.model-dropdown:focus {
+    outline: none;
+    border-color: var(--accent-color, #a855f7);
+    box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.1);
+}
+
+.model-dropdown optgroup {
+    font-weight: 600;
+    font-size: 11px;
+    color: var(--text-color);
+    background-color: var(--panel-bg);
+    padding: 4px 0;
+}
+
+.model-dropdown option {
+    padding: 4px 8px;
+    font-size: 11px;
+    color: var(--text-color);
+    background-color: var(--panel-bg);
+}
+
+.model-dropdown option:hover {
+    background-color: var(--hover-bg, #f5f5f5);
+}
+
+/* Dark mode support */
+[data-theme="dark"] .model-dropdown {
+    border-color: #444;
+    background-color: #2a2a2a;
+    color: #fff;
+}
+
+[data-theme="dark"] .model-dropdown:hover {
+    border-color: #a855f7;
+    background-color: #333;
+}
+
+[data-theme="dark"] .model-dropdown optgroup {
+    background-color: #2a2a2a;
+    color: #fff;
+}
+
+[data-theme="dark"] .model-dropdown option {
+    background-color: #2a2a2a;
+    color: #fff;
+}
+
+[data-theme="dark"] .model-dropdown option:hover {
+    background-color: #444;
+}
+
+/* Responsive design */
+@media (max-width: 480px) {
+    .model-dropdown {
+        font-size: 14px;
+        padding: 10px 12px;
+        padding-right: 36px;
+    }
+    
+    .selected-model-info {
+        gap: 4px;
+    }
+    
+    .model-name {
+        font-size: 12px;
+    }
+    
+    .model-description {
+        font-size: 11px;
+    }
+}
+
+/* Compact styling for sidebar usage */
+.sidebar .model-selector {
+    margin-bottom: 5px;
+}
+
+.sidebar .model-selector-header {
+    margin-bottom: 4px;
+}
+
+.sidebar .model-selector-header label {
+    font-size: 11px;
+    margin-bottom: 2px;
+}
+
+.sidebar .model-name {
+    font-size: 10px;
+}
+
+.sidebar .model-description {
+    font-size: 9px;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.sidebar .model-dropdown {
+    padding: 6px 10px;
+    padding-right: 28px;
+    font-size: 11px;
+    background-size: 14px;
+    background-position: right 6px center;
+}

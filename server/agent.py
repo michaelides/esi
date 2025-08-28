@@ -214,6 +214,7 @@ def create_agent(temperature: float = 0.5, model: str = "gemini-2.5-flash", verb
             # Use official ChatMistralAI from langchain-mistralai
             if not mistral_api_key:
                 raise ValueError("MISTRAL_API_KEY environment variable is required for Mistral models")
+
             llm = ChatMistralAI(
                 model=model,
                 temperature=temperature,

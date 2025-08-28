@@ -37,7 +37,7 @@ class TestOpenRouterModelManager:
         # Test some known models from our registry
         assert manager.validate_model("openai/gpt-4o")
         assert manager.validate_model("anthropic/claude-3.5-sonnet")
-        assert manager.validate_model("mistralai/mistral-7b-instruct:free")
+        assert manager.validate_model("mistral-7b-instruct")
     
     def test_validate_model_invalid(self, manager):
         """Test validation of invalid models."""
@@ -68,7 +68,7 @@ class TestOpenRouterModelManager:
         assert manager.get_max_temperature_for_model("anthropic/claude-3.5-sonnet") == 1.0
         
         # Mistral models should support up to 1.0
-        assert manager.get_max_temperature_for_model("mistralai/mistral-small") == 1.0
+        assert manager.get_max_temperature_for_model("mistral-small-latest") == 1.0
         
         # Unknown models should default to 2.0
         assert manager.get_max_temperature_for_model("unknown/model") == 2.0
@@ -131,7 +131,7 @@ class TestOpenRouterModelManager:
         
         assert len(free_models) > 0
         assert len(premium_models) > 0
-        assert "mistralai/mistral-7b-instruct:free" in free_models
+        assert "google/gemma-2-9b-it:free" in free_models
         assert "openai/gpt-4o" in premium_models
     
     def test_handle_api_error(self, manager):
@@ -160,7 +160,9 @@ class TestUtilityFunctions:
         # Should detect valid OpenRouter models
         assert is_openrouter_model("openai/gpt-4o")
         assert is_openrouter_model("anthropic/claude-3.5-sonnet")
-        assert is_openrouter_model("mistralai/mistral-small")
+        
+        # Should not detect Mistral models
+        assert not is_openrouter_model("mistral-small-latest")
         
         # Should not detect Gemini models
         assert not is_openrouter_model("gemini-2.5-flash")
@@ -201,13 +203,14 @@ class TestAgentIntegration:
     @patch.dict(os.environ, {
         "OPENROUTER_API_KEY": "test_openrouter_key",
         "GOOGLE_API_KEY": "test_google_key", 
-        "TAVILY_API_KEY": "test_tavily_key"
+        "TAVILY_API_KEY": "test_tavily_key",
+        "MISTRAL_API_KEY": "test_mistral_key"
     })
     def test_create_agent_with_openrouter_model(self):
         """Test agent creation with OpenRouter models."""
         # Test with a valid OpenRouter model
         agent = create_agent(
-            model="mistralai/mistral-7b-instruct:free",
+            model="openai/gpt-4o",
             temperature=0.7,
             verbosity=3
         )
@@ -259,7 +262,7 @@ if __name__ == "__main__":
     test_models = [
         "openai/gpt-4o",
         "anthropic/claude-3.5-sonnet", 
-        "mistralai/mistral-7b-instruct:free",
+        "mistral-7b-instruct",
         "invalid/model"
     ]
     

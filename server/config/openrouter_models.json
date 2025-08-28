@@ -48,22 +48,10 @@
         "top_p": 1.0
       }
     },
-    "mistralai/mistral-7b-instruct:free": {
-      "display_name": "Mistral 7B Instruct (Free)",
-      "description": "Free, efficient instruction-following model",
-      "provider": "Mistral AI",
-      "max_temperature": 1.0,
-      "context_window": 32768,
-      "supports_streaming": true,
-      "pricing_tier": "free",
-      "model_kwargs": {
-        "top_p": 1.0
-      }
-    },
-    "mistralai/mistral-small": {
-      "display_name": "Mistral Small",
-      "description": "Efficient, cost-effective model for most tasks",
-      "provider": "Mistral AI",
+    "mistral-7b-instruct": {
+      "display_name": "Mistral 7B Instruct",
+      "description": "Efficient instruction-following model",
+      "provider": "Mistral",
       "max_temperature": 1.0,
       "context_window": 32768,
       "supports_streaming": true,
@@ -72,10 +60,22 @@
         "top_p": 1.0
       }
     },
-    "mistralai/mistral-large": {
+    "mistral-small-latest": {
+      "display_name": "Mistral Small",
+      "description": "Efficient, cost-effective model for most tasks",
+      "provider": "Mistral",
+      "max_temperature": 1.0,
+      "context_window": 32768,
+      "supports_streaming": true,
+      "pricing_tier": "standard",
+      "model_kwargs": {
+        "top_p": 1.0
+      }
+    },
+    "mistral-large-latest": {
       "display_name": "Mistral Large",
       "description": "High-performance model for complex tasks",
-      "provider": "Mistral AI", 
+      "provider": "Mistral",
       "max_temperature": 1.0,
       "context_window": 32768,
       "supports_streaming": true,
@@ -120,13 +120,13 @@
       "default_temperature": 1.0,
       "max_temperature": 1.0
     },
-    "Mistral AI": {
-      "base_url": "https://openrouter.ai/api/v1",
+    "Mistral": {
+      "base_url": "https://api.mistral.ai/v1",
       "default_temperature": 0.7,
       "max_temperature": 1.0
     },
     "Google": {
-      "base_url": "https://openrouter.ai/api/v1", 
+      "base_url": "https://openrouter.ai/api/v1",
       "default_temperature": 0.7,
       "max_temperature": 1.0
     },

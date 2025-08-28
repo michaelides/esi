@@ -250,6 +250,10 @@ def is_openrouter_model(model_id: str) -> bool:
     if model_id.startswith("gemini"):
         return False
     
+    # Mistral models are handled separately
+    if model_id.startswith("mistral"):
+        return False
+    
     # Check if model is in our registry
     manager = get_openrouter_manager()
     return manager.validate_model(model_id)

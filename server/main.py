@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from google.auth.exceptions import DefaultCredentialsError
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_openai import ChatOpenAI
+from langchain_mistralai import ChatMistralAI
 from langchain.callbacks.base import BaseCallbackHandler, AsyncCallbackHandler
 import asyncio
 import magic
@@ -19,7 +20,7 @@ import os
 import re
 from pathlib import Path
 
-from agent import create_agent, get_captured_figures, clear_captured_figures
+from agent import create_agent, get_captured_figures, clear_captured_figures, is_mistral_model, MISTRAL_MODEL_MAPPING
 from vector_db import get_vector_db
 from config import settings
 from openrouter_manager import constrain_temperature_for_model
@@ -275,6 +276,14 @@ async def chat_stream(
                 temperature=temperature,
                 google_api_key=settings.GOOGLE_API_KEY,
                 streaming=True,
+            )
+        elif is_mistral_model(model):
+            official_model_name = MISTRAL_MODEL_MAPPING.get(model, model)
+            llm = ChatMistralAI(
+                model=official_model_name,
+                temperature=temperature,
+                streaming=True,
+                mistral_api_key=settings.MISTRAL_API_KEY,
             )
         else:
             # Use OpenRouter manager for consistent model handling

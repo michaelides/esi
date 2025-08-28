@@ -195,7 +195,7 @@
     width: 24px;
     cursor: pointer;
     animation: pulse 2s infinite;
-    color: #ff0000; /* Red color */
+    color: #000000; /* Red color */
 }
 
 @keyframes pulse {
@@ -555,14 +555,10 @@
     /* slightly more room on small screens due to tighter layout */
     .result{ padding-bottom: 140px; }
 }
-
+/*
 [data-theme="dark"] .input-box img {
     filter: invert(1);
-}
-
-[data-theme="dark"] .input-box img.stop-button {
-    filter: none;
-}
+}*/
 
 [data-theme="dark"] .msg-row.user img[src*="edit_icon"] {
     filter: invert(1);

@@ -177,7 +177,7 @@ const Main = () => {
                       <i className="fa-solid fa-rotate-right action-icon" title="Redo this response" onClick={() => redoAssistantAt(idx)} />
                       <i className="fa-regular fa-copy action-icon" title="Copy to clipboard" onClick={() => copyAssistantAt(idx)} />
                       <i className="fa-solid fa-share-nodes action-icon" title="Share" onClick={() => shareAssistantAt(idx)} />
-                      <i className="fa-solid fa-shield-halved action-icon" title="Double-check this response" onClick={() => verifyAssistantAt(idx)} />
+                      <i className="fa-solid fa-bug action-icon" title="Double-check this response" onClick={() => verifyAssistantAt(idx)} />
                     </div>
                   )}
                 </div>

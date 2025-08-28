@@ -71,8 +71,20 @@
       "model_kwargs": {
         "top_p": 1.0
       }
+    },    
+    "mistral-medium-2508": {
+      "display_name": "Mistral Small",
+      "description": "Efficient, cost-effective model for most tasks",
+      "provider": "Mistral",
+      "max_temperature": 1.0,
+      "context_window": 32768,
+      "supports_streaming": true,
+      "pricing_tier": "standard",
+      "model_kwargs": {
+        "top_p": 1.0
+      }
     },
-    "mistral-large-latest": {
+    "mistral-large-2411": {
       "display_name": "Mistral Large",
       "description": "High-performance model for complex tasks",
       "provider": "Mistral",

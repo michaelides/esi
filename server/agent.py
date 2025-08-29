@@ -13,7 +13,7 @@ from langchain_tavily import TavilySearch
 from langchain_community.tools import WikipediaQueryRun
 from langchain_community.utilities import WikipediaAPIWrapper
 from langchain_experimental.tools.python.tool import PythonREPLTool
-# from custom_python_repl import CustomPythonREPLTool
+from custom_python_repl import CustomPythonREPLTool
 from crawler import SimpleCrawl4AITool, AdvancedCrawl4AITool, SmartExtractionTool, BatchCrawl4AITool
 from custom_tools import CustomSemanticScholarQueryRun
 from openrouter_manager import get_openrouter_manager, is_openrouter_model
@@ -251,7 +251,7 @@ def create_agent(temperature: float = 0.5, model: str = "gemini-2.5-flash", verb
     is_debug_enabled = (debug is True) or env_debug
     
     # Create tools
-    python_repl_tool = PythonREPLTool()
+    python_repl_tool = CustomPythonREPLTool()
     if dataframe is not None:
         python_repl_tool.globals = {"df": dataframe}
 

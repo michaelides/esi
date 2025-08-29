@@ -13,10 +13,10 @@ from langchain_tavily import TavilySearch
 from langchain_community.tools import WikipediaQueryRun
 from langchain_community.utilities import WikipediaAPIWrapper
 from langchain_experimental.tools.python.tool import PythonREPLTool
-from custom_python_repl import CustomPythonREPLTool
-from crawler import SimpleCrawl4AITool, AdvancedCrawl4AITool, SmartExtractionTool, BatchCrawl4AITool
-from custom_tools import CustomSemanticScholarQueryRun
-from openrouter_manager import get_openrouter_manager, is_openrouter_model
+from .custom_python_repl import CustomPythonREPLTool
+from .crawler import SimpleCrawl4AITool, AdvancedCrawl4AITool, SmartExtractionTool, BatchCrawl4AITool
+from .custom_tools import CustomSemanticScholarQueryRun
+from .openrouter_manager import get_openrouter_manager, is_openrouter_model
 import json
 import sys
 from io import StringIO
@@ -53,16 +53,16 @@ def is_mistral_model(model_id: str) -> bool:
 
 # Import RAG tools
 import asyncio
-from rag import search_documents_tool, store_document_tool, get_document_tool
-from vector_db import get_vector_db
+from .rag import search_documents_tool, store_document_tool, get_document_tool
+from .vector_db import get_vector_db
 
 # Import Google Generative AI types for GenerationConfig and SafetySettings
 from google.generativeai.types import GenerationConfig, HarmCategory, HarmBlockThreshold
 
 # RAG tool functions for module-level access
-from rag import search_documents_tool as search_documents
-from rag import store_document_tool as store_document
-from rag import get_document_tool as get_document_info
+from .rag import search_documents_tool as search_documents
+from .rag import store_document_tool as store_document
+from .rag import get_document_tool as get_document_info
 # Initialize the global list to store captured figures
 _captured_figures: List[str] = []
 

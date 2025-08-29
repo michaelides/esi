@@ -172,7 +172,10 @@ async def chat(
                     return v.strip()
 
         # Fallback: convert the entire raw response to a string
-        return str(r)
+        raw_response_str = str(r)
+        if raw_response_str.startswith("{'messages':"):
+            return "Oops, it seems that my wires got mixed up... Can you try again?"
+        return raw_response_str
 
     text = extract_markdown(result)
     return {"text": text, "artifacts": artifacts}
@@ -404,7 +407,10 @@ async def chat_stream(
                                 return v.strip()
 
                     print(f"Debug: No extractable text found, returning string representation")
-                    return str(r)
+                    raw_response_str = str(r)
+                    if raw_response_str.startswith("{'messages':"):
+                        return "Oops, it seems that my wires got mixed up... Can you try again?"
+                    return raw_response_str
                 
                 def add_markdown_structure(text):
                     """Add proper line breaks to text that lacks markdown structure"""
